@@ -2,7 +2,7 @@ import { Drawer } from 'antd'; // Importing the Drawer component from antd
 import Color from 'color'; // Importing the Color library for color manipulations
 import { CSSProperties, useState } from 'react'; // Importing the CSSProperties type and useState hook from React
 
-import { IconButton, Iconify, SvgIcon } from '@/components/icon'; // Importing IconButton, Iconify, and SvgIcon components
+import { IconButton, SvgIcon } from '@/components/icon'; // Importing IconButton, Iconify, and SvgIcon components
 import LocalePicker from '@/components/locale-picker'; // Importing the LocalePicker component
 import Logo from '@/components/logo'; // Importing the Logo component
 import { useSettings } from '@/store/settingStore'; // Importing the useSettings hook from the settings store
@@ -10,7 +10,7 @@ import { useResponsive, useThemeToken } from '@/theme/hooks'; // Importing useRe
 
 import AccountDropdown from '../_common/account-dropdown'; // Importing AccountDropdown component from the _common directory
 import BreadCrumb from '../_common/bread-crumb'; // Importing BreadCrumb component from the _common directory
-import NoticeButton from '../_common/notice'; // Importing NoticeButton component from the _common directory
+// import NoticeButton from '../_common/notice'; // Importing NoticeButton component from the _common directory
 import SearchBar from '../_common/search-bar'; // Importing SearchBar component from the _common directory
 import SettingButton from '../_common/setting-button'; // Importing SettingButton component from the _common directory
 
@@ -102,8 +102,15 @@ export default function Header({ className = '', offsetTop = false }: Props) {
         onClose={() => setDrawerOpen(false)}
         open={drawerOpen}
         closeIcon={false}
-        headerStyle={{ display: 'none' }}
-        bodyStyle={{ padding: 0, overflow: 'hidden' }}
+        styles={{
+          header: {
+            display: 'none',
+          },
+          body: {
+            padding: 0,
+            overflow: 'hidden',
+          },
+        }}
         width="auto"
       >
         <Nav closeSideBarDrawer={() => setDrawerOpen(false)} /> {/* Navigation drawer */}
