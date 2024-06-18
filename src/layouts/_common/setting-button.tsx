@@ -130,8 +130,12 @@ export default function SettingButton() {
         open={drawerOpen}
         closable={false}
         width={280}
-        bodyStyle={bodyStyle}
-        maskStyle={{ backgroundColor: 'transparent' }}
+        styles={{
+          body: bodyStyle,
+          mask: {
+            backgroundColor: 'transparent',
+          },
+        }}
         style={style}
         extra={
           <IconButton onClick={() => setDrawerOpen(false)} className="h-9 w-9 hover:scale-105">
@@ -200,12 +204,14 @@ export default function SettingButton() {
                 onClick={() => setThemeLayout(ThemeLayout.Vertical)}
                 className="h-14 cursor-pointer"
                 style={{ flexGrow: 1, flexShrink: 0 }}
-                bodyStyle={{
-                  padding: 0,
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  height: '100%',
+                styles={{
+                  body: {
+                    padding: 0,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: '100%',
+                  },
                 }}
               >
                 <div className="flex h-full w-7 flex-shrink-0 flex-col gap-1 p-1">
@@ -233,13 +239,15 @@ export default function SettingButton() {
                 onClick={() => setThemeLayout(ThemeLayout.Horizontal)}
                 className="h-14 cursor-pointer"
                 style={{ flexGrow: 1, flexShrink: 0 }}
-                bodyStyle={{
-                  padding: 0,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  height: '100%',
+                styles={{
+                  body: {
+                    padding: 0,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: '100%',
+                  },
                 }}
               >
                 <div className="flex h-4 w-full items-center gap-1  p-1">
@@ -267,12 +275,14 @@ export default function SettingButton() {
                 onClick={() => setThemeLayout(ThemeLayout.Mini)}
                 className="h-14 cursor-pointer"
                 style={{ flexGrow: 1, flexShrink: 0 }}
-                bodyStyle={{
-                  padding: 0,
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  height: '100%',
+                styles={{
+                  body: {
+                    padding: 0,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: '100%',
+                  },
                 }}
               >
                 <div className="flex h-full flex-shrink-0 flex-col gap-1 p-1">
@@ -311,12 +321,14 @@ export default function SettingButton() {
             <Card
               onClick={() => setThemeStretch(!themeStretch)}
               className="flex h-20 w-full cursor-pointer items-center justify-center"
-              bodyStyle={{
-                width: '50%',
-                padding: 0,
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
+              styles={{
+                body: {
+                  width: '50%',
+                  padding: 0,
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                },
               }}
             >
               {themeStretch ? (

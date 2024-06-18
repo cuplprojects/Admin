@@ -7,6 +7,7 @@ import { CircleLoading } from '@/components/loading';
 import { AppRouteObject } from '#/router';
 
 const ClipboardPage = lazy(() => import('@/pages/functions/clipboard'));
+const ImageAnnotation = lazy(() => import('@/pages/functions/imageannotation'));
 
 const functions: AppRouteObject = {
   order: 4,
@@ -30,6 +31,11 @@ const functions: AppRouteObject = {
       path: 'clipboard',
       element: <ClipboardPage />,
       meta: { label: 'sys.menu.clipboard', key: '/functions/clipboard' },
+    },
+    {
+      path: 'imageannotation',
+      element: <ImageAnnotation />,
+      meta: { label: 'sys.menu.imageannotation', key: '/functions/imageannotation' },
     },
   ],
 };

@@ -1,0 +1,20 @@
+.rectangle-selection {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  
+  .rectangle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100px;
+    height: 50px;
+    margin: 5px;
+    border: 2px solid #007bff;
+    cursor: pointer;
+  }
+  .rectangle.selected {
+    color: #fff;
+    background-color: #007bff;
+  }
+  
