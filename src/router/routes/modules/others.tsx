@@ -11,11 +11,27 @@ const ExternalLink = lazy(() => import('@/pages/sys/others/iframe/external-link'
 const Iframe = lazy(() => import('@/pages/sys/others/iframe'));
 const Calendar = lazy(() => import('@/pages/sys/others/calendar'));
 const Kanban = lazy(() => import('@/pages/sys/others/kanban'));
+const ProjectConfig = lazy(() => import('@/pages/ProjectConfig'));
+
 
 function Wrapper({ children }: any) {
   return <Suspense fallback={<CircleLoading />}>{children}</Suspense>;
 }
 const others: AppRouteObject[] = [
+  //ProjectConfiguration COmponent
+  {
+    path: 'ProjectConfiguration',
+    element: (
+      <Wrapper>
+        <ProjectConfig />
+      </Wrapper>
+    ),
+    meta: {
+      label: 'sys.menu.ProjectConfig',
+      icon: <Iconify icon="solar:calendar-bold-duotone" size={24} />,
+      key: '/ProjectConfiguration',
+    },
+  },
   {
     path: 'calendar',
     element: (

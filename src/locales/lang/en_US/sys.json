@@ -114,6 +114,8 @@
       "chart": "Chart",
       "functions": "Functions",
       "clipboard": "Clipboard",
+      "ProjectConfig":  "ProjectConfig",
+      "FieldConfiguration":"FieldConfig",
       "menulevel": {
         "index": "Menu Level",
         "1a": "Menu Level 1a",
