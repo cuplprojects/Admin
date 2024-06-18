@@ -18,9 +18,10 @@ export default function GeneralTab() {
     const { name, value } = e.target;
     setUserData((prev) => ({ ...prev, [name]: value }));
   };
-// submit user 
+
+  // submit user 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+
     try {
       const res = await axios.post("https://localhost:7290/api/Users1", userData);
       setUserData({
@@ -36,7 +37,6 @@ export default function GeneralTab() {
     } catch (error) {
       console.log(error.message)
     }
-
   };
 
   return (
@@ -59,10 +59,17 @@ export default function GeneralTab() {
             initialValues={userData} // Set initialValues to populate the form
             labelCol={{ span: 8 }}
             className="w-full"
+            onFinish={handleSubmit} // Added onFinish event handler
           >
             <Row gutter={16}>
               <Col span={12}>
-                <Form.Item label="First Name" name="firstName">
+                <Form.Item
+                  label="First Name"
+                  name="firstName"
+                  rules={[
+                    { required: true, message: 'Please enter your first name!' },
+                  ]}
+                >
                   <Input
                     name="firstName"
                     value={userData.firstName}
@@ -71,7 +78,13 @@ export default function GeneralTab() {
                 </Form.Item>
               </Col>
               <Col span={12}>
-                <Form.Item label="Last Name" name="lastName">
+                <Form.Item
+                  label="Last Name"
+                  name="lastName"
+                  rules={[
+                    { required: true, message: 'Please enter your last name!' },
+                  ]}
+                >
                   <Input
                     name="lastName"
                     value={userData.lastName}
@@ -83,7 +96,13 @@ export default function GeneralTab() {
 
             <Row gutter={16}>
               <Col span={12}>
-                <Form.Item label="Email" name="email">
+                <Form.Item
+                  label="Email"
+                  name="email"
+                  rules={[
+                    { required: true, message: 'Please enter your email!' },
+                  ]}
+                >
                   <Input
                     name="email"
                     value={userData.email}
@@ -92,19 +111,34 @@ export default function GeneralTab() {
                 </Form.Item>
               </Col>
               <Col span={12}>
-                <Form.Item label="Role" name="roleId">
-                  <Input
-                    name="roleId"
-                    value={userData.roleId}
-                    onChange={handleChange}
-                  />
-                </Form.Item>
+              <Form.Item
+  label="Role"
+  name="roleId"
+  rules={[
+    { required: true, message: 'Please enter your role!' },
+    ({ getFieldValue }) => ({
+      validator(_, value) {
+        if (!value || value === 0) {
+          return Promise.reject(new Error('Please select a valid role!'));
+        }
+        return Promise.resolve();
+      },
+    }),
+  ]}
+>
+  <Input
+    name="roleId"
+    value={userData.roleId}
+    onChange={handleChange}
+  />
+</Form.Item>
+  
               </Col>
             </Row>
 
             <div className="flex w-full justify-end">
-              <Button type="primary" onClick={handleSubmit}>
-                Save Changes
+              <Button type="primary" htmlType="submit">
+                ADD
               </Button>
             </div>
           </Form>

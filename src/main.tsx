@@ -41,6 +41,7 @@ root.render(
       <ReactQueryDevtools initialIsOpen={false} />
       <Suspense>
         <Analytics />
+        
         <App />
       </Suspense>
     </QueryClientProvider>

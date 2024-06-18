@@ -23,9 +23,9 @@ function Login() {
   const token = useUserToken();
   const { colorBgElevated } = useThemeToken();
 
-  // 判断用户是否有权限
+  // Determine whether the user has permissions
   if (token.accessToken) {
-    // 如果有授权，则跳转到首页
+    //If authorized, jump to the homepage
     return <Navigate to={HOMEPAGE} replace />;
   }
 

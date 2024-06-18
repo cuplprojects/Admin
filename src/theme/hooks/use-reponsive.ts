@@ -19,8 +19,8 @@ export function useResponsive() {
   };
   const screenMap: ScreenMap = useBreakpoint();
 
-  // 使用 [...screenArray].reverse().find() 来代替 findLast 方法，避免兼容性问题
-  // [...screenArray] 创建了一个 screenArray 的副本，这样 reverse 方法不会改变原数组的顺序
+ //Use [...screenArray].reverse().find() instead of findLast method to avoid compatibility issues
+  //[...screenArray] creates a copy of screenArray so that the reverse method does not change the order of the original array
   const currentScrren = [...screenArray].reverse().find((item) => {
     const result = screenMap[item];
     return result === true;
