@@ -40,6 +40,7 @@ root.render(
       <ReactQueryDevtools initialIsOpen={true} /> {/* React dev tool */}
       <Suspense>
         <Analytics />
+        
         <App />
       </Suspense>
     </QueryClientProvider>

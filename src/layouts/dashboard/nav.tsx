@@ -88,10 +88,12 @@ export default function Nav(props: Props) {
     setOpenKeys(keys);
   };
   const onClick: MenuProps['onClick'] = ({ key }) => {
-    //Match the currently clicked one from the flattened routing information
+
+   //Match the currently clicked one from the flattened routing information
     const nextLink = flattenedRoutes?.find((el) => el.key === key);
 
-    //Handle special cases of external links in menu items
+    //Handle the special case of external links in menu items
+
     //When clicking on the external link, the route will not be jumped, the current project will not be added with a tab, the current route will not be selected, and a new tab will be opened to open the external link.
     if (nextLink?.hideTab && nextLink?.frameSrc) {
       window.open(nextLink?.frameSrc, '_blank');
