@@ -304,6 +304,15 @@ const FUNCTIONS_PERMISSION = {
       route: 'clipboard',
       component: '/components/icon/index.tsx',
     },
+    {
+      id: '3667930780705750',
+      parentId: '8132044808088488',
+      label: 'sys.menu.imageannotation',
+      name: 'Image Annotation',
+      type: PermissionType.MENU,
+      route: 'imageannotation',
+      component: '/functions/imageannotation/index.tsx',
+    },
   ],
 };
 const MENU_LEVEL_PERMISSION = {

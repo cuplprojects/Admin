@@ -9,7 +9,8 @@
     "build": "tsc && vite build",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "lint:css": "stylelint '**/*.css'"
   },
   "dependencies": {
     "@ant-design/cssinjs": "^1.17.2",
@@ -103,7 +104,7 @@
     "prettier-plugin-tailwindcss": "^0.3.0",
     "rollup-plugin-visualizer": "^5.9.2",
     "sass": "^1.69.3",
-    "stylelint": "^15.10.3",
+    "stylelint": "^15.11.0",
     "stylelint-config-rational-order": "^0.1.2",
     "stylelint-config-standard": "^33.0.0",
     "stylelint-declaration-block-no-ignored-properties": "^2.7.0",
