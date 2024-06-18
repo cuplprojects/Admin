@@ -71,7 +71,7 @@ export default function AccountDropdown() {
       key: '2',
     },
     {
-      label: <NavLink to="/management/user/account">{t('sys.menu.user.account')}</NavLink>,
+      label: <NavLink to="/management/user/AddUser">{t('sys.menu.user.AddUser')}</NavLink>,
       key: '3',
     },
     { type: 'divider' },

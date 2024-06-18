@@ -92,7 +92,7 @@
       "user": {
         "index": "User",
         "profile": "Profile",
-        "account": "Account"
+        "AddUser": "Add User"
       },
       "system": {
         "index": "System",

@@ -107,10 +107,10 @@ const MANAGEMENT_PERMISSION = {
         {
           id: '2516598794787938',
           parentId: '2781684678535711',
-          label: 'sys.menu.user.account',
-          name: 'Account',
+          label: 'sys.menu.user.AddUser',
+          name: 'AddUser',
           type: PermissionType.MENU,
-          route: 'account',
+          route: 'AddUser',
           component: '/management/user/account/index.tsx',
         },
       ],
