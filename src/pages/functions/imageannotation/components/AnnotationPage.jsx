@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import { Button, Modal, Select } from 'antd'; // Import Select and Button from Ant Design
 import ImageUploader from './ImageUploader';
 import AnnotationCanvas from './AnnotationCanvas';
 import Toolkit from './Toolkit';
-
 import { CloseOutlined } from '@ant-design/icons';
-import { Button } from 'antd';
+
+const { Option } = Select; // Destructure Option from Select for ease of use
 
 const AnnotationPage = () => {
   const [imageUrl, setImageUrl] = useState(null);
@@ -16,25 +17,11 @@ const AnnotationPage = () => {
   const [isAdjustingSize, setIsAdjustingSize] = useState(false);
   const [selectedInputField, setSelectedInputField] = useState('');
   const [mappedFields, setMappedFields] = useState({});
-  const inputFields = ['Roll No', 'Booklet No', 'Booklet Series/Set', 'Year/Semester']; // Sample input fields
+  const [openModal, setOpenModal] = useState(false);
+  const [modalFields, setModalFields] = useState([]);
+  const [coordinates, setCoordinates] = useState([]);
 
-  const handleImageSelect = (url, width, height) => {
-    setImageUrl(url);
-  };
-
-  useEffect(() => {
-    if (selectedAnnotation !== null) {
-      setSelectedInputField(annotations[selectedAnnotation].FieldName);
-    }
-  }, [selectedAnnotation, annotations]);
-
-  useEffect(() => {
-    if (selectedAnnotation !== null) {
-      const updatedAnnotations = [...annotations];
-      updatedAnnotations[selectedAnnotation].FieldName = selectedInputField;
-      localStorage.setItem('annotations', JSON.stringify(updatedAnnotations));
-    }
-  }, [selectedAnnotation, selectedInputField, annotations]);
+  const inputFields = ['Roll No', 'Booklet No', 'Booklet Series/Set', 'Year/Semester'];
 
   useEffect(() => {
     const mappedFieldsObj = {};
@@ -58,27 +45,53 @@ const AnnotationPage = () => {
       return;
     }
 
-    const selectedField = prompt(
-      `Select an input field to map (${unmappedInputFields.join(', ')}):`,
+    setModalFields(unmappedInputFields);
+    setOpenModal(true);
+    setCoordinates(coordinates);
+  };
+
+  useEffect(() => {
+    const unmappedInputFields = inputFields.filter(
+      (field) => !annotations.some((annotation) => annotation.FieldName === field),
     );
+    setMappedFields(unmappedInputFields);
+  },[annotations]);
 
-    if (
-      !selectedField ||
-      annotations.some((annotation) => annotation.FieldName === selectedField)
-    ) {
-      alert('Please select a valid input field.');
-      return;
-    }
-
+  const handleFieldSelect = (selectedField) => {
     const newAnnotation = {
       coordinates,
       FieldName: selectedField,
-      FieldValue: '', // Add an empty value initially
+      FieldValue: '',
     };
     const updatedAnnotations = [...annotations, newAnnotation];
     setAnnotations(updatedAnnotations);
     setSelectedInputField(selectedField);
+    localStorage.setItem('annotations', JSON.stringify(updatedAnnotations));
+
+    setOpenModal(false);
   };
+
+  const handleCloseModal = () => {
+    setOpenModal(false);
+  };
+
+  const handleImageSelect = (url, width, height) => {
+    setImageUrl(url);
+  };
+
+  useEffect(() => {
+    if (selectedAnnotation !== null) {
+      setSelectedInputField(annotations[selectedAnnotation].FieldName);
+    }
+  }, [selectedAnnotation, annotations]);
+
+  useEffect(() => {
+    if (selectedAnnotation !== null) {
+      const updatedAnnotations = [...annotations];
+      updatedAnnotations[selectedAnnotation].FieldName = selectedInputField;
+      localStorage.setItem('annotations', JSON.stringify(updatedAnnotations));
+    }
+  }, [selectedAnnotation, selectedInputField, annotations]);
 
   const handleDeleteAnnotation = () => {
     const updatedAnnotations = annotations.filter((_, i) => i !== selectedAnnotation);
@@ -154,29 +167,10 @@ const AnnotationPage = () => {
     handleResize(selectedAnnotation, 0, deltaY, 'bottom-right');
   };
 
-  // post annotations 
-  const submitAnnotation = async ()=>{
-//  const res = 
-  }
-
-  const startResizing = (e, index, corner) => {
-    e.preventDefault();
-    const startX = e.clientX;
-    const startY = e.clientY;
-
-    const handleMouseMove = (moveEvent) => {
-      const deltaX = moveEvent.clientX - startX;
-      const deltaY = moveEvent.clientY - startY;
-      handleResize(index, deltaX, deltaY, corner);
-    };
-
-    const handleMouseUp = () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
+  const submitAnnotation = async () => {
+    // Logic for submitting annotations
+    console.log('Submitting annotations:', annotations);
+    // Example: make API call to submit annotations
   };
 
   const handleCloseAnnotation = () => {
@@ -189,7 +183,7 @@ const AnnotationPage = () => {
       {selectedAnnotation !== null && (
         <div
           style={{
-            zIndex:'99',
+            zIndex: '99',
             position: 'fixed',
             bottom: '10px',
             right: '10px',
@@ -200,7 +194,7 @@ const AnnotationPage = () => {
         >
           <div className="d-flex align-items-center justify-content-end text-danger">
             <button className="btn btn-sm btn-outline-danger mb-4" onClick={handleCloseAnnotation}>
-                <CloseOutlined />
+              <CloseOutlined />
             </button>
           </div>
           <Toolkit
@@ -222,10 +216,14 @@ const AnnotationPage = () => {
 
       <div className="d-flex align-items-center justify-content-around m-1">
         <ImageUploader onImageSelect={handleImageSelect} />
-        {annotations.length > 0 && imageUrl &&  <Button type='primary' onclick={submitAnnotation}>Submit Annotation</Button>}
-      
+        {annotations.length > 0 && imageUrl && (
+          <Button type="primary" onClick={submitAnnotation}>
+            Submit Annotation
+          </Button>
+        )}
       </div>
-      {imageUrl &&  (
+
+      {imageUrl && (
         <div style={{ position: 'relative' }}>
           <AnnotationCanvas imageUrl={imageUrl} onAddAnnotation={handleAddAnnotation} />
           {annotations.map((annotation, index) => (
@@ -263,6 +261,33 @@ const AnnotationPage = () => {
           ))}
         </div>
       )}
+
+      <Modal
+        title="Select Field"
+        visible={openModal}
+        onCancel={handleCloseModal}
+        footer={[
+          <Button key="cancel" onClick={handleCloseModal}>
+            Cancel
+          </Button>,
+          <Button key="submit" type="primary" onClick={() => handleFieldSelect(selectedInputField)}>
+            Submit
+          </Button>,
+        ]}
+      >
+        <Select
+          style={{ width: '100%' }}
+          placeholder="Select an input field"
+          onChange={(value) => setSelectedInputField(value)}
+          value={selectedInputField}
+        >
+          {modalFields.map((field, index) => (
+            <Option key={index} value={field}>
+              {field}
+            </Option>
+          ))}
+        </Select>
+      </Modal>
     </div>
   );
 };
