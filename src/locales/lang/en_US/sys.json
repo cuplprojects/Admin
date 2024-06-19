@@ -114,7 +114,11 @@
       "chart": "Chart",
       "functions": "Functions",
       "clipboard": "Clipboard",
+      "ProjectConfig":  "ProjectConfig",
+      "FieldConfiguration":"FieldConfig",
+
       "imageannotation": "Image Annotation",
+
       "menulevel": {
         "index": "Menu Level",
         "1a": "Menu Level 1a",
