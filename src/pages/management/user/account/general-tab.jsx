@@ -1,4 +1,4 @@
-import { App, Button, Col, Form, Input, Row, Space, Switch } from 'antd';
+import { App, Button, Col, Form, Input, Row, Space, Switch, Select } from 'antd';
 import Card from '@/components/card';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
@@ -11,31 +11,49 @@ export default function GeneralTab() {
     firstName: '',
     lastName: '',
     email: '',
-    roleId: 0,
+    roleId: '',
   });
+
+  const [roles, setRoles] = useState([]);
+
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const res = await axios.get('https://localhost:7290/api/Roles'); // Adjust the API endpoint as needed
+        setRoles(res.data);
+      } catch (error) {
+        console.log(error.message);
+      }
+    };
+
+    fetchRoles();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setUserData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // submit user 
-  const handleSubmit = async (e) => {
+  const handleRoleChange = (value) => {
+    setUserData((prev) => ({ ...prev, roleId: value }));
+  };
 
+  // submit user 
+  const handleSubmit = async () => {
     try {
-      const res = await axios.post("https://localhost:7290/api/Users1", userData);
+      await axios.post("https://localhost:7290/api/Users1", userData);
       setUserData({
         firstName: '',
         lastName: '',
         email: '',
-        roleId: 0,
-      })
+        roleId: '',
+      });
       notification.success({
         message: 'Update success!',
         duration: 3,
       });
     } catch (error) {
-      console.log(error.message)
+      console.log(error.message);
     }
   };
 
@@ -111,28 +129,24 @@ export default function GeneralTab() {
                 </Form.Item>
               </Col>
               <Col span={12}>
-              <Form.Item
-  label="Role"
-  name="roleId"
-  rules={[
-    { required: true, message: 'Please enter your role!' },
-    ({ getFieldValue }) => ({
-      validator(_, value) {
-        if (!value || value === 0) {
-          return Promise.reject(new Error('Please select a valid role!'));
-        }
-        return Promise.resolve();
-      },
-    }),
-  ]}
->
-  <Input
-    name="roleId"
-    value={userData.roleId}
-    onChange={handleChange}
-  />
-</Form.Item>
-  
+                <Form.Item
+                  label="Role"
+                  name="roleId"
+                  rules={[
+                    { required: true, message: 'Please select a role!' },
+                  ]}
+                >
+                  <Select
+                    value={userData.roleId}
+                    onChange={handleRoleChange}
+                  >
+                    {roles.map((role) => (
+                      <Select.Option key={role.roleId} value={role.roleId}>
+                        {role.roleName}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Form.Item>
               </Col>
             </Row>
 

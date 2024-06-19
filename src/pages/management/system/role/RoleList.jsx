@@ -4,7 +4,6 @@ import RoleModal from './RoleModal';
 import axios from 'axios';
 import { IconButton, Iconify } from '@/components/icon';
 import ProTag from '@/theme/antd/components/tag';
-import { BasicStatus } from '#/enum';
 
 const RoleList = () => {
   const [roles, setRoles] = useState([]);
@@ -42,7 +41,11 @@ const RoleList = () => {
       title: 'Label',
       dataIndex: 'label',
     },
-    { title: 'Order', dataIndex: 'order', width: 60 },
+    {
+      title: 'Order',
+      dataIndex: 'order',
+      width: 60,
+    },
     {
       title: 'Status',
       dataIndex: 'status',
@@ -54,7 +57,10 @@ const RoleList = () => {
         </ProTag>
       ),
     },
-    { title: 'Description', dataIndex: 'desc' },
+    {
+      title: 'Description',
+      dataIndex: 'desc',
+    },
     {
       title: 'Action',
       key: 'operation',
