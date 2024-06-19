@@ -200,7 +200,7 @@ const FieldConfiguration = () => {
     <div className="field-configuration">
       <div className='d-flex justify-content-between align-items-center'>
         <h2 className='mt-2'>Fields</h2>
-        <i className='bx bxs-edit-alt fs-4' onClick={toggleFormVisibility} style={{ cursor: 'pointer', color: colorPrimary }}></i>
+        <i className='bx bx-edit-alt fs-4' onClick={toggleFormVisibility} style={{ cursor: 'pointer', color: colorPrimary }}></i>
       </div>
       {isFormVisible && (
         <div className="mt-3">

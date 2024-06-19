@@ -103,7 +103,11 @@ const Segmentation = () => {
 
   return (
     <div style={{ padding: '20px', border: '1px solid #ccc', borderRadius: '5px' }}>
+      <div className='d-flex align-items-center justify-content-between'>
       <h3>Segmentation</h3>
+      <i className='bx bx-edit-alt fs-4' onClick={()=> setIsEditing(!isEditing)} style={{ cursor: 'pointer', color: colorPrimary }}></i>
+      </div>
+      
       <div style={{ marginBottom: '10px', display: 'flex', alignItems: 'center' }}>
         <p style={{ marginRight: '10px' }}>Is Question Paper divided in Sections?</p>
         <label style={{ marginRight: '10px' }}>
@@ -322,6 +326,7 @@ const Segmentation = () => {
         <Button type="primary" className="btn  mb-2 text-center" onClick={handleSave} style={{ marginTop: '10px' }} disabled={!isEditing || (isDivided === 'yes' && numSections === 0)}>
           Save
         </Button>
+        
       </div>
     </div>
   );
