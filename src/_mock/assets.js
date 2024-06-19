@@ -423,7 +423,7 @@ const ERRORS_PERMISSION = {
   ],
 };
 const OTHERS_PERMISSION = [
-  //ProjectCOnfig Permission
+  //ProjectConfig Permission --Akshaya
   {
     id: '3981225257359246',
     parentId: '',
@@ -433,6 +433,17 @@ const OTHERS_PERMISSION = [
     type: PermissionType.MENU,
     route: 'ProjectConfig',
     component: '/ProjectConfig/index.tsx',
+  },
+  //AuditPage Permisssion --Akshaya
+  {
+    id: '3981225257359246',
+    parentId: '',
+    label: 'sys.menu.Audit',
+    name: 'Audit',
+    icon: 'solar:calendar-bold-duotone',
+    type: PermissionType.MENU,
+    route: 'Audit',
+    component: '/AuditPage/index.tsx',
   },
   {
     id: '3981225257359246',

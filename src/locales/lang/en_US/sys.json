@@ -114,8 +114,9 @@
       "chart": "Chart",
       "functions": "Functions",
       "clipboard": "Clipboard",
-      "ProjectConfig":  "ProjectConfig",
+      "ProjectConfig":  "ProjectConfig", 
       "FieldConfiguration":"FieldConfig",
+      "Audit": "Audit",
 
       "imageannotation": "Image Annotation",
 

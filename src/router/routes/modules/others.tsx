@@ -4,14 +4,15 @@ import Card from '@/components/card';
 import { Iconify, SvgIcon } from '@/components/icon';
 import { CircleLoading } from '@/components/loading';
 import ProTag from '@/theme/antd/components/tag';
-
 import { AppRouteObject } from '#/router';
+
 
 const ExternalLink = lazy(() => import('@/pages/sys/others/iframe/external-link'));
 const Iframe = lazy(() => import('@/pages/sys/others/iframe'));
 const Calendar = lazy(() => import('@/pages/sys/others/calendar'));
 const Kanban = lazy(() => import('@/pages/sys/others/kanban'));
 const ProjectConfig = lazy(() => import('@/pages/ProjectConfig'));
+const Audit = lazy(() => import('@/pages/AuditPage/Audit'));
 
 
 function Wrapper({ children }: any) {
@@ -30,6 +31,19 @@ const others: AppRouteObject[] = [
       label: 'sys.menu.ProjectConfig',
       icon: <Iconify icon="solar:calendar-bold-duotone" size={24} />,
       key: '/ProjectConfiguration',
+    },
+  },
+  {
+    path: 'Audit',
+    element: (
+      <Wrapper>
+        <Audit />
+      </Wrapper>
+    ),
+    meta: {
+      label: 'sys.menu.Audit',
+      icon: <Iconify icon="solar:calendar-bold-duotone" size={24} />,
+      key: '/Audit',
     },
   },
   {
