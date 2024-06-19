@@ -10,7 +10,7 @@ const customThemeTokenConfig: ThemeConfig['token'] = {
   colorError: '#ff5630',
   colorInfo: '#00b8d9',
 
-  // 线性化
+  //Linearize
   wireframe: false,
 
   borderRadiusSM: 2,

@@ -23,10 +23,11 @@ function Login() {
   const token = useUserToken();
   const { colorBgElevated } = useThemeToken();
 
-  //Determine whether the user has permissions
+  // Determine whether the user has permissions
   if (token.accessToken) {
     //If authorized, jump to the homepage
-return <Navigate to={HOMEPAGE} replace />;
+    return <Navigate to={HOMEPAGE} replace />;
+
   }
 
   const gradientBg = Color(colorBgElevated).alpha(0.9).toString();

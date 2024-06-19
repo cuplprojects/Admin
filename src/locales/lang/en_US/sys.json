@@ -92,7 +92,7 @@
       "user": {
         "index": "User",
         "profile": "Profile",
-        "account": "Account"
+        "AddUser": "Add User"
       },
       "system": {
         "index": "System",
@@ -116,6 +116,9 @@
       "clipboard": "Clipboard",
       "ProjectConfig":  "ProjectConfig",
       "FieldConfiguration":"FieldConfig",
+
+      "imageannotation": "Image Annotation",
+
       "menulevel": {
         "index": "Menu Level",
         "1a": "Menu Level 1a",

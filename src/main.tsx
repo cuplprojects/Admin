@@ -18,14 +18,13 @@ import './locales/i18n';
 // tailwind css
 import './theme/index.css';
 
-
 // Create a client
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 3, // Number of failed retries
       cacheTime: 300_000, // Cache validity period 5m
-      staleTime: 10_1000, // Time for data to become "stale" 10s
+      staleTime: 10_1000, // Time for data to become "stale" 10s.
       refetchOnWindowFocus: false, // Disable re-acquisition of data when window is focused
       refetchOnReconnect: false, // Disable data retrieval on reconnection
       refetchOnMount: false, // Disable re-obtaining data when components are mounted
@@ -38,9 +37,10 @@ const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 root.render(
   <HelmetProvider>
     <QueryClientProvider client={queryClient}>
-      <ReactQueryDevtools initialIsOpen={false} />
+      <ReactQueryDevtools initialIsOpen={true} /> {/* React dev tool */}
       <Suspense>
         <Analytics />
+        
         <App />
       </Suspense>
     </QueryClientProvider>
