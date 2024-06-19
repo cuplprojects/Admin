@@ -49,12 +49,12 @@ const RoleList = () => {
       align: 'center',
       width: 120,
       render: (status) => (
-        <ProTag color={status === BasicStatus.DISABLE ? 'error' : 'success'}>
-          {status === BasicStatus.DISABLE ? 'Disable' : 'Enable'}
+        <ProTag color={status === 'DISABLE' ? 'error' : 'success'}>
+          {status === 'DISABLE' ? 'Disable' : 'Enable'}
         </ProTag>
       ),
     },
-    { title: 'Description', dataIndex: 'desc' }, // Updated to match API response
+    { title: 'Description', dataIndex: 'desc' },
     {
       title: 'Action',
       key: 'operation',
@@ -90,8 +90,8 @@ const RoleList = () => {
         roleName: '',
         label: '',
         order: 0,
-        status: 'enable', // Default status or whatever suits your logic
-        desc: '', // Updated to match API payload
+        status: 'enable',
+        desc: '',
       },
     });
   };
@@ -105,15 +105,10 @@ const RoleList = () => {
   };
 
   const handleRoleModalOk = async (updatedRole) => {
-    // Destructure the necessary fields from the updatedRole to ensure the correct structure
     const { roleId, roleName, label, order, status, desc } = updatedRole;
-  
-    // Construct the payload with only the required fields
     const rolePayload = { roleId, roleName, label, order, status, desc };
-  
+
     try {
-      console.log('Updated role payload:', JSON.stringify(rolePayload, null, 2)); // Log the payload
-  
       if (roleModalProps.role && roleModalProps.role.roleId !== 0) {
         await axios.put(`https://localhost:7290/api/Roles/${roleModalProps.role.roleId}`, rolePayload, {
           headers: {
@@ -144,7 +139,6 @@ const RoleList = () => {
       });
     }
   };
-  
 
   const handleRoleModalCancel = () => {
     setRoleModalProps({
@@ -190,11 +184,11 @@ const RoleList = () => {
         columns={columns}
         dataSource={roles}
       />
-
       <RoleModal
         visible={roleModalProps.visible}
         title={roleModalProps.title}
         role={roleModalProps.role}
+        permissions={[]} // You can fetch and pass permissions here
         onOk={handleRoleModalOk}
         onCancel={handleRoleModalCancel}
       />

@@ -1,9 +1,17 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Modal, Form, Input, InputNumber, Radio } from 'antd';
-import PermissionTree from './PermissionTree'; // Importing PermissionTree locally
+import PermissionTree from './PermissionTree';
 
 const RoleModal = ({ visible, title, role, permissions, onOk, onCancel }) => {
   const [form] = Form.useForm();
+
+  useEffect(() => {
+    if (visible) {
+      form.setFieldsValue(role);
+    } else {
+      form.resetFields();
+    }
+  }, [visible, role, form]);
 
   const handleOk = async () => {
     try {
@@ -19,21 +27,44 @@ const RoleModal = ({ visible, title, role, permissions, onOk, onCancel }) => {
   };
 
   return (
-    <Modal title={title} visible={visible} onOk={handleOk} onCancel={onCancel}>
-      <Form form={form} initialValues={role} labelCol={{ span: 4 }} wrapperCol={{ span: 18 }}>
-        <Form.Item label="Name" name="name" rules={[{ required: true, message: 'Please enter name' }]}>
+    <Modal
+      title={title}
+      visible={visible}
+      onOk={handleOk}
+      onCancel={onCancel}
+      afterClose={() => form.resetFields()} // Reset form when modal is closed
+    >
+      <Form
+        form={form}
+        initialValues={role}
+        labelCol={{ span: 4 }}
+        wrapperCol={{ span: 18 }}
+      >
+        <Form.Item
+          label="Name"
+          name="roleName"
+          rules={[{ required: true, message: 'Please enter name' }]}
+        >
           <Input />
         </Form.Item>
-        <Form.Item label="Label" name="label" rules={[{ required: true, message: 'Please enter label' }]}>
+        <Form.Item
+          label="Label"
+          name="label"
+          rules={[{ required: true, message: 'Please enter label' }]}
+        >
           <Input />
         </Form.Item>
         <Form.Item label="Order" name="order">
           <InputNumber style={{ width: '100%' }} />
         </Form.Item>
-        <Form.Item label="Status" name="status" rules={[{ required: true, message: 'Please select status' }]}>
+        <Form.Item
+          label="Status"
+          name="status"
+          rules={[{ required: true, message: 'Please select status' }]}
+        >
           <Radio.Group>
-            <Radio value="enable">Enable</Radio>
-            <Radio value="disable">Disable</Radio>
+            <Radio value="ENABLE">Enable</Radio>
+            <Radio value="DISABLE">Disable</Radio>
           </Radio.Group>
         </Form.Item>
         <Form.Item label="Desc" name="desc">
