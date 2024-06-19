@@ -1,6 +1,6 @@
 import { Typography } from 'antd';
 import { Suspense } from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
+import {  Outlet } from 'react-router-dom';
 
 import { SvgIcon } from '@/components/icon';
 import { CircleLoading } from '@/components/loading';
@@ -11,24 +11,29 @@ function MenuLevel({ title }: { title: string }) {
   return <Typography.Title>Menu Level: {title}</Typography.Title>;
 }
 
-const menulevel: AppRouteObject = {
+const Master: AppRouteObject = {
   order: 5,
-  path: 'menu_level',
+  path: 'Masters',
   element: (
     <Suspense fallback={<CircleLoading />}>
       <Outlet />
     </Suspense>
   ),
   meta: {
-    label: 'sys.menu.ProjectConfig',
+    label: 'sys.menu.Master',
     icon: <SvgIcon icon="ic-menulevel" className="ant-menu-item-icon" size="24" />,
-    key: '/menu_level',
+    key: '/Masters',
   },
   children: [
     {
-      path: 'menu_level_1a',
-      element: <MenuLevel title="1a" />,
-      meta: { label: 'sys.menu.FieldConfig', key: '/menu_level/menu_level_1a' },
+      path: 'Projects',
+      element: <MenuLevel title="projects" />,
+      meta: { label: 'sys.menu.project', key: '/Masters/Projects' },
+    },
+    {
+      path: 'Fields',
+      element: <MenuLevel title="fields" />,
+      meta: { label: 'sys.menu.fields', key: '/Masters/Fields' },
     },
     // {
     //   path: 'menu_level_1b',
@@ -80,4 +85,4 @@ const menulevel: AppRouteObject = {
   ],
 };
 
-export default menulevel;
+export default Master;

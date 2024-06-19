@@ -114,6 +114,9 @@
       "chart": "Chart",
       "functions": "Functions",
       "clipboard": "Clipboard",
+      "Masters": "Masters",
+      "projects":"Projects",
+      "fields":"Fields",
       "ProjectConfig":  "ProjectConfig",
       "FieldConfiguration":"FieldConfig",
 
