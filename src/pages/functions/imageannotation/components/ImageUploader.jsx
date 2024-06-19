@@ -28,7 +28,7 @@ const ImageUploader = ({ onImageSelect }) => {
         reader.onload = () => {
           const img = new Image();
           img.onload = () => {
-            onImageSelect(reader.result, img.width, img.height);
+            onImageSelect(reader.result);
           };
           img.src = reader.result;
         };

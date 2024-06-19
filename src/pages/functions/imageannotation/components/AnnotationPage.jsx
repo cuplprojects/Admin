@@ -1,13 +1,13 @@
-// components/AnnotationPage.jsx
 import React, { useEffect, useState } from 'react';
 import ImageUploader from './ImageUploader';
 import AnnotationCanvas from './AnnotationCanvas';
 import Toolkit from './Toolkit';
 
+import { CloseOutlined } from '@ant-design/icons';
+import { Button } from 'antd';
+
 const AnnotationPage = () => {
   const [imageUrl, setImageUrl] = useState(null);
-  const [imgwidth, setImgwidth] = useState(null);
-  const [imgheight, setImghight] = useState(null);
   const [annotations, setAnnotations] = useState(() => {
     const savedAnnotations = localStorage.getItem('annotations');
     return savedAnnotations ? JSON.parse(savedAnnotations) : [];
@@ -20,8 +20,6 @@ const AnnotationPage = () => {
 
   const handleImageSelect = (url, width, height) => {
     setImageUrl(url);
-    setImgwidth(width);
-    setImghight(height);
   };
 
   useEffect(() => {
@@ -156,6 +154,11 @@ const AnnotationPage = () => {
     handleResize(selectedAnnotation, 0, deltaY, 'bottom-right');
   };
 
+  // post annotations 
+  const submitAnnotation = async ()=>{
+//  const res = 
+  }
+
   const startResizing = (e, index, corner) => {
     e.preventDefault();
     const startX = e.clientX;
@@ -176,28 +179,55 @@ const AnnotationPage = () => {
     document.addEventListener('mouseup', handleMouseUp);
   };
 
+  const handleCloseAnnotation = () => {
+    setSelectedAnnotation(null);
+    setIsAdjustingSize(false);
+  };
+
   return (
     <div>
-      <Toolkit
-        onDelete={handleDeleteAnnotation}
-        onAdjustSize={handleAdjustSize}
-        isAdjustingSize={isAdjustingSize}
-        onLeftAdjust={handleAdjustLeftSize}
-        onRightAdjust={handleAdjustRightSize}
-        onTopAdjust={handleAdjustTopSize}
-        onBottomAdjust={handleAdjustBottomSize}
-        inputFields={inputFields}
-        selectedInputField={selectedInputField}
-        setSelectedInputField={setSelectedInputField}
-        mappedFields={mappedFields}
-        selectedAnnotation={selectedAnnotation !== null}
-      />
-      <div className="d-flex align-items-center justify-content-center m-1">
+      {selectedAnnotation !== null && (
+        <div
+          style={{
+            zIndex:'99',
+            position: 'fixed',
+            bottom: '10px',
+            right: '10px',
+            backgroundColor: '#dadada',
+            padding: '20px',
+            borderRadius: '8px',
+          }}
+        >
+          <div className="d-flex align-items-center justify-content-end text-danger">
+            <button className="btn btn-sm btn-outline-danger mb-4" onClick={handleCloseAnnotation}>
+                <CloseOutlined />
+            </button>
+          </div>
+          <Toolkit
+            onDelete={handleDeleteAnnotation}
+            onAdjustSize={handleAdjustSize}
+            isAdjustingSize={isAdjustingSize}
+            onLeftAdjust={handleAdjustLeftSize}
+            onRightAdjust={handleAdjustRightSize}
+            onTopAdjust={handleAdjustTopSize}
+            onBottomAdjust={handleAdjustBottomSize}
+            inputFields={inputFields}
+            selectedInputField={selectedInputField}
+            setSelectedInputField={setSelectedInputField}
+            mappedFields={mappedFields}
+            selectedAnnotation={selectedAnnotation !== null}
+          />
+        </div>
+      )}
+
+      <div className="d-flex align-items-center justify-content-around m-1">
         <ImageUploader onImageSelect={handleImageSelect} />
+        {annotations.length > 0 && imageUrl &&  <Button type='primary' onclick={submitAnnotation}>Submit Annotation</Button>}
+      
       </div>
-      {imageUrl && (
+      {imageUrl &&  (
         <div style={{ position: 'relative' }}>
-          <AnnotationCanvas imageUrl={imageUrl} imgwidth={imgwidth} imgheight={imgheight} onAddAnnotation={handleAddAnnotation} />
+          <AnnotationCanvas imageUrl={imageUrl} onAddAnnotation={handleAddAnnotation} />
           {annotations.map((annotation, index) => (
             <div
               key={index}
@@ -220,7 +250,6 @@ const AnnotationPage = () => {
                   padding: '5px',
                   outline: 'none',
                   boxSizing: 'border-box',
-                  position: 'relative',
                 }}
                 value={annotation.FieldValue}
                 onChange={(e) => {

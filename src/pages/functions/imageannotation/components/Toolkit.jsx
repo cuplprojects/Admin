@@ -30,17 +30,7 @@ const Toolkit = ({
 
   return (
     <div
-      style={{
-        position: 'fixed',
-        top: '10px',
-        right: '10px',
-        zIndex: 99,
-        backgroundColor: '#dadada',
-        marginBottom: '10px',
-        height: 'calc(100vh - 20px)',
-        padding: '20px',
-        borderRadius: '8px',
-      }}
+
     >
       <button className='btn btn-primary m-1' onClick={onAdjustSize} disabled={!selectedAnnotation}>
         Adjust Size
