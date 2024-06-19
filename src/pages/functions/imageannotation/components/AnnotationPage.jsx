@@ -49,12 +49,12 @@ const AnnotationPage = () => {
     setOpenModal(true);
     setCoordinates(coordinates);
   };
-
+  
   useEffect(() => {
     const unmappedInputFields = inputFields.filter(
       (field) => !annotations.some((annotation) => annotation.FieldName === field),
     );
-    setMappedFields(unmappedInputFields);
+    setModalFields(unmappedInputFields);
   },[annotations]);
 
   const handleFieldSelect = (selectedField) => {
@@ -255,6 +255,7 @@ const AnnotationPage = () => {
                   updatedAnnotations[index].FieldValue = e.target.value;
                   setAnnotations(updatedAnnotations);
                   localStorage.setItem('annotations', JSON.stringify(updatedAnnotations));
+                  // placeholder=annotation.FieldName
                 }}
               />
             </div>
