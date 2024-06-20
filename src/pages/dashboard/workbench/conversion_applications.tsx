@@ -19,7 +19,7 @@ export function Conversion() {
 export function Applications() {
   const { colorInfoActive, colorInfoBorder } = useThemeToken();
   return (
-    <Basic
+    <Basic 
       percent={75}
       title="45,566"
       subtitle="Applications"
@@ -53,7 +53,7 @@ function Basic({ percent, title, subtitle, iconify, bg, strokeColor }: Props) {
         format={format}
         strokeColor={strokeColor}
       />
-      <div className="ml-2 flex flex-col">
+      <div className="ml-2 flex flex-col placeholder">
         <span className="text-2xl font-bold">{title}</span>
         <span className="opacity-50">{subtitle}</span>
       </div>

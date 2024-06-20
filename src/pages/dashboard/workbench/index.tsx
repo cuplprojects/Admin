@@ -57,7 +57,7 @@ function Workbench() {
         </Col>
       </Row>
 
-      <Row gutter={[16, 16]} className="mt-4" justify="center">
+      {/* <Row gutter={[16, 16]} className="mt-4" justify="center">
         <Col span={24} md={12} lg={8}>
           <CurrentDownload />
         </Col>
@@ -83,7 +83,7 @@ function Workbench() {
         <Col span={24} md={12}>
           <TopAuthor />
         </Col>
-      </Row>
+      </Row> */}
     </>
   );
 }
