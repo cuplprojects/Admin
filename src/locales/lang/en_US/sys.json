@@ -119,8 +119,10 @@
       "fields":"Fields",
       "ProjectConfig":  "ProjectConfig",
       "FieldConfiguration":"FieldConfig",
-
+      
       "imageannotation": "Image Annotation",
+      "Imports" : "Imports",
+      "AllImports" : "AllImports",
 
       "menulevel": {
         "index": "Menu Level",

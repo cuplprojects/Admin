@@ -392,6 +392,10 @@ const MENU_LEVEL_PERMISSION = {
     // },
   ],
 };
+
+
+  
+   
 const ERRORS_PERMISSION = {
   id: '9406067785553476',
   parentId: '',
@@ -442,6 +446,17 @@ const OTHERS_PERMISSION = [
     type: PermissionType.MENU,
     route: 'ProjectConfig',
     component: '/ProjectConfig/index.tsx',
+  },
+  // IMPORTS PERMISSION
+  {
+    id: '3981225257359246',
+    parentId: '',
+    label: 'sys.menu.AllImports',
+    name: 'Imports',
+    icon: 'solar:calendar-bold-duotone',
+    type: PermissionType.MENU,
+    route: 'AllImports',
+    component: '/Imports/index.tsx',
   },
   {
     id: '3981225257359246',
