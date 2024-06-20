@@ -6,6 +6,7 @@ import { CircleLoading } from '@/components/loading';
 import ProTag from '@/theme/antd/components/tag';
 
 import { AppRouteObject } from '#/router';
+import Import from '@/pages/Imports/AllImports';
 
 const ExternalLink = lazy(() => import('@/pages/sys/others/iframe/external-link'));
 const Iframe = lazy(() => import('@/pages/sys/others/iframe'));
@@ -30,6 +31,20 @@ const others: AppRouteObject[] = [
       label: 'sys.menu.ProjectConfig',
       icon: <Iconify icon="solar:calendar-bold-duotone" size={24} />,
       key: '/ProjectConfiguration',
+    },
+  },
+  // Import Component
+  {
+    path: 'AllImports',
+    element: (
+      <Wrapper>
+        <Import />
+      </Wrapper>
+    ),
+    meta: {
+      label: 'sys.menu.AllImports',
+      icon: <Iconify icon="solar:calendar-bold-duotone" size={24} />,
+      key: '/AllImports',
     },
   },
   {
