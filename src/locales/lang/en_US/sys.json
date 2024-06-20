@@ -114,7 +114,10 @@
       "chart": "Chart",
       "functions": "Functions",
       "clipboard": "Clipboard",
-      "ProjectConfig":  "ProjectConfig", 
+      "Masters": "Masters",
+      "projects":"Projects",
+      "fields":"Fields",
+      "ProjectConfig":  "ProjectConfig",
       "FieldConfiguration":"FieldConfig",
       "Audit": "Audit",
 

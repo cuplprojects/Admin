@@ -1,6 +1,6 @@
 // react-query
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+// import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 // react
 import { Analytics } from '@vercel/analytics/react';
 import { Suspense } from 'react';
@@ -37,7 +37,7 @@ const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 root.render(
   <HelmetProvider>
     <QueryClientProvider client={queryClient}>
-      <ReactQueryDevtools initialIsOpen={true} /> {/* React dev tool */}
+      {/* <ReactQueryDevtools initialIsOpen={true} /> React dev tool */}
       <Suspense>
         <Analytics />
         
