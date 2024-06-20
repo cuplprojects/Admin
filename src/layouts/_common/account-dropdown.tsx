@@ -57,23 +57,23 @@ export default function AccountDropdown() {
   );
 
   const items: MenuProps['items'] = [
-    {
-      label: (
-        <NavLink to="/" target="_blank">
-          {t('sys.docs')}
-        </NavLink>
-      ),
-      key: '0',
-    },
+    // {
+    //   label: (
+    //     <NavLink to="/" target="_blank">
+    //       {t('sys.docs')}
+    //     </NavLink>
+    //   ),
+    //   key: '0',
+    // },
     { label: <NavLink to={HOMEPAGE}>{t('sys.menu.dashboard')}</NavLink>, key: '1' },
     {
       label: <NavLink to="/management/user/profile">{t('sys.menu.user.profile')}</NavLink>,
       key: '2',
     },
-    {
-      label: <NavLink to="/management/user/AddUser">{t('sys.menu.user.AddUser')}</NavLink>,
-      key: '3',
-    },
+    // {
+    //   label: <NavLink to="/management/user/AddUser">{t('sys.menu.user.AddUser')}</NavLink>,
+    //   key: '3',
+    // },
     { type: 'divider' },
     {
       label: <button className="font-bold text-warning">{t('sys.login.logout')}</button>,
