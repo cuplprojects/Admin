@@ -1,5 +1,5 @@
 import en_US from 'antd/locale/en_US';
-import zh_CN from 'antd/locale/zh_CN';
+import hi_IN from 'antd/locale/hi_IN';
 import { useTranslation } from 'react-i18next';
 
 import { LocalEnum } from '#/enum';
@@ -14,11 +14,11 @@ type Language = {
 };
 
 export const LANGUAGE_MAP: Record<Locale, Language> = {
-  [LocalEnum.zh_CN]: {
-    locale: LocalEnum.zh_CN,
+  [LocalEnum.hi_IN]: {
+    locale: LocalEnum.hi_IN,
     label: 'हिंदी',
     icon: 'ic-locale_hi_IN',
-    antdLocal: zh_CN,
+    antdLocal: hi_IN,
   },
   [LocalEnum.en_US]: {
     locale: LocalEnum.en_US,
