@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 // import './Import.css';
-import OMRImages from './OMRImages';
+// import OMRImages from './OMRImages';
 import Scanned from './ScannedData';
 import Registration from './RegistrationData';
 import Absentee from './Absentee';
@@ -10,6 +10,7 @@ import FileUploadComponent from './FileUploadComponent';
 import './style.css'
 import { useThemeToken } from '@/theme/hooks';
 import { color } from 'framer-motion';
+import ImportOmr from './OmrImport/ImportOmr';
 
 const Import = () => {
   const { colorPrimary } = useThemeToken();
@@ -285,7 +286,7 @@ const Import = () => {
                 </ul>
               </div>
               <div className="tab-content-pq">
-                {activetab === 'OMRImages' && <FileUploadComponent />}
+                {activetab === 'OMRImages' && <ImportOmr />}
                 {activetab === 'scanned' && <Scanned handleFileUpload={handleFileUpload} handleScannedUpload={handleScannedUpload} selectedFile={selectedFile} />}
                 {activetab === 'registration' && <Registration handleFileUpload={handleFileUpload} handleRegistrationUpload={handleRegistrationUpload} selectedFile={selectedFile} headers={headers} registrationMapping={registrationMapping} handleRegistrationMappingChange={handleRegistrationMappingChange} />}
                 {activetab === 'absentee' && (
