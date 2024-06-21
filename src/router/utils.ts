@@ -3,7 +3,7 @@ import { ascend } from 'ramda';
 import { AppRouteObject, RouteMeta } from '#/router';
 
 /**
- * return menu routes
+ *return menu routes
  */
 export const menuFilter = (items: AppRouteObject[]) => {
   return items
@@ -18,7 +18,7 @@ export const menuFilter = (items: AppRouteObject[]) => {
 };
 
 /**
- * 基于 src/router/routes/modules 文件结构动态生成路由
+ *Dynamically generate routes based on the src/router/routes/modules file structure
  */
 export function getRoutesFromModules() {
   const menuModules: AppRouteObject[] = [];
@@ -33,15 +33,15 @@ export function getRoutesFromModules() {
 }
 
 /**
- * return the routes will be used in sidebar menu
+ *return the routes will be used in sidebar menu
  */
 export function getMenuRoutes(appRouteObjects: AppRouteObject[]) {
-  // return menuFilter(getMenuModules());
+  //return menuFilter(getMenuModules());
   return menuFilter(appRouteObjects);
 }
 
 /**
- * return flatten routes
+ *return flatten routes
  */
 export function flattenMenuRoutes(routes: AppRouteObject[]) {
   return routes.reduce<RouteMeta[]>((prev, item) => {
