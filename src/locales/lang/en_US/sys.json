@@ -117,12 +117,12 @@
       "Masters": "Masters",
       "projects":"Projects",
       "fields":"Fields",
-      "ProjectConfig":  "ProjectConfig",
+      "ProjectConfig":  "Project Configuration",
       "FieldConfiguration":"FieldConfig",
       
       "imageannotation": "Image Annotation",
       "Imports" : "Imports",
-      "AllImports" : "AllImports",
+      "AllImports" : "All Imports",
 
       "menulevel": {
         "index": "Menu Level",

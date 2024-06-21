@@ -2,7 +2,7 @@ import { Layout } from 'antd';
 import Color from 'color';
 import { Navigate } from 'react-router-dom';
 
-import DashboardImg from '@/assets/images/background/dashboard.png';
+import LoginImg from '@/assets/images/background/login.png';
 import Overlay2 from '@/assets/images/background/overlay_2.jpg';
 import LocalePicker from '@/components/locale-picker';
 import { useUserToken } from '@/store/userStore';
@@ -39,8 +39,8 @@ function Login() {
           background: bg,
         }}
       >
-        <div className="text-3xl font-bold leading-normal lg:text-4xl xl:text-5xl">Slash Admin</div>
-        <img className="max-w-[480px] xl:max-w-[560px]" src={DashboardImg} alt="" />
+        <div className="text-3xl font-bold leading-normal lg:text-4xl xl:text-5xl">CUPL SPA</div>
+        <img className="max-w-[480px] xl:max-w-[560px]" src={LoginImg} alt="" />
       </div>
 
       <div className="m-auto flex !h-screen w-full max-w-[480px] flex-col justify-center px-[16px] lg:px-[64px]">

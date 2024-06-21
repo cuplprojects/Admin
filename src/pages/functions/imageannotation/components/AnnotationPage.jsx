@@ -15,7 +15,7 @@ const AnnotationPage = () => {
   });
   const [selectedAnnotation, setSelectedAnnotation] = useState(null);
   const [isAdjustingSize, setIsAdjustingSize] = useState(false);
-  const [selectedInputField, setSelectedInputField] = useState('');
+  const [selectedInputField, setSelectedInputField] = useState(null);
   const [mappedFields, setMappedFields] = useState({});
   const [openModal, setOpenModal] = useState(false);
   const [modalFields, setModalFields] = useState([]);
@@ -49,13 +49,13 @@ const AnnotationPage = () => {
     setOpenModal(true);
     setCoordinates(coordinates);
   };
-  
+
   useEffect(() => {
     const unmappedInputFields = inputFields.filter(
       (field) => !annotations.some((annotation) => annotation.FieldName === field),
     );
     setModalFields(unmappedInputFields);
-  },[annotations]);
+  }, [annotations]);
 
   const handleFieldSelect = (selectedField) => {
     const newAnnotation = {
@@ -65,7 +65,7 @@ const AnnotationPage = () => {
     };
     const updatedAnnotations = [...annotations, newAnnotation];
     setAnnotations(updatedAnnotations);
-    setSelectedInputField(selectedField);
+    setSelectedInputField('');
     localStorage.setItem('annotations', JSON.stringify(updatedAnnotations));
 
     setOpenModal(false);
@@ -73,6 +73,7 @@ const AnnotationPage = () => {
 
   const handleCloseModal = () => {
     setOpenModal(false);
+    setSelectedInputField(null);
   };
 
   const handleImageSelect = (url, width, height) => {
@@ -255,7 +256,6 @@ const AnnotationPage = () => {
                   updatedAnnotations[index].FieldValue = e.target.value;
                   setAnnotations(updatedAnnotations);
                   localStorage.setItem('annotations', JSON.stringify(updatedAnnotations));
-                  // placeholder=annotation.FieldName
                 }}
               />
             </div>
@@ -280,12 +280,12 @@ const AnnotationPage = () => {
           style={{ width: '100%' }}
           placeholder="Select an input field"
           onChange={(value) => setSelectedInputField(value)}
-          value={selectedInputField}
+          value={selectedInputField} // Ensure this corresponds to the selected value
         >
           {modalFields.map((field, index) => (
-            <Option key={index} value={field}>
+            <Select.Option key={index} value={field}>
               {field}
-            </Option>
+            </Select.Option>
           ))}
         </Select>
       </Modal>
