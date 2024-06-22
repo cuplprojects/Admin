@@ -35,6 +35,7 @@ const Toolkit = ({
     const updatedMappedFields = { ...mappedFields };
     updatedMappedFields[newInputField] = true; // Assuming true means mapped
     setMappedFields(updatedMappedFields); // Update state of mappedFields
+    console.log(mappedFields)
   };
 
   return (

@@ -392,6 +392,10 @@ const MENU_LEVEL_PERMISSION = {
     // },
   ],
 };
+
+
+  
+   
 const ERRORS_PERMISSION = {
   id: '9406067785553476',
   parentId: '',
@@ -443,6 +447,62 @@ const OTHERS_PERMISSION = [
     route: 'ProjectConfig',
     component: '/ProjectConfig/index.tsx',
   },
+
+  // IMPORTS PERMISSION
+  {
+    id: '3981225257359246',
+    parentId: '',
+    label: 'sys.menu.AllImports',
+    name: 'Imports',
+    icon: 'solar:calendar-bold-duotone',
+    type: PermissionType.MENU,
+    route: 'AllImports',
+    component: '/Imports/index.tsx',
+  },
+//   {
+//     id: '3981225257359246',
+//     parentId: '',
+//     label: 'sys.menu.calendar',
+//     name: 'Calendar',
+//     icon: 'solar:calendar-bold-duotone',
+//     type: PermissionType.MENU,
+//     route: 'calendar',
+//     component: '/sys/others/calendar/index.tsx',
+//   },
+//   {
+//     id: '3513985683886393',
+//     parentId: '',
+//     label: 'sys.menu.kanban',
+//     name: 'kanban',
+//     icon: 'solar:clipboard-bold-duotone',
+//     type: PermissionType.MENU,
+//     route: 'kanban',
+//     component: '/sys/others/kanban/index.tsx',
+//   },
+//   {
+//     id: '5455837930804461',
+//     parentId: '',
+//     label: 'sys.menu.disabled',
+//     name: 'Disabled',
+//     icon: 'ic_disabled',
+//     type: PermissionType.MENU,
+//     route: 'disabled',
+//     status: BasicStatus.DISABLE,
+//     component: '/sys/others/calendar/index.tsx',
+//   },
+//   {
+//     id: '7728048658221587',
+//     parentId: '',
+//     label: 'sys.menu.label',
+//     name: 'Label',
+//     icon: 'ic_label',
+//     type: PermissionType.MENU,
+//     route: 'label',
+//     newFeature: true,
+//     component: '/sys/others/blank.tsx',
+//   },
+
+
   // {
   //   id: '3981225257359246',
   //   parentId: '',
@@ -527,6 +587,7 @@ const OTHERS_PERMISSION = [
   //   route: 'blank',
   //   component: '/sys/others/blank.tsx',
   // },
+
 ];
 
 export const PERMISSION_LIST = [

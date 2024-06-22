@@ -17,6 +17,7 @@ import { worker } from './_mock';
 import './locales/i18n';
 // tailwind css
 import './theme/index.css';
+import { FileUploadProvider } from './pages/Imports/Importfile';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -40,8 +41,9 @@ root.render(
       {/* <ReactQueryDevtools initialIsOpen={true} /> React dev tool */}
       <Suspense>
         <Analytics />
-        
+        <FileUploadProvider>
         <App />
+        </FileUploadProvider>
       </Suspense>
     </QueryClientProvider>
   </HelmetProvider>,

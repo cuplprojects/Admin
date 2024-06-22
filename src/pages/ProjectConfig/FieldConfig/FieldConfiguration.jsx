@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './FieldConfig.css';
-import { Button } from 'antd';
-import {Iconify, IconButton} from './../../../components/icon'
+import { Button, Table, Input, Select, Space, Popconfirm, message } from 'antd';
+import { DeleteOutlined } from '@ant-design/icons';
 import { useThemeToken } from '@/theme/hooks';
+
+const { Option } = Select;
 
 const FieldConfiguration = () => {
   const { colorPrimary } = useThemeToken();
@@ -13,18 +15,34 @@ const FieldConfiguration = () => {
     minRange: '',
     maxRange: '',
     controlType: '',
-    numberOfBlocks: ''
+    numberOfBlocks: 0
   });
   const [savedData, setSavedData] = useState([]);
-  const [selectedRows, setSelectedRows] = useState({});
-  const [selectAllChecked, setSelectAllChecked] = useState(false);
+  const [selectedRows, setSelectedRows] = useState([]);
   const [fields, setFields] = useState([]);
   const [alertMessage, setAlertMessage] = useState('');
   const [alertType, setAlertType] = useState('');
   const [selectedFieldIndex, setSelectedFieldIndex] = useState(-1);
   const [selectedFieldData, setSelectedFieldData] = useState(null);
   const [selectedFields, setSelectedFields] = useState([]);
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+    total: 0,
+    showSizeChanger: true,
+    pageSizeOptions: ['10', '20', '30', '50']
+  });
 
+
+  useEffect(() => {
+    if (formData.maxRange) {
+      setFormData(prevFormData => ({
+        ...prevFormData,
+        numberOfBlocks: formData.maxRange.toString().length
+      }));
+    }
+  }, [formData.maxRange]);
+  
   useEffect(() => {
     axios.get('http://localhost:5071/api/Fields')
       .then(response => {
@@ -37,6 +55,7 @@ const FieldConfiguration = () => {
     axios.get('http://localhost:5071/api/FieldConfigurations')
       .then(response => {
         setSavedData(response.data);
+        setPagination({ ...pagination, total: response.data.length });
       })
       .catch(error => {
         console.error('Error fetching field configurations:', error);
@@ -56,7 +75,7 @@ const FieldConfiguration = () => {
 
     // Additional validation for range fields
     if ((id === 'minRange' && value > formData.maxRange) ||
-        (id === 'maxRange' && value < formData.minRange)) {
+      (id === 'maxRange' && value < formData.minRange)) {
       showAlert('Maximum range cannot be less than minimum range.', 'danger');
       // Reset the field to its previous value
       setFormData(prevState => ({
@@ -101,15 +120,14 @@ const FieldConfiguration = () => {
       setSelectedFieldIndex(-1);
       setSelectedFieldData(null);
       showAlert('Field configuration updated successfully.', 'success');
-
-      // Remove old field name from selectedFields
-      setSelectedFields(selectedFields.filter(field => field !== savedData[selectedFieldIndex].attributeDetails.field));
     } else {
       // Add new field configuration
       axios.post('http://localhost:5071/api/FieldConfigurations', newConfig)
         .then(response => {
-          setSavedData([...savedData, response.data]);
+          const newFieldConfig = response.data;
+          setSavedData([...savedData, newFieldConfig]); // Update savedData with the new data
           showAlert('Field configuration saved successfully.', 'success');
+          setPagination({ ...pagination, total: savedData.length + 1 }); // Update pagination if necessary
         })
         .catch(error => {
           console.error('Error saving field configuration:', error);
@@ -132,54 +150,48 @@ const FieldConfiguration = () => {
     setSelectedFields([...selectedFields, formData.field]);
   };
 
-  const handleCheckboxChange = (index) => {
-    setSelectedRows({
-      ...selectedRows,
-      [index]: !selectedRows[index]
-    });
+  useEffect(() => {
+    if (savedData.length > 0) {
+      const savedFieldNames = savedData.map(item => item.attributeDetails.field); // Extracting field names from savedData 0
+      // Filter fields to include only those that exist in savedData
+
+      const filteredFields = fields.filter(field => !savedFieldNames.includes(field.fieldName));
+
+      setFields(filteredFields);
+    }
+  }, [savedData]); // Ensure to include `fields` as a dependency if you are updating it based on `savedData`
+
+
+  const handleCheckboxChange = (selectedRowKeys) => {
+    setSelectedRows(selectedRowKeys);
   };
 
-  const handleDeleteSelected = () => {
-    const selectedIds = savedData
-      .filter((_, index) => selectedRows[index])
-      .map(item => item.fieldConfigurationId);
-
-    axios.all(selectedIds.map(id => axios.delete(`http://localhost:5071/api/FieldConfigurations/${id}`)))
+  const handleDelete = (fieldConfigurationId) => {
+    axios.delete(`http://localhost:5071/api/FieldConfigurations/${fieldConfigurationId}`)
       .then(() => {
-        setSavedData(savedData.filter((_, index) => !selectedRows[index]));
-        setSelectedRows({});
-        setSelectAllChecked(false);
+        setSavedData(savedData.filter(item => item.fieldConfigurationId !== fieldConfigurationId));
+        message.success('Field configuration deleted successfully.');
       })
       .catch(error => {
-        console.error('Error deleting field configurations:', error);
+        console.error('Error deleting field configuration:', error);
+        message.error('Error deleting field configuration. Please try again later.');
       });
   };
 
-  const handleSelectAll = () => {
-    const allChecked = !selectAllChecked;
-    let updatedSelectedRows = {};
-    savedData.forEach((_, index) => {
-      updatedSelectedRows[index] = allChecked;
-    });
-    setSelectedRows(updatedSelectedRows);
-    setSelectAllChecked(allChecked);
-  };
-
-  const isAnyRowSelected = Object.values(selectedRows).some((isSelected) => isSelected);
-
-  const handleFieldSelection = (index) => {
-    setSelectedFieldIndex(index);
-    setSelectedFieldData(savedData[index]);
+  const handleFieldSelection = (record, rowIndex) => {
+    setFormVisible(!isFormVisible);
+    setSelectedFieldIndex(rowIndex);
+    setSelectedFieldData(record);
     setFormData({
-      field: savedData[index].attributeDetails.field,
-      minRange: savedData[index].attributeDetails.minRange,
-      maxRange: savedData[index].attributeDetails.maxRange,
-      controlType: savedData[index].attributeDetails.controlType,
-      numberOfBlocks: savedData[index].attributeDetails.numberOfBlocks
+      field: record.attributeDetails.field,
+      minRange: record.attributeDetails.minRange,
+      maxRange: record.attributeDetails.maxRange,
+      controlType: record.attributeDetails.controlType,
+      numberOfBlocks: record.attributeDetails.numberOfBlocks
     });
 
-    // Remove currently selected field from selectedFields
-    setSelectedFields(selectedFields.filter(field => field !== savedData[index].attributeDetails.field));
+    // Remove currently selected field from selectedFields if it exists
+    setSelectedFields(selectedFields.filter(field => field !== record.attributeDetails.field));
   };
 
   const showAlert = (message, type) => {
@@ -193,8 +205,67 @@ const FieldConfiguration = () => {
     }, 3000);
   };
 
-  // Filter options for the select dropdown to exclude selected fields
-  const filteredFields = fields.filter(field => !selectedFields.includes(field.fieldName));
+  const columns = [
+    {
+      title: 'Field',
+      dataIndex: ['attributeDetails', 'field'],
+      key: 'field',
+      sorter: (a, b) => a.attributeDetails.field.localeCompare(b.attributeDetails.field),
+      sortDirections: ['ascend', 'descend'],
+    },
+    {
+      title: 'Min Range',
+      dataIndex: ['attributeDetails', 'minRange'],
+      key: 'minRange',
+      sorter: (a, b) => parseInt(a.attributeDetails.minRange) - parseInt(b.attributeDetails.minRange),
+    },
+    {
+      title: 'Max Range',
+      dataIndex: ['attributeDetails', 'maxRange'],
+      key: 'maxRange',
+      sorter: (a, b) => parseInt(a.attributeDetails.maxRange) - parseInt(b.attributeDetails.maxRange),
+    },
+    {
+      title: 'Control Type',
+      dataIndex: ['attributeDetails', 'controlType'],
+      key: 'controlType',
+      sorter: (a, b) => a.attributeDetails.controlType.localeCompare(b.attributeDetails.controlType),
+    },
+    {
+      title: 'Number of Blocks',
+      dataIndex: ['attributeDetails', 'numberOfBlocks'],
+      key: 'numberOfBlocks',
+      sorter: (a, b) => parseInt(a.attributeDetails.numberOfBlocks) - parseInt(b.attributeDetails.numberOfBlocks),
+    },
+    {
+      title: 'Actions',
+      key: 'actions',
+      render: (text, record, index) => (
+        <Space>
+          <Button type="link" onClick={() => handleFieldSelection(record, index)}>Edit</Button>
+          <Popconfirm
+            title="Are you sure delete this configuration?"
+            onConfirm={() => handleDelete(record.fieldConfigurationId)}
+            okText="Yes"
+            cancelText="No"
+          >
+            <Button type="link" danger>Delete</Button>
+          </Popconfirm>
+        </Space>
+      ),
+    },
+  ];
+
+  const handleTableChange = (pagination, filters, sorter) => {
+    console.log('Table change:', pagination, filters, sorter);
+    // Implement sorting logic
+    const { field, order } = sorter;
+    if (order === 'ascend') {
+      setSavedData([...savedData.sort((a, b) => a[field] > b[field] ? 1 : -1)]);
+    } else if (order === 'descend') {
+      setSavedData([...savedData.sort((a, b) => a[field] < b[field] ? 1 : -1)]);
+    }
+  };
 
   return (
     <div className="field-configuration">
@@ -209,7 +280,7 @@ const FieldConfiguration = () => {
               <label htmlFor="field" className="sr-only">Select Field</label>
               <select id="field" className="form-control" value={formData.field} onChange={handleInputChange}>
                 <option value="">Select Field</option>
-                {filteredFields.map((field) => (
+                {fields.map((field) => (
                   <option key={field.fieldName} value={field.fieldName}>{field.fieldName}</option>
                 ))}
               </select>
@@ -234,7 +305,7 @@ const FieldConfiguration = () => {
               <label htmlFor="numberOfBlocks" className="sr-only">Number of Blocks</label>
               <input type="number" id="numberOfBlocks" className="form-control" placeholder="Blocks" value={formData.numberOfBlocks} onChange={handleInputChange} />
             </div>
-            <Button type="primary" className="btn  mb-2 text-center" onClick={handleSave}>
+            <Button type="primary" className="btn mb-2 text-center" onClick={handleSave}>
               {selectedFieldIndex !== -1 ? 'Update' : 'Save'}
             </Button>
           </form>
@@ -247,51 +318,13 @@ const FieldConfiguration = () => {
       )}
       {savedData.length > 0 && (
         <div className="mt-4">
-          <div className='d-flex justify-content-between align-items-center'>
-            <h1>Saved Fields</h1>
-            {isAnyRowSelected && (
-              <IconButton onClick={handleDeleteSelected} className="mt-2">
-                <Iconify icon="mingcute:delete-2-fill" size={18} className="text-error" />
-              </IconButton>
-            )}
-          </div>
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Field</th>
-                <th>Min Range</th>
-                <th>Max Range</th>
-                <th>Control Type</th>
-                <th>Number of Blocks</th>
-                <th>
-                  Select All
-                  <input
-                    type="checkbox"
-                    checked={selectAllChecked}
-                    onChange={handleSelectAll}
-                  />
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {savedData.map((data, index) => (
-                <tr key={data.fieldConfigurationId} onClick={() => handleFieldSelection(index)} style={{ cursor: 'pointer' }}>
-                  <td>{data.attributeDetails.field}</td>
-                  <td>{data.attributeDetails.minRange}</td>
-                  <td>{data.attributeDetails.maxRange}</td>
-                  <td>{data.attributeDetails.controlType}</td>
-                  <td>{data.attributeDetails.numberOfBlocks}</td>
-                  <td>
-                    <input
-                      type="checkbox"
-                      checked={!!selectedRows[index]}
-                      onChange={() => handleCheckboxChange(index)}
-                    />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <Table
+            columns={columns}
+            dataSource={savedData}
+            rowKey={record => record.fieldConfigurationId}
+            pagination={pagination}
+            onChange={handleTableChange}
+          />
         </div>
       )}
     </div>
