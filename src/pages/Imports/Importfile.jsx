@@ -11,7 +11,7 @@ const useFileUpload = () => {
 const ENDPOINTS = {
   UPLOAD: 'http://localhost:5071/api/OMRData/upload',
   UPLOAD_STATUS: 'http://localhost:5071/api/OMRData/upload-status',
-  UPLOAD_REQUEST: 'http://localhost:5071/api/OMRData/upload-request',
+  UPLOAD_REQUEST: 'http://localhost:5071/api/OMRData/upload-request?WhichDatabase=Local',
 };
 
 const defaultOptions = {
@@ -181,6 +181,8 @@ const FileUploadProvider = ({ children }) => {
         onComplete: (e, file) => {
           options.onComplete(e, file);
           lastSuccessfulFileIndex = currentFileIndex - 1; // Update the last successful file index
+          console.log( + currentFileIndex)
+
           localforage.setItem('lastSuccessfulFileIndex', lastSuccessfulFileIndex); // Store in localForage
           uploadNextFile(); // Move to the next file after completion
         },

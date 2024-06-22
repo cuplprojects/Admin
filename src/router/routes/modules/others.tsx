@@ -73,6 +73,7 @@ const others: AppRouteObject[] = [
       icon: <Iconify icon="solar:calendar-bold-duotone" size={24} />,
       key: '/calendar',
     },
+
   },
   {
     path: 'kanban',

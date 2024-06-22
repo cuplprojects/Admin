@@ -5,18 +5,18 @@ import glass_bag from '@/assets/images/glass/ic_glass_bag.png';
 import glass_buy from '@/assets/images/glass/ic_glass_buy.png';
 import glass_message from '@/assets/images/glass/ic_glass_message.png';
 import glass_users from '@/assets/images/glass/ic_glass_users.png';
-import { Iconify } from '@/components/icon';
-import ChartBar from '@/pages/components/chart/view/chart-bar';
-import ChartMixed from '@/pages/components/chart/view/chart-mixed';
-import ChartPie from '@/pages/components/chart/view/chart-pie';
-import ChartRadar from '@/pages/components/chart/view/chart-radar';
 import { useThemeToken } from '@/theme/hooks';
-
 import AnalysisCard from './analysis-card';
-import AnalysisNews from './analysis-news';
-import AnalysisOrderTimeline from './analysis-order-timeline';
-import AnalysisTasks from './analysis-tasks';
-import AnalysisTrafficCard from './analysis-traffic-card';
+// import { Iconify } from '@/components/icon';
+// import ChartBar from '@/pages/components/chart/view/chart-bar';
+// import ChartMixed from '@/pages/components/chart/view/chart-mixed';
+// import ChartPie from '@/pages/components/chart/view/chart-pie';
+// import ChartRadar from '@/pages/components/chart/view/chart-radar';
+
+// import AnalysisNews from './analysis-news';
+// import AnalysisOrderTimeline from './analysis-order-timeline';
+// import AnalysisTasks from './analysis-tasks';
+// import AnalysisTrafficCard from './analysis-traffic-card';
 
 function Analysis() {
   const theme = useThemeToken();

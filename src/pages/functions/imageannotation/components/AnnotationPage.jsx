@@ -4,6 +4,7 @@ import ImageUploader from './ImageUploader';
 import AnnotationCanvas from './AnnotationCanvas';
 import Toolkit from './Toolkit';
 import { CloseOutlined } from '@ant-design/icons';
+import axios from 'axios';
 
 const { Option } = Select; // Destructure Option from Select for ease of use
 
@@ -15,7 +16,7 @@ const AnnotationPage = () => {
   });
   const [selectedAnnotation, setSelectedAnnotation] = useState(null);
   const [isAdjustingSize, setIsAdjustingSize] = useState(false);
-  const [selectedInputField, setSelectedInputField] = useState('');
+  const [selectedInputField, setSelectedInputField] = useState(null);
   const [mappedFields, setMappedFields] = useState({});
   const [openModal, setOpenModal] = useState(false);
   const [modalFields, setModalFields] = useState([]);
@@ -49,13 +50,13 @@ const AnnotationPage = () => {
     setOpenModal(true);
     setCoordinates(coordinates);
   };
-  
+
   useEffect(() => {
     const unmappedInputFields = inputFields.filter(
       (field) => !annotations.some((annotation) => annotation.FieldName === field),
     );
     setModalFields(unmappedInputFields);
-  },[annotations]);
+  }, [annotations]);
 
   const handleFieldSelect = (selectedField) => {
     const newAnnotation = {
@@ -65,7 +66,7 @@ const AnnotationPage = () => {
     };
     const updatedAnnotations = [...annotations, newAnnotation];
     setAnnotations(updatedAnnotations);
-    setSelectedInputField(selectedField);
+    setSelectedInputField('');
     localStorage.setItem('annotations', JSON.stringify(updatedAnnotations));
 
     setOpenModal(false);
@@ -73,6 +74,7 @@ const AnnotationPage = () => {
 
   const handleCloseModal = () => {
     setOpenModal(false);
+    setSelectedInputField(null);
   };
 
   const handleImageSelect = (url, width, height) => {
@@ -167,11 +169,37 @@ const AnnotationPage = () => {
     handleResize(selectedAnnotation, 0, deltaY, 'bottom-right');
   };
 
+
+
   const submitAnnotation = async () => {
-    // Logic for submitting annotations
-    console.log('Submitting annotations:', annotations);
-    // Example: make API call to submit annotations
+    try {
+      // Prepare data for POST request
+      const postData = {
+        projectId: 1,
+        ImageUrl: 'Url-String',
+        annotations: annotations.map(annotation => ({
+          FieldName: annotation.FieldName,
+          coordinates: JSON.stringify(annotation.coordinates).replace(/\"/g, "'"), // Convert coordinates to JSON string
+        }))
+      };
+  
+      console.log('Submitting annotations:', postData);
+  
+      // Make POST request using Axios
+      const response = await axios.post('your_api_endpoint_here', postData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+  
+      console.log('Response:', response.data);
+      // Handle response as needed
+    } catch (error) {
+      console.error('Error:', error);
+      // Handle error
+    }
   };
+  
 
   const handleCloseAnnotation = () => {
     setSelectedAnnotation(null);
@@ -255,7 +283,6 @@ const AnnotationPage = () => {
                   updatedAnnotations[index].FieldValue = e.target.value;
                   setAnnotations(updatedAnnotations);
                   localStorage.setItem('annotations', JSON.stringify(updatedAnnotations));
-                  // placeholder=annotation.FieldName
                 }}
               />
             </div>
@@ -280,12 +307,12 @@ const AnnotationPage = () => {
           style={{ width: '100%' }}
           placeholder="Select an input field"
           onChange={(value) => setSelectedInputField(value)}
-          value={selectedInputField}
+          value={selectedInputField} // Ensure this corresponds to the selected value
         >
           {modalFields.map((field, index) => (
-            <Option key={index} value={field}>
+            <Select.Option key={index} value={field}>
               {field}
-            </Option>
+            </Select.Option>
           ))}
         </Select>
       </Modal>

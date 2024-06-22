@@ -4,6 +4,7 @@ import './ProjectConfiguration.css'; // Ensure this file is created for custom s
 import FieldConfiguration from './FieldConfig/FieldConfiguration';
 import ResponseConfiguration from './ResponseConfig/ResponseConfiguration';
 import { useThemeToken } from '@/theme/hooks';
+import AnnotationPage from '../functions/imageannotation/components/AnnotationPage';
 
 const ProjectConfig = () => {
   const { colorPrimary } = useThemeToken();
@@ -31,12 +32,7 @@ const ProjectConfig = () => {
             </div>
           </Tab>
           <Tab eventKey="section3" title="Image Annotation">
-            <div role="tabpanel" className={`tab-pane ${activeKey === 'section3' && 'show active'}`} id="Section3">
-              <h3>Section 3</h3>
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce semper, magna a ultricies volutpat, mi eros viverra massa, vitae consequat nisi justo in tortor. Proin accumsan felis ac felis dapibus, non iaculis mi varius.
-              </p>
-            </div>
+            <AnnotationPage/>
           </Tab>
         </Tabs>
       </div>

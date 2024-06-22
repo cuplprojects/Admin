@@ -19,3 +19,4 @@ const OMRImages = ({ handleFileUpload, handleImagesUpload, selectedFile }) => {
 };
 
 export default OMRImages;
+

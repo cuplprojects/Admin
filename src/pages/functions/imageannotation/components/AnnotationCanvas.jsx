@@ -12,7 +12,7 @@ const AnnotationCanvas = ({ imageUrl, onAddAnnotation }) => {
     img.onload = () => {
       setImage(img);
       const aspectRatio = img.width / img.height;
-      const canvasWidth = window.innerWidth * 0.5;
+      const canvasWidth = 1000;
       const canvasHeight = canvasWidth / aspectRatio;
       setImageDimensions({ width: canvasWidth, height: canvasHeight });
     };
