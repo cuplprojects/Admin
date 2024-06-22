@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Button } from 'antd';
+import localforage from 'localforage';
 
 const ImportOmr = () => {
   const [files, setFiles] = useState([]);
@@ -9,22 +10,42 @@ const ImportOmr = () => {
   const [showSkipBtn, setShowSkipBtn] = useState(false);
   const [currentFileName, setCurrentFileName] = useState('');
 
-  // UseEffect to load files from localStorage on component mount
+  // UseEffect to load files and currentFileIndex from localforage on component mount
   useEffect(() => {
-    const storedFiles = JSON.parse(localStorage.getItem('uploadFiles')) || [];
-    setFiles(storedFiles);
-    console.log(storedFiles);
+    const fetchData = async () => {
+      try {
+        const storedFiles = await localforage.getItem('uploadFiles') || [];
+        const storedIndex = await localforage.getItem('currentFileIndex') || 0;
+        setFiles(storedFiles);
+        setCurrentFileIndex(storedIndex);
+      } catch (error) {
+        console.error('Error fetching data from localforage:', error);
+      }
+    };
+    fetchData();
   }, []);
 
   // Function to handle file selection
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const selectedFiles = [...e.target.files];
-    const jsondata = JSON.stringify(selectedFiles);
-    // Store files in localStorage immediately after selection
-    localStorage.setItem('uploadFiles', jsondata);
-    console.log(jsondata);
-    // Update state to reflect selected files
-    setFiles(selectedFiles);
+
+    try {
+      // Save files in localforage
+      await localforage.setItem('uploadFiles', selectedFiles);
+      setFiles(selectedFiles);
+    } catch (error) {
+      console.error('Error storing data in localforage:', error);
+    }
+  };
+
+  const removeFromLocalForage = async (file) => {
+    try {
+      let storedFiles = await localforage.getItem('uploadFiles') || [];
+      storedFiles = storedFiles.filter((f) => f.name !== file.name);
+      await localforage.setItem('uploadFiles', storedFiles);
+    } catch (error) {
+      console.error('Error removing data from localforage:', error);
+    }
   };
 
   // Function to handle form submission
@@ -54,10 +75,12 @@ const ImportOmr = () => {
         console.log(`File ${i + 1} uploaded successfully:`, response);
 
         // Remove the uploaded file from localStorage
-        removeFromLocalStorage(files[i]);
+        await removeFromLocalForage(files[i]);
 
-        // Update current file index in state
-        setCurrentFileIndex(i + 1);
+        // Update current file index in state and localforage
+        const nextFileIndex = i + 1;
+        setCurrentFileIndex(nextFileIndex);
+        await localforage.setItem('currentFileIndex', nextFileIndex);
       } catch (error) {
         // Handle specific error for file with same name already exists
         if (error.response && error.response.status === 409) {
@@ -76,25 +99,19 @@ const ImportOmr = () => {
   };
 
   // Function to skip the current file
-  const skipFile = () => {
+  const skipFile = async () => {
     setShowSkipBtn(false); // Hide the skip button after skipping
-    removeFromLocalStorage(files[currentFileIndex]); // Remove from localStorage anyway
+    await removeFromLocalForage(files[currentFileIndex]); // Remove from localStorage anyway
 
     // Move to the next file
-    setCurrentFileIndex(currentFileIndex + 1);
+    const nextFileIndex = currentFileIndex + 1;
+    setCurrentFileIndex(nextFileIndex);
+    await localforage.setItem('currentFileIndex', nextFileIndex);
     handleSubmit({ preventDefault: () => {} });
-  };
-
-  // Function to remove file from localStorage
-  const removeFromLocalStorage = (file) => {
-    let storedFiles = JSON.parse(localStorage.getItem('uploadFiles')) || [];
-    storedFiles = storedFiles.filter((f) => f.name !== file.name);
-    localStorage.setItem('uploadFiles', JSON.stringify(storedFiles));
   };
 
   // Function to resume upload process from where it stopped
   const handleResume = () => {
-    // Set current file index to resume from where it stopped
     setLoading(true);
     handleSubmit({ preventDefault: () => {} }); // Call handleSubmit to resume
   };
