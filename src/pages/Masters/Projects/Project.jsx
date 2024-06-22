@@ -39,6 +39,7 @@ const Project = () => {
   const [form] = Form.useForm();
   const [data, setData] = useState([]);
   const [editingKey, setEditingKey] = useState('');
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   const isEditing = (record) => record.key === editingKey;
 
@@ -65,6 +66,7 @@ const Project = () => {
 
   const cancel = () => {
     setEditingKey('');
+    
   };
 
   const save = async (key) => {
@@ -83,10 +85,12 @@ const Project = () => {
         }
         setData(newData);
         setEditingKey('');
+        setHasUnsavedChanges(false);
       } else {
         await addRow(row);
         setData([...newData, row]);
         setEditingKey('');
+        setHasUnsavedChanges(false);
       }
     } catch (errInfo) {
       console.log('Validate Failed:', errInfo);
@@ -124,6 +128,7 @@ const Project = () => {
         throw new Error('Failed to add new project');
       }
       // Handle success
+      setHasUnsavedChanges(false);
     } catch (error) {
       console.error('Error adding new project:', error);
     }
@@ -139,6 +144,7 @@ const Project = () => {
     };
     setData([...data, newData]);
     setEditingKey(newRowKey.toString());
+    setHasUnsavedChanges(true);
   };
 
   const columns = [
@@ -207,7 +213,7 @@ const Project = () => {
 
   return (
     <div className='mt-5'>
-      <Button onClick={handleAdd} type="primary" style={{ marginBottom: 16 }}>
+      <Button onClick={handleAdd} type="primary" style={{ marginBottom: 16 }} disabled={hasUnsavedChanges}>
         Add a row
       </Button>
       <Form form={form} component={false}>
