@@ -4,6 +4,7 @@ import ImageUploader from './ImageUploader';
 import AnnotationCanvas from './AnnotationCanvas';
 import Toolkit from './Toolkit';
 import { CloseOutlined } from '@ant-design/icons';
+import axios from 'axios';
 
 const { Option } = Select; // Destructure Option from Select for ease of use
 
@@ -168,11 +169,37 @@ const AnnotationPage = () => {
     handleResize(selectedAnnotation, 0, deltaY, 'bottom-right');
   };
 
+
+
   const submitAnnotation = async () => {
-    // Logic for submitting annotations
-    console.log('Submitting annotations:', annotations);
-    // Example: make API call to submit annotations
+    try {
+      // Prepare data for POST request
+      const postData = {
+        projectId: 1,
+        ImageUrl: 'Url-String',
+        annotations: annotations.map(annotation => ({
+          FieldName: annotation.FieldName,
+          coordinates: JSON.stringify(annotation.coordinates).replace(/\"/g, "'"), // Convert coordinates to JSON string
+        }))
+      };
+  
+      console.log('Submitting annotations:', postData);
+  
+      // Make POST request using Axios
+      const response = await axios.post('your_api_endpoint_here', postData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+  
+      console.log('Response:', response.data);
+      // Handle response as needed
+    } catch (error) {
+      console.error('Error:', error);
+      // Handle error
+    }
   };
+  
 
   const handleCloseAnnotation = () => {
     setSelectedAnnotation(null);
