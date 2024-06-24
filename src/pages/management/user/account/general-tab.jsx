@@ -5,14 +5,7 @@ import axios from 'axios';
 
 export default function GeneralTab() {
   const { notification } = App.useApp();
-
-  // Initialize userData with valid initial values
-  const [userData, setUserData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    roleId: '',
-  });
+  const [form] = Form.useForm(); // Create form instance
 
   const [roles, setRoles] = useState([]);
 
@@ -29,27 +22,12 @@ export default function GeneralTab() {
     fetchRoles();
   }, []);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setUserData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleRoleChange = (value) => {
-    setUserData((prev) => ({ ...prev, roleId: value }));
-  };
-
-  // submit user 
-  const handleSubmit = async () => {
+  const handleSubmit = async (values) => {
     try {
-      await axios.post("https://localhost:7290/api/Users1", userData);
-      setUserData({
-        firstName: '',
-        lastName: '',
-        email: '',
-        roleId: '',
-      });
+      await axios.post("https://localhost:7290/api/Users?WhichDatabase=local", values);
+      form.resetFields(); // Reset form fields
       notification.success({
-        message: 'Update success!',
+        message: 'User added successfully!',
         duration: 3,
       });
     } catch (error) {
@@ -59,7 +37,7 @@ export default function GeneralTab() {
 
   return (
     <Row gutter={[16, 16]}>
-      <Col span={24} lg={8}>
+      {/* <Col span={24} lg={8}>
         <Card className="flex-col !px-6 !pb-10 !pt-20">
           <Space className="py-6">
             <div>Public Profile</div>
@@ -69,12 +47,18 @@ export default function GeneralTab() {
             Delete User
           </Button>
         </Card>
-      </Col>
+      </Col> */}
       <Col span={24} lg={16}>
         <Card>
           <Form
+            form={form} // Attach the form instance
             layout="vertical"
-            initialValues={userData} // Set initialValues to populate the form
+            initialValues={{
+              firstName: '',
+              lastName: '',
+              email: '',
+              roleId: '',
+            }} // Set initialValues to populate the form
             labelCol={{ span: 8 }}
             className="w-full"
             onFinish={handleSubmit} // Added onFinish event handler
@@ -88,11 +72,7 @@ export default function GeneralTab() {
                     { required: true, message: 'Please enter your first name!' },
                   ]}
                 >
-                  <Input
-                    name="firstName"
-                    value={userData.firstName}
-                    onChange={handleChange}
-                  />
+                  <Input />
                 </Form.Item>
               </Col>
               <Col span={12}>
@@ -103,11 +83,7 @@ export default function GeneralTab() {
                     { required: true, message: 'Please enter your last name!' },
                   ]}
                 >
-                  <Input
-                    name="lastName"
-                    value={userData.lastName}
-                    onChange={handleChange}
-                  />
+                  <Input />
                 </Form.Item>
               </Col>
             </Row>
@@ -121,11 +97,7 @@ export default function GeneralTab() {
                     { required: true, message: 'Please enter your email!' },
                   ]}
                 >
-                  <Input
-                    name="email"
-                    value={userData.email}
-                    onChange={handleChange}
-                  />
+                  <Input />
                 </Form.Item>
               </Col>
               <Col span={12}>
@@ -136,10 +108,7 @@ export default function GeneralTab() {
                     { required: true, message: 'Please select a role!' },
                   ]}
                 >
-                  <Select
-                    value={userData.roleId}
-                    onChange={handleRoleChange}
-                  >
+                  <Select>
                     {roles.map((role) => (
                       <Select.Option key={role.roleId} value={role.roleId}>
                         {role.roleName}

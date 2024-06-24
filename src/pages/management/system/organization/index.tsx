@@ -21,7 +21,7 @@ import orgService from '@/api/services/orgService';
 import { IconButton, Iconify } from '@/components/icon';
 import ProTag from '@/theme/antd/components/tag';
 
-import OrganizationChart from './organization-chart';
+// import OrganizationChart from './organization-chart';
 
 import { Organization } from '#/entity';
 
@@ -178,9 +178,9 @@ export default function OrganizationPage() {
         />
       </Card>
 
-      <Card title="Organization Chart">
+      {/* <Card title="Organization Chart">
         <OrganizationChart organizations={data} />
-      </Card>
+      </Card> */}
 
       <OrganizationModal {...organizationModalPros} />
     </Space>

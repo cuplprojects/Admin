@@ -14,6 +14,7 @@ export default function GeneralTab() {
     lastName: '',
     email: '',
     roleId: '',
+    roleName: '',
   });
 
   const [userList, setUserList] = useState([]);
@@ -26,10 +27,23 @@ export default function GeneralTab() {
     const fetchUsersAndRoles = async () => {
       try {
         const [usersRes, rolesRes] = await Promise.all([
-          axios.get('https://localhost:7290/api/Users1'),
+          axios.get('https://localhost:7290/api/Users?WhichDatabase=local'),
           axios.get('https://localhost:7290/api/Roles'),
         ]);
-        setUserList(usersRes.data);
+
+        // Create a role map to easily map roleId to roleName
+        const roleMap = rolesRes.data.reduce((acc, role) => {
+          acc[role.roleId] = role.roleName;
+          return acc;
+        }, {});
+
+        // Map role names to users
+        const usersWithRoleNames = usersRes.data.map(user => ({
+          ...user,
+          roleName: roleMap[user.roleId]
+        }));
+
+        setUserList(usersWithRoleNames);
         setRoles(rolesRes.data);
       } catch (error) {
         console.log(error.message);
@@ -45,24 +59,26 @@ export default function GeneralTab() {
   };
 
   const handleRoleChange = (value) => {
-    setUserData((prev) => ({ ...prev, roleId: value }));
+    const selectedRole = roles.find(role => role.roleId === value);
+    setUserData((prev) => ({ ...prev, roleId: value, roleName: selectedRole?.roleName }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('https://localhost:7290/api/Users1', userData);
+      await axios.post('https://localhost:7290/api/Users?WhichDatabase=local', userData);
       setUserData({
         firstName: '',
         lastName: '',
         email: '',
         roleId: '',
+        roleName: '',
       });
       notification.success({
         message: 'User added successfully!',
         duration: 3,
       });
-      const res = await axios.get('https://localhost:7290/api/Users1');
+      const res = await axios.get('https://localhost:7290/api/Users?WhichDatabase=local');
       setUserList(res.data);
     } catch (error) {
       console.log(error.message);
@@ -76,19 +92,20 @@ export default function GeneralTab() {
 
   const handleSave = async (userId) => {
     try {
-      await axios.put(`https://localhost:7290/api/Users1/${userId}`, userData);
+      await axios.put(`https://localhost:7290/api/Users/${userId}?WhichDatabase=local`, userData);
       setEditingUserId(null);
       setUserData({
         firstName: '',
         lastName: '',
         email: '',
         roleId: '',
+        roleName: '',
       });
       notification.success({
         message: 'User updated successfully!',
         duration: 3,
       });
-      const res = await axios.get('https://localhost:7290/api/Users1');
+      const res = await axios.get('https://localhost:7290/api/Users?WhichDatabase=local');
       setUserList(res.data);
     } catch (error) {
       console.log(error.message);
@@ -102,6 +119,7 @@ export default function GeneralTab() {
       lastName: '',
       email: '',
       roleId: '',
+      roleName: '',
     });
   };
 
@@ -112,12 +130,12 @@ export default function GeneralTab() {
 
   const handleDelete = async () => {
     try {
-      await axios.delete(`https://localhost:7290/api/Users1/${userIdToDelete}`);
+      await axios.delete(`https://localhost:7290/api/Users/${userIdToDelete}?WhichDatabase=local`);
       notification.success({
         message: 'User deleted successfully!',
         duration: 3,
       });
-      const res = await axios.get('https://localhost:7290/api/Users1');
+      const res = await axios.get('https://localhost:7290/api/Users?WhichDatabase=local');
       setUserList(res.data);
       setDeleteModalVisible(false);
     } catch (error) {
@@ -173,6 +191,7 @@ export default function GeneralTab() {
                         user.email
                       )}
                     </td>
+                    
                     <td>
                       {editingUserId === user.userId ? (
                         <Select
@@ -208,7 +227,7 @@ export default function GeneralTab() {
                           <Button type="primary" icon={<Icon icon={editOutlined} />} onClick={() => handleEdit(user)} />
                           <Popconfirm
                             title="Are you sure you want to delete this user?"
-                            onConfirm={handleDelete}
+                            onConfirm={() => showDeleteConfirm(user.userId)}
                             okText="Yes"
                             cancelText="No"
                           >

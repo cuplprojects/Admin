@@ -1,7 +1,7 @@
 import { Alert, Button, Checkbox, Col, Divider, Form, Input, Row } from 'antd';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AiFillGithub, AiFillGoogleCircle, AiFillWechat } from 'react-icons/ai';
+// import { AiFillGithub, AiFillGoogleCircle, AiFillWechat } from 'react-icons/ai';
 
 import { DEFAULT_USER, TEST_USER, USER_USER } from '@/_mock/assets';
 import { SignInReq } from '@/api/services/userService';
@@ -110,7 +110,7 @@ function LoginForm() {
           </Button>
         </Form.Item>
 
-        <Row align="middle" gutter={8}>
+        {/* <Row align="middle" gutter={8}>
           <Col span={9} flex="1">
             <Button
               className="w-full !text-sm"
@@ -138,10 +138,10 @@ function LoginForm() {
           <AiFillGithub />
           <AiFillWechat />
           <AiFillGoogleCircle />
-        </div>
+        </div> */}
       </Form>
     </>
   );
 }
 
-export default LoginForm;4
+export default LoginForm;
