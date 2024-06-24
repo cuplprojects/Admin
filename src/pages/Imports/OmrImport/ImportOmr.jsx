@@ -9,8 +9,9 @@ const ImportOmr = () => {
   const [currentFileIndex, setCurrentFileIndex] = useState(0);
   const [showSkipBtn, setShowSkipBtn] = useState(false);
   const [currentFileName, setCurrentFileName] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertType, setAlertType] = useState('');
 
-  // UseEffect to load files and currentFileIndex from localforage on component mount
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -25,12 +26,10 @@ const ImportOmr = () => {
     fetchData();
   }, []);
 
-  // Function to handle file selection
   const handleFileChange = async (e) => {
     const selectedFiles = [...e.target.files];
 
     try {
-      // Save files in localforage
       await localforage.setItem('uploadFiles', selectedFiles);
       setFiles(selectedFiles);
     } catch (error) {
@@ -48,19 +47,16 @@ const ImportOmr = () => {
     }
   };
 
-  // Function to handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     const fileCount = files.length;
 
-    // Iterate through each file and upload sequentially
     for (let i = currentFileIndex; i < fileCount; i++) {
       const formData = new FormData();
       formData.append('file', files[i]);
 
       try {
-        // Make sure to update your API endpoint accordingly
         const response = await axios.post(
           'http://localhost:5071/api/OMRData/upload-request?WhichDatabase=Local',
           formData,
@@ -71,26 +67,31 @@ const ImportOmr = () => {
           },
         );
 
-        // Handle success (for demonstration, we're logging the response)
         console.log(`File ${i + 1} uploaded successfully:`, response);
 
-        // Remove the uploaded file from localStorage
         await removeFromLocalForage(files[i]);
 
-        // Update current file index in state and localforage
         const nextFileIndex = i + 1;
         setCurrentFileIndex(nextFileIndex);
         await localforage.setItem('currentFileIndex', nextFileIndex);
+        if (nextFileIndex >= fileCount) {
+          await localforage.removeItem('currentFileIndex');
+          setAlertMessage('All files uploaded successfully!');
+          setAlertType('success');
+        }
       } catch (error) {
-        // Handle specific error for file with same name already exists
         if (error.response && error.response.status === 409) {
           setShowSkipBtn(true);
           setCurrentFileName(files[i].name);
+          setAlertMessage('File with same name already exists!');
+          setAlertType('danger');
           break;
         } else {
           console.error(`Error uploading file ${i + 1}:`, error);
           setLoading(false);
-          break; // Stop upload process on error
+          setAlertMessage('Error uploading file!');
+          setAlertType('danger');
+          break;
         }
       }
     }
@@ -98,39 +99,45 @@ const ImportOmr = () => {
     setLoading(false);
   };
 
-  // Function to skip the current file
   const skipFile = async () => {
-    setShowSkipBtn(false); // Hide the skip button after skipping
-    await removeFromLocalForage(files[currentFileIndex]); // Remove from localStorage anyway
+    setShowSkipBtn(false);
+    await removeFromLocalForage(files[currentFileIndex]);
 
-    // Move to the next file
     const nextFileIndex = currentFileIndex + 1;
     setCurrentFileIndex(nextFileIndex);
     await localforage.setItem('currentFileIndex', nextFileIndex);
     handleSubmit({ preventDefault: () => {} });
   };
 
-  // Function to resume upload process from where it stopped
   const handleResume = () => {
     setLoading(true);
-    handleSubmit({ preventDefault: () => {} }); // Call handleSubmit to resume
+    handleSubmit({ preventDefault: () => {} });
   };
 
   return (
     <>
-      <form className="text-center" onSubmit={handleSubmit}>
+
+   
+   <h3 className="head text-center">Upload OMR Data</h3>
+      <form className="text-center mb -5 mt-4" onSubmit={handleSubmit}>
         <input type="file" multiple onChange={handleFileChange} />
-        {files.length > 0 && (
+        {files.length > 0 && currentFileIndex < files.length && (
           <Button type="primary" htmlType="submit" disabled={loading}>
             {loading ? 'Uploading...' : 'Upload'}
           </Button>
         )}
       </form>
+ 
       {loading && <p>Loading...</p>}
       {showSkipBtn && (
         <Button type="primary" onClick={skipFile}>
           Skip {currentFileName}
         </Button>
+      )}
+      {alertMessage && (
+        <div className={`alert alert-${alertType} mt-3`} role="alert">
+          {alertMessage}
+        </div>
       )}
     </>
   );
