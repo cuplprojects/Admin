@@ -8,7 +8,7 @@ import { useLocation, useMatches, useNavigate } from 'react-router-dom';
 
 import MotionContainer from '@/components/animate/motion-container';
 import { varSlide } from '@/components/animate/variants';
-import Logo from '@/components/logo';
+// import Logo from '@/components/logo';
 import Scrollbar from '@/components/scrollbar';
 import { useRouteToMenuFn, usePermissionRoutes, useFlattenedRoutes } from '@/router/hooks';
 import { menuFilter } from '@/router/utils';

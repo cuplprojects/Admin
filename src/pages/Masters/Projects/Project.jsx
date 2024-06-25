@@ -40,7 +40,7 @@ const Project = () => {
   const [data, setData] = useState([]);
   const [editingKey, setEditingKey] = useState('');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-
+  const [sortedInfo, setSortedInfo] = useState({});
   const isEditing = (record) => record.key === editingKey;
 
   useEffect(() => {
@@ -49,12 +49,20 @@ const Project = () => {
 
   const fetchData = async () => {
     try {
-      const response = await fetch('http://localhost:5071/api/Projects');
+      const response = await fetch('http://localhost:5071/api/Projects?WhichDatabase=Local');
       const data = await response.json();
       setData(data.map((item, index) => ({ ...item, key: index.toString(), serialNo: index + 1 })));
     } catch (error) {
       console.error('Error fetching data:', error);
     }
+  };
+
+  const handleChange = (pagination, filters, sorter) => {
+    console.log('Various parameters', pagination, filters, sorter);
+    setSortedInfo({
+      order: sorter.order,
+      columnKey: sorter.field,
+    });
   };
 
   const edit = (record) => {
@@ -66,7 +74,14 @@ const Project = () => {
 
   const cancel = () => {
     setEditingKey('');
-    
+    const lastRow = data[data.length - 1];
+    if (lastRow && lastRow.projectName.trim() === '') {
+      // Remove the last row if Project Name is blank
+      const newData = [...data];
+      newData.pop();
+      setData(newData);
+      setHasUnsavedChanges(false);
+    }
   };
 
   const save = async (key) => {
@@ -99,7 +114,7 @@ const Project = () => {
 
   const updateRow = async (updatedRow) => {
     try {
-      const response = await fetch(`http://localhost:5071/api/Projects/${updatedRow.projectId}`, {
+      const response = await fetch(`http://localhost:5071/api/Projects/${updatedRow.projectId}?WhichDatabase=Local`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -111,13 +126,13 @@ const Project = () => {
       }
       // Handle success
     } catch (error) {
-      console.error('Error updating project:', error);
+      console.error('Error updating project:', error)
     }
   };
 
   const addRow = async (newRow) => {
     try {
-      const response = await fetch('http://localhost:5071/api/Projects', {
+      const response = await fetch('http://localhost:5071/api/Projects?WhichDatabase=Local', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -125,11 +140,14 @@ const Project = () => {
         body: JSON.stringify(newRow),
       });
       if (!response.ok) {
+        cancel()
         throw new Error('Failed to add new project');
       }
+      fetchData()
       // Handle success
       setHasUnsavedChanges(false);
     } catch (error) {
+      
       console.error('Error adding new project:', error);
     }
   };
@@ -152,12 +170,16 @@ const Project = () => {
       title: 'Serial No',
       dataIndex: 'serialNo',
       width: '15%',
+      sorter: (a, b) => a.serialNo - b.serialNo,
+      sortOrder: sortedInfo.columnKey === 'serialNo' && sortedInfo.order,
     },
     {
       title: 'Project Name',
       dataIndex: 'projectName',
       width: '70%',
       editable: true,
+      sorter: (a, b) => a.projectName.length - b.projectName.length,
+      sortOrder: sortedInfo.columnKey === 'projectName' && sortedInfo.order,
       render: (_, record) => (
         <span>{record.projectName}</span>
       ),
@@ -230,6 +252,7 @@ const Project = () => {
           pagination={{
             onChange: cancel,
           }}
+          onChange={handleChange}
         />
       </Form>
     </div>

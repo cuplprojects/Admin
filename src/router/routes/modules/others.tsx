@@ -13,6 +13,7 @@ const Iframe = lazy(() => import('@/pages/sys/others/iframe'));
 const Calendar = lazy(() => import('@/pages/sys/others/calendar'));
 const Kanban = lazy(() => import('@/pages/sys/others/kanban'));
 const ProjectConfig = lazy(() => import('@/pages/ProjectConfig'));
+const Correction = lazy(() => import('@/pages/correction/CorrectionPage'));
 
 
 function Wrapper({ children }: any) {
@@ -45,6 +46,20 @@ const others: AppRouteObject[] = [
       label: 'sys.menu.AllImports',
       icon: <Iconify icon="solar:calendar-bold-duotone" size={24} />,
       key: '/AllImports',
+    },
+  },
+  // Correction Window
+  {
+    path: 'correction',
+    element: (
+      <Wrapper>
+        <Correction />
+      </Wrapper>
+    ),
+    meta: {
+      label: 'sys.menu.correctionwindow',
+      icon: <Iconify icon="solar:document-add-bold-duotone" size={24} />,
+      key: '/correction',
     },
   },
   {

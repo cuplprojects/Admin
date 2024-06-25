@@ -41,6 +41,7 @@ const Field = () => {
   const [data, setData] = useState([]);
   const [editingKey, setEditingKey] = useState('');
   const [open, setOpen] = useState(false);
+  const [sortedInfo, setSortedInfo] = useState({});
   const [disabled, setDisabled] = useState(true);
   const [bounds, setBounds] = useState({
     left: 0,
@@ -58,7 +59,7 @@ const Field = () => {
 
   const fetchData = async () => {
     try {
-      const response = await fetch('http://localhost:5071/api/Fields');
+      const response = await fetch('http://localhost:5071/api/Fields?WhichDatabase=Local');
       const data = await response.json();
       setData(data.map((item, index) => ({ ...item, key: index.toString(), serialNo: index + 1 })));
     } catch (error) {
@@ -74,6 +75,13 @@ const Field = () => {
   };
 
   const cancel = () => {
+    const lastRow = data[data.length - 1];
+  if (lastRow && lastRow.projectName.trim() === '') {
+    // Remove the last row if Project Name is blank
+    const newData = [...data];
+    newData.pop();
+    setData(newData);  
+  }
     setEditingKey('');
   };
 
@@ -105,7 +113,7 @@ const Field = () => {
 
   const updateRow = async (updatedRow) => {
     try {
-      const response = await fetch(`http://localhost:5071/api/Fields/${updatedRow.fieldId}`, {
+      const response = await fetch(`http://localhost:5071/api/Fields/${updatedRow.fieldId}?WhichDatabase=Local`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -123,7 +131,7 @@ const Field = () => {
 
   const addRow = async (newRow) => {
     try {
-      const response = await fetch('http://localhost:5071/api/Fields', {
+      const response = await fetch('http://localhost:5071/api/Fields?WhichDatabase=Local', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -154,6 +162,7 @@ const Field = () => {
       await addRow(newRow);
       setData([...data, newRow]);
       setOpen(false);
+      form.resetFields();
     } catch (errInfo) {
       console.log('Validate Failed:', errInfo);
     }
@@ -161,6 +170,7 @@ const Field = () => {
 
   const handleCancel = () => {
     setOpen(false);
+    form.resetFields();
   };
 
   const onStart = (_event, uiData) => {
@@ -176,18 +186,28 @@ const Field = () => {
       bottom: clientHeight - (targetRect.bottom - uiData.y),
     });
   };
-
+  const handleChange = (pagination, filters, sorter) => {
+    console.log('Various parameters', pagination, filters, sorter);
+    setSortedInfo({
+      order: sorter.order,
+      columnKey: sorter.field,
+    });
+  };
   const columns = [
     {
       title: 'Serial No',
       dataIndex: 'serialNo',
       width: '15%',
+      sorter: (a, b) => a.serialNo - b.serialNo,
+      sortOrder: sortedInfo.columnKey === 'serialNo' && sortedInfo.order,
     },
     {
       title: 'Field Name',
       dataIndex: 'fieldName',
       width: '70%',
       editable: true,
+      sorter: (a, b) => a.fieldName.length - b.fieldName.length,
+      sortOrder: sortedInfo.columnKey === 'fieldName' && sortedInfo.order,
       render: (_, record) => (
         <span>{record.fieldName}</span>
       ),
@@ -244,7 +264,7 @@ const Field = () => {
   return (
     <div className='mt-5'>
       <Button onClick={handleAdd} type="primary" style={{ marginBottom: 16 }}>
-        Add a row
+        Add Field
       </Button>
       <Form form={form} component={false}>
         <Table
@@ -260,6 +280,7 @@ const Field = () => {
           pagination={{
             onChange: cancel,
           }}
+          onChange={handleChange}
         />
       </Form>
       <Modal
