@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-const AnnotationCanvas = ({ imageUrl, imgwidth, imgheight, onAddAnnotation }) => {
+const AnnotationCanvas = ({ imageUrl, onAddAnnotation }) => {
   const [startPos, setStartPos] = useState(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [image, setImage] = useState(null);
@@ -11,8 +11,8 @@ const AnnotationCanvas = ({ imageUrl, imgwidth, imgheight, onAddAnnotation }) =>
     const img = new Image();
     img.onload = () => {
       setImage(img);
-      const aspectRatio = imgwidth / imgheight;
-      const canvasWidth = window.innerWidth * 0.5;
+      const aspectRatio = img.width / img.height;
+      const canvasWidth = 1000;
       const canvasHeight = canvasWidth / aspectRatio;
       setImageDimensions({ width: canvasWidth, height: canvasHeight });
     };
@@ -21,7 +21,7 @@ const AnnotationCanvas = ({ imageUrl, imgwidth, imgheight, onAddAnnotation }) =>
     return () => {
       img.onload = null; // Cleanup: Remove the onload handler
     };
-  }, [imageUrl, imgwidth, imgheight]);
+  }, [imageUrl]);
 
   useEffect(() => {
     if (image) {
@@ -59,7 +59,6 @@ const AnnotationCanvas = ({ imageUrl, imgwidth, imgheight, onAddAnnotation }) =>
         width: x - startPos.x,
         height: y - startPos.y,
       };
-
       onAddAnnotation(coordinates);
     }
   };

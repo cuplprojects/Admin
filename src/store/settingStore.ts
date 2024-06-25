@@ -14,7 +14,7 @@ type SettingsType = {
 };
 type SettingStore = {
   settings: SettingsType;
- //Use the actions namespace to store all actions
+  // Use the actions namespace to store all actions
   actions: {
     setSettings: (settings: SettingsType) => void;
     clearSettings: () => void;

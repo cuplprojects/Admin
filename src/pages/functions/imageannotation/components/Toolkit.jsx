@@ -1,5 +1,6 @@
 import React from 'react';
-import "./Toolkit.css"
+import "./Toolkit.css";
+
 const Toolkit = ({
   onDelete,
   onAdjustSize,
@@ -15,33 +16,30 @@ const Toolkit = ({
   annotations,
   setAnnotations,
   mappedFields,
+  setMappedFields // Assuming you have this setter function for mappedFields
 }) => {
+  // Function to handle input field change
   const handleInputChange = (event) => {
     const newInputField = event.target.value;
-    setSelectedInputField(newInputField);
+    setSelectedInputField(newInputField); // Update selectedInputField in state
 
+    // Update annotations if a selected annotation exists
     if (selectedAnnotation !== null) {
       const updatedAnnotations = [...annotations];
       updatedAnnotations[selectedAnnotation].inputName = newInputField;
-      setAnnotations(updatedAnnotations);
-      localStorage.setItem('annotations', JSON.stringify(updatedAnnotations));
+      setAnnotations(updatedAnnotations); // Update annotations state
+      localStorage.setItem('annotations', JSON.stringify(updatedAnnotations)); // Store in localStorage
     }
+
+    // Update mappedFields state to mark the selected input field as mapped
+    const updatedMappedFields = { ...mappedFields };
+    updatedMappedFields[newInputField] = true; // Assuming true means mapped
+    setMappedFields(updatedMappedFields); // Update state of mappedFields
+    console.log(mappedFields)
   };
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        top: '10px',
-        right: '10px',
-        zIndex: 99,
-        backgroundColor: '#dadada',
-        marginBottom: '10px',
-        height: 'calc(100vh - 20px)',
-        padding: '20px',
-        borderRadius: '8px',
-      }}
-    >
+    <div>
       <button className='btn btn-primary m-1' onClick={onAdjustSize} disabled={!selectedAnnotation}>
         Adjust Size
       </button>
@@ -71,14 +69,16 @@ const Toolkit = ({
       <br />
       {selectedAnnotation !== null && (
         <>
+          {/* Dropdown to select input field */}
           <select className="form-select m-2" value={selectedInputField} onChange={handleInputChange}>
             <option value="">Select Input Field</option>
             {inputFields.map((field, index) => (
-               <option key={index} value={field} disabled={mappedFields[field]}>
-               {field}
-             </option>
+              <option key={index} value={field} disabled={mappedFields[field]}>
+                {field}
+              </option>
             ))}
           </select>
+          {/* Display selected input field */}
           <p>You have selected: {selectedInputField}</p>
         </>
       )}

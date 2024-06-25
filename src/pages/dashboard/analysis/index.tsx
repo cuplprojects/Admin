@@ -5,18 +5,18 @@ import glass_bag from '@/assets/images/glass/ic_glass_bag.png';
 import glass_buy from '@/assets/images/glass/ic_glass_buy.png';
 import glass_message from '@/assets/images/glass/ic_glass_message.png';
 import glass_users from '@/assets/images/glass/ic_glass_users.png';
-import { Iconify } from '@/components/icon';
-import ChartBar from '@/pages/components/chart/view/chart-bar';
-import ChartMixed from '@/pages/components/chart/view/chart-mixed';
-import ChartPie from '@/pages/components/chart/view/chart-pie';
-import ChartRadar from '@/pages/components/chart/view/chart-radar';
 import { useThemeToken } from '@/theme/hooks';
-
 import AnalysisCard from './analysis-card';
-import AnalysisNews from './analysis-news';
-import AnalysisOrderTimeline from './analysis-order-timeline';
-import AnalysisTasks from './analysis-tasks';
-import AnalysisTrafficCard from './analysis-traffic-card';
+// import { Iconify } from '@/components/icon';
+// import ChartBar from '@/pages/components/chart/view/chart-bar';
+// import ChartMixed from '@/pages/components/chart/view/chart-mixed';
+// import ChartPie from '@/pages/components/chart/view/chart-pie';
+// import ChartRadar from '@/pages/components/chart/view/chart-radar';
+
+// import AnalysisNews from './analysis-news';
+// import AnalysisOrderTimeline from './analysis-order-timeline';
+// import AnalysisTasks from './analysis-tasks';
+// import AnalysisTrafficCard from './analysis-traffic-card';
 
 function Analysis() {
   const theme = useThemeToken();
@@ -83,7 +83,7 @@ function Analysis() {
         </Col>
       </Row>
 
-      <Row gutter={[16, 16]} className="mt-8" justify="center">
+      {/* <Row gutter={[16, 16]} className="mt-8" justify="center">
         <Col span={23} lg={12} xl={16}>
           <Card title="Website Visits">
             <ChartMixed />
@@ -94,9 +94,9 @@ function Analysis() {
             <ChartPie />
           </Card>
         </Col>
-      </Row>
+      </Row> */}
 
-      <Row gutter={[16, 16]} className="mt-8" justify="center">
+      {/* <Row gutter={[16, 16]} className="mt-8" justify="center">
         <Col span={23} lg={12} xl={16}>
           <Card title="Conversion Rates">
             <ChartBar />
@@ -107,9 +107,9 @@ function Analysis() {
             <ChartRadar />
           </Card>
         </Col>
-      </Row>
+      </Row> */}
 
-      <Row gutter={[16, 16]} className="mt-8">
+      {/* <Row gutter={[16, 16]} className="mt-8">
         <Col span={24} lg={12} xl={16}>
           <Card title="News">
             <AnalysisNews />
@@ -120,9 +120,9 @@ function Analysis() {
             <AnalysisOrderTimeline />
           </Card>
         </Col>
-      </Row>
+      </Row> */}
 
-      <Row gutter={[16, 16]} className="my-8">
+      {/* <Row gutter={[16, 16]} className="my-8">
         <Col span={24} lg={12} xl={8}>
           <Card title="Traffic by Site">
             <Row gutter={[16, 16]}>
@@ -166,7 +166,7 @@ function Analysis() {
             <AnalysisTasks />
           </Card>
         </Col>
-      </Row>
+      </Row> */}
     </>
   );
 }

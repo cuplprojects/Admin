@@ -38,7 +38,7 @@ export enum ThemeColorPresets {
 
 export enum LocalEnum {
   en_US = 'en_US',
-  zh_CN = 'zh_CN'
+  hi_IN = 'hi_IN'
 }
 
 export enum MultiTabOperation {

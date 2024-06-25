@@ -16,8 +16,8 @@ export default function AnalysisCard({ cover, subtitle, title, style }: Props) {
       }}
     >
       <img src={cover} alt="" />
-      <span className="text-3xl font-bold">{title}</span>
-      <span className="text-sm">{subtitle}</span>
+      <span className="text-3xl font-bold placeholder">{title}</span>
+      <span className="text-sm placeholder">{subtitle}</span>
     </div>
   );
 }

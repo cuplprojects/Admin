@@ -10,6 +10,12 @@ export default function PermissionTab() {
   const { userId } = useParams();
 
   const [modules, setModules] = useState([]);
+  const [selectAll, setSelectAll] = useState({
+    canView: false,
+    canAdd: false,
+    canUpdate: false,
+    canDelete: false,
+  });
 
   useEffect(() => {
     const fetchModules = async () => {
@@ -56,15 +62,33 @@ export default function PermissionTab() {
   }, [notification, userId]);
 
   const handlePermissionChange = async (moduleId, permissionType, checked) => {
-    setModules(prevModules =>
-      prevModules.map(module =>
-        module.moduleId === moduleId ? { ...module, [permissionType]: checked } : module
-      )
-    );
-
     const updatedModules = modules.map(module =>
       module.moduleId === moduleId ? { ...module, [permissionType]: checked } : module
     );
+    setModules(updatedModules);
+
+    try {
+      await axios.put('https://localhost:7290/api/Permissions', { userId, modules: updatedModules });
+      notification.success({
+        message: 'Permissions updated successfully!',
+        duration: 3,
+      });
+    } catch (error) {
+      notification.error({
+        message: 'Failed to update permissions',
+        description: error.message,
+        duration: 3,
+      });
+    }
+  };
+
+  const handleSelectAllChange = async (permissionType, checked) => {
+    const updatedModules = modules.map(module => ({
+      ...module,
+      [permissionType]: checked,
+    }));
+    setModules(updatedModules);
+    setSelectAll(prevState => ({ ...prevState, [permissionType]: checked }));
 
     try {
       await axios.put('https://localhost:7290/api/Permissions', { userId, modules: updatedModules });
@@ -88,7 +112,11 @@ export default function PermissionTab() {
       key: 'moduleName',
     },
     {
-      title: 'View',
+      title: (
+        <div>
+          View <Switch checked={selectAll.canView} onChange={checked => handleSelectAllChange('canView', checked)} />
+        </div>
+      ),
       dataIndex: 'canView',
       key: 'canView',
       render: (text, record) => (
@@ -99,7 +127,11 @@ export default function PermissionTab() {
       ),
     },
     {
-      title: 'Add',
+      title: (
+        <div>
+          Add <Switch checked={selectAll.canAdd} onChange={checked => handleSelectAllChange('canAdd', checked)} />
+        </div>
+      ),
       dataIndex: 'canAdd',
       key: 'canAdd',
       render: (text, record) => (
@@ -110,7 +142,11 @@ export default function PermissionTab() {
       ),
     },
     {
-      title: 'Update',
+      title: (
+        <div>
+          Update <Switch checked={selectAll.canUpdate} onChange={checked => handleSelectAllChange('canUpdate', checked)} />
+        </div>
+      ),
       dataIndex: 'canUpdate',
       key: 'canUpdate',
       render: (text, record) => (
@@ -121,7 +157,11 @@ export default function PermissionTab() {
       ),
     },
     {
-      title: 'Delete',
+      title: (
+        <div>
+          Delete <Switch checked={selectAll.canDelete} onChange={checked => handleSelectAllChange('canDelete', checked)} />
+        </div>
+      ),
       dataIndex: 'canDelete',
       key: 'canDelete',
       render: (text, record) => (

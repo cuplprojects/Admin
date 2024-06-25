@@ -42,7 +42,7 @@ function LoginForm() {
         }}
         onFinish={handleFinish}
       >
-        <div className="mb-4 flex flex-col">
+        {/* <div className="mb-4 flex flex-col">
           <Alert
             type="info"
             description={
@@ -78,7 +78,7 @@ function LoginForm() {
             }
             showIcon
           />
-        </div>
+        </div> */}
 
         <Form.Item
           name="username"
@@ -130,10 +130,12 @@ function LoginForm() {
           <Col span={6} flex="1" onClick={() => setLoginState(LoginStateEnum.REGISTER)}>
             <Button className="w-full !text-sm">{t('sys.login.signUpFormTitle')}</Button>
           </Col>
-        </Row>
+        </Row> */}
 
-        <Divider className="!text-xs">{t('sys.login.otherSignIn')}</Divider>
-
+        <Divider className="!text-xs">
+          {/* {t('sys.login.otherSignIn')} */}
+          </Divider>
+{/* 
         <div className="flex cursor-pointer justify-around text-2xl">
           <AiFillGithub />
           <AiFillWechat />

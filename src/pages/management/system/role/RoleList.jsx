@@ -4,6 +4,8 @@ import RoleModal from './RoleModal';
 import axios from 'axios';
 import { IconButton, Iconify } from '@/components/icon';
 import ProTag from '@/theme/antd/components/tag';
+import { BasicStatus } from '#/enum';
+import {t} from '@/locales/i18n'
 
 const RoleList = () => {
   const [roles, setRoles] = useState([]);
@@ -170,7 +172,7 @@ const RoleList = () => {
   }
 
   if (error) {
-    return <p>Failed to load roles. Please try again later.</p>;
+    return <p className='text-center text-danger mt-4'>{t('pagedata.rolepage.failedtoloaderror')}</p>;
   }
 
   return (

@@ -114,7 +114,16 @@
       "chart": "Chart",
       "functions": "Functions",
       "clipboard": "Clipboard",
+      "Masters": "Masters",
+      "projects":"Projects",
+      "fields":"Fields",
+      "ProjectConfig":  "Project Configuration",
+      "FieldConfiguration":"FieldConfig",
+      
       "imageannotation": "Image Annotation",
+      "Imports" : "Imports",
+      "AllImports" : "All Imports",
+
       "menulevel": {
         "index": "Menu Level",
         "1a": "Menu Level 1a",

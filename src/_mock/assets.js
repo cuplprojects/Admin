@@ -3,48 +3,6 @@ import { faker } from '@faker-js/faker';
 import { BasicStatus, PermissionType } from '#/enum';
 
 /**
- * Organization data mock
- */
-export const ORG_LIST = [
-  {
-    id: '1',
-    name: 'East China Branch',
-    status: 'enable',
-    desc: faker.lorem.words(),
-    order: 1,
-    children: [
-      { id: '1-1', name: 'R&D Department', status: 'disable', desc: '', order: 1 },
-      { id: '1-2', name: 'Marketing Department', status: 'enable', desc: '', order: 2 },
-      { id: '1-3', name: 'Finance Department', status: 'enable', desc: '', order: 3 },
-    ],
-  },
-  {
-    id: '2',
-    name: 'South China Branch',
-    status: 'enable',
-    desc: faker.lorem.words(),
-    order: 2,
-    children: [
-      { id: '2-1', name: 'R&D Department', status: 'disable', desc: '', order: 1 },
-      { id: '2-2', name: 'Marketing Department', status: 'enable', desc: '', order: 2 },
-      { id: '2-3', name: 'Finance Department', status: 'enable', desc: '', order: 3 },
-    ],
-  },
-  {
-    id: '3',
-    name: 'Northwest Branch',
-    status: 'enable',
-    desc: faker.lorem.words(),
-    order: 3,
-    children: [
-      { id: '3-1', name: 'R&D Department', status: 'disable', desc: '', order: 1 },
-      { id: '3-2', name: 'Marketing Department', status: 'enable', desc: '', order: 2 },
-      { id: '3-3', name: 'Finance Department', status: 'enable', desc: '', order: 3 },
-    ],
-  },
-];
-
-/**
  * User permission mock
  */
 const DASHBOARD_PERMISSION = {
@@ -295,15 +253,15 @@ const FUNCTIONS_PERMISSION = {
   route: 'functions',
   order: 4,
   children: [
-    {
-      id: '3667930780705750',
-      parentId: '8132044808088488',
-      label: 'sys.menu.clipboard',
-      name: 'Clipboard',
-      type: PermissionType.MENU,
-      route: 'clipboard',
-      component: '/components/icon/index.tsx',
-    },
+    // {
+    //   id: '3667930780705750',
+    //   parentId: '8132044808088488',
+    //   label: 'sys.menu.clipboard',
+    //   name: 'Clipboard',
+    //   type: PermissionType.MENU,
+    //   route: 'clipboard',
+    //   component: '/components/icon/index.tsx',
+    // },
     {
       id: '3667930780705750',
       parentId: '8132044808088488',
@@ -318,71 +276,84 @@ const FUNCTIONS_PERMISSION = {
 const MENU_LEVEL_PERMISSION = {
   id: '0194818428516575',
   parentId: '',
-  label: 'sys.menu.menulevel.index',
-  name: 'Menu Level',
+  label: 'sys.menu.Masters',
+  name: 'Masters',
   icon: 'ic-menulevel',
   type: PermissionType.CATALOGUE,
-  route: 'menu-level',
+  route: 'Masters',
   order: 5,
   children: [
-    // {
-    //   id: '0144431332471389',
-    //   parentId: '0194818428516575',
-    //   label: 'sys.menu.menulevel.1a',
-    //   name: 'Menu Level 1a',
-    //   type: PermissionType.MENU,
-    //   route: 'menu-level-1a',
-    //   component: '/menu-level/menu-level-1a/index.tsx',
-    // },
     {
-      id: '7572529636800586',
+      id: '0144431332471389',
       parentId: '0194818428516575',
-      label: 'sys.menu.menulevel.1b.index',
-      name: 'Menu Level 1b',
-      type: PermissionType.CATALOGUE,
-      route: 'menu-level-1b',
-      children: [
-        // {
-        //   id: '3653745576583237',
-        //   parentId: '7572529636800586',
-        //   label: 'sys.menu.menulevel.1b.2a',
-        //   name: 'Menu Level 2a',
-        //   type: PermissionType.MENU,
-        //   route: 'menu-level-2a',
-        //   component: '/menu-level/menu-level-1b/menu-level-2a/index.tsx',
-        // },
-        {
-          id: '4873136353891364',
-          parentId: '7572529636800586',
-          label: 'sys.menu.menulevel.1b.2b.index',
-          name: 'Menu Level 2b',
-          type: PermissionType.CATALOGUE,
-          route: 'menu-level-2b',
-          children: [
-            // {
-            //   id: '4233029726998055',
-            //   parentId: '4873136353891364',
-            //   label: 'sys.menu.menulevel.1b.2b.3a',
-            //   name: 'Menu Level 3a',
-            //   type: PermissionType.MENU,
-            //   route: 'menu-level-3a',
-            //   component: '/menu-level/menu-level-1b/menu-level-2b/menu-level-3a/index.tsx',
-            // },
-            // {
-            //   id: '3298034742548454',
-            //   parentId: '4873136353891364',
-            //   label: 'sys.menu.menulevel.1b.2b.3b',
-            //   name: 'Menu Level 3b',
-            //   type: PermissionType.MENU,
-            //   route: 'menu-level-3b',
-            //   component: '/menu-level/menu-level-1b/menu-level-2b/menu-level-3b/index.tsx',
-            // },
-          ],
-        },
-      ],
+      label: 'sys.menu.projects',
+      name: 'Projects',
+      type: PermissionType.MENU,
+      route: 'Projects',
+      component: '/Masters/Projects/index.tsx',
     },
+    {
+      id: '0144431332471389',
+      parentId: '0194818428516575',
+      label: 'sys.menu.fields',
+      name: 'Fields',
+      type: PermissionType.MENU,
+      route: 'Fields',
+      component: '/Masters/Fields/index.tsx',
+    },
+    // {
+    //   id: '7572529636800586',
+    //   parentId: '0194818428516575',
+    //   label: 'sys.menu.menulevel.1b.index',
+    //   name: 'Menu Level 1b',
+    //   type: PermissionType.CATALOGUE,
+    //   route: 'menu-level-1b',
+    //   children: [
+    //     {
+    //       id: '3653745576583237',
+    //       parentId: '7572529636800586',
+    //       label: 'sys.menu.menulevel.1b.2a',
+    //       name: 'Menu Level 2a',
+    //       type: PermissionType.MENU,
+    //       route: 'menu-level-2a',
+    //       component: '/menu-level/menu-level-1b/menu-level-2a/index.tsx',
+    //     },
+    //     {
+    //       id: '4873136353891364',
+    //       parentId: '7572529636800586',
+    //       label: 'sys.menu.menulevel.1b.2b.index',
+    //       name: 'Menu Level 2b',
+    //       type: PermissionType.CATALOGUE,
+    //       route: 'menu-level-2b',
+    //       children: [
+    //         {
+    //           id: '4233029726998055',
+    //           parentId: '4873136353891364',
+    //           label: 'sys.menu.menulevel.1b.2b.3a',
+    //           name: 'Menu Level 3a',
+    //           type: PermissionType.MENU,
+    //           route: 'menu-level-3a',
+    //           component: '/menu-level/menu-level-1b/menu-level-2b/menu-level-3a/index.tsx',
+    //         },
+    //         {
+    //           id: '3298034742548454',
+    //           parentId: '4873136353891364',
+    //           label: 'sys.menu.menulevel.1b.2b.3b',
+    //           name: 'Menu Level 3b',
+    //           type: PermissionType.MENU,
+    //           route: 'menu-level-3b',
+    //           component: '/menu-level/menu-level-1b/menu-level-2b/menu-level-3b/index.tsx',
+    //         },
+    //       ],
+    //     },
+    //   ],
+    // },
   ],
 };
+
+
+  
+   
 const ERRORS_PERMISSION = {
   id: '9406067785553476',
   parentId: '',
@@ -420,9 +391,77 @@ const ERRORS_PERMISSION = {
       route: '500',
       component: '/sys/error/Page500.tsx',
     },
+    
   ],
 };
 const OTHERS_PERMISSION = [
+  //ProjectCOnfig Permission
+  {
+    id: '3981225257359246',
+    parentId: '',
+    label: 'sys.menu.ProjectConfig',
+    name: 'ProjectConfig',
+    icon: 'solar:calendar-bold-duotone',
+    type: PermissionType.MENU,
+    route: 'ProjectConfig',
+    component: '/ProjectConfig/index.tsx',
+  },
+
+  // IMPORTS PERMISSION
+  {
+    id: '3981225257359246',
+    parentId: '',
+    label: 'sys.menu.AllImports',
+    name: 'Imports',
+    icon: 'solar:calendar-bold-duotone',
+    type: PermissionType.MENU,
+    route: 'AllImports',
+    component: '/Imports/index.tsx',
+  },
+//   {
+//     id: '3981225257359246',
+//     parentId: '',
+//     label: 'sys.menu.calendar',
+//     name: 'Calendar',
+//     icon: 'solar:calendar-bold-duotone',
+//     type: PermissionType.MENU,
+//     route: 'calendar',
+//     component: '/sys/others/calendar/index.tsx',
+//   },
+//   {
+//     id: '3513985683886393',
+//     parentId: '',
+//     label: 'sys.menu.kanban',
+//     name: 'kanban',
+//     icon: 'solar:clipboard-bold-duotone',
+//     type: PermissionType.MENU,
+//     route: 'kanban',
+//     component: '/sys/others/kanban/index.tsx',
+//   },
+//   {
+//     id: '5455837930804461',
+//     parentId: '',
+//     label: 'sys.menu.disabled',
+//     name: 'Disabled',
+//     icon: 'ic_disabled',
+//     type: PermissionType.MENU,
+//     route: 'disabled',
+//     status: BasicStatus.DISABLE,
+//     component: '/sys/others/calendar/index.tsx',
+//   },
+//   {
+//     id: '7728048658221587',
+//     parentId: '',
+//     label: 'sys.menu.label',
+//     name: 'Label',
+//     icon: 'ic_label',
+//     type: PermissionType.MENU,
+//     route: 'label',
+//     newFeature: true,
+//     component: '/sys/others/blank.tsx',
+//   },
+
+
   // {
   //   id: '3981225257359246',
   //   parentId: '',
@@ -454,68 +493,69 @@ const OTHERS_PERMISSION = [
   //   status: BasicStatus.DISABLE,
   //   component: '/sys/others/calendar/index.tsx',
   // },
-  {
-    id: '7728048658221587',
-    parentId: '',
-    label: 'sys.menu.label',
-    name: 'Label',
-    icon: 'ic_label',
-    type: PermissionType.MENU,
-    route: 'label',
-    newFeature: true,
-    component: '/sys/others/blank.tsx',
-  },
-  {
-    id: '5733704222120995',
-    parentId: '',
-    label: 'sys.menu.frame',
-    name: 'Frame',
-    icon: 'ic_external',
-    type: PermissionType.CATALOGUE,
-    route: 'frame',
-    children: [
-      {
-        id: '9884486809510480',
-        parentId: '5733704222120995',
-        label: 'sys.menu.external_link',
-        name: 'External Link',
-        type: PermissionType.MENU,
-        route: 'external_link',
-        hideTab: true,
-        component: '/sys/others/iframe/external-link.tsx',
-        frameSrc: 'https://ant.design/',
-      },
-      {
-        id: '9299640886731819',
-        parentId: '5733704222120995',
-        label: 'sys.menu.iframe',
-        name: 'Iframe',
-        type: PermissionType.MENU,
-        route: 'frame',
-        component: '/sys/others/iframe/index.tsx',
-        frameSrc: 'https://ant.design/',
-      },
-    ],
-  },
-  {
-    id: '0941594969900756',
-    parentId: '',
-    label: 'sys.menu.blank',
-    name: 'Disabled',
-    icon: 'ic_blank',
-    type: PermissionType.MENU,
-    route: 'blank',
-    component: '/sys/others/blank.tsx',
-  },
+  // {
+  //   id: '7728048658221587',
+  //   parentId: '',
+  //   label: 'sys.menu.label',
+  //   name: 'Label',
+  //   icon: 'ic_label',
+  //   type: PermissionType.MENU,
+  //   route: 'label',
+  //   newFeature: true,
+  //   component: '/sys/others/blank.tsx',
+  // },
+  // {
+  //   id: '5733704222120995',
+  //   parentId: '',
+  //   label: 'sys.menu.frame',
+  //   name: 'Frame',
+  //   icon: 'ic_external',
+  //   type: PermissionType.CATALOGUE,
+  //   route: 'frame',
+  //   children: [
+  //     {
+  //       id: '9884486809510480',
+  //       parentId: '5733704222120995',
+  //       label: 'sys.menu.external_link',
+  //       name: 'External Link',
+  //       type: PermissionType.MENU,
+  //       route: 'external_link',
+  //       hideTab: true,
+  //       component: '/sys/others/iframe/external-link.tsx',
+  //       frameSrc: 'https://ant.design/',
+  //     },
+  //     {
+  //       id: '9299640886731819',
+  //       parentId: '5733704222120995',
+  //       label: 'sys.menu.iframe',
+  //       name: 'Iframe',
+  //       type: PermissionType.MENU,
+  //       route: 'frame',
+  //       component: '/sys/others/iframe/index.tsx',
+  //       frameSrc: 'https://ant.design/',
+  //     },
+  //   ],
+  // },
+  // {
+  //   id: '0941594969900756',
+  //   parentId: '',
+  //   label: 'sys.menu.blank',
+  //   name: 'Disabled',
+  //   icon: 'ic_blank',
+  //   type: PermissionType.MENU,
+  //   route: 'blank',
+  //   component: '/sys/others/blank.tsx',
+  // },
+
 ];
 
 export const PERMISSION_LIST = [
   DASHBOARD_PERMISSION,
   MANAGEMENT_PERMISSION,
-  COMPONENTS_PERMISSION,
+  // COMPONENTS_PERMISSION,
   FUNCTIONS_PERMISSION,
   MENU_LEVEL_PERMISSION,
-  ERRORS_PERMISSION,
+  // ERRORS_PERMISSION,
   ...OTHERS_PERMISSION,
 ];
 
@@ -548,7 +588,7 @@ export const ROLE_LIST = [ADMIN_ROLE, TEST_ROLE];
 export const DEFAULT_USER = {
   id: 'b34719e1-ce46-457e-9575-99505ecee828',
   username: 'admin',
-  email: faker.internet.email(),
+  email: "shivom@chandrakala.co.in",
   avatar: faker.image.avatarLegacy(),
   createdAt: faker.date.anytime(),
   updatedAt: faker.date.recent(),
@@ -560,7 +600,8 @@ export const TEST_USER = {
   id: 'efaa20ea-4dc5-47ee-a200-8a899be29494',
   username: 'test',
   password: 'demo1234',
-  email: faker.internet.email(),
+  // email: faker.internet.email(),
+  email: "shivom@chandrakala.co.in",
   avatar: faker.image.avatarLegacy(),
   createdAt: faker.date.anytime(),
   updatedAt: faker.date.recent(),
@@ -571,11 +612,11 @@ export const USER_USER = {
   id: 'efaa20ea-4dc5-47ee-a200-8a899be54213',
   username: 'shivom',
   password: 'demo1234',
-  email: faker.internet.email(),
+  email: "shivom@chandrakala.co.in",
   avatar: faker.image.avatarLegacy(),
   createdAt: faker.date.anytime(),
   updatedAt: faker.date.recent(),
-  role: TEST_ROLE,
+  // role: TEST_ROLE,
   permissions: TEST_ROLE.permission,
 };
 export const USER_LIST = [DEFAULT_USER, TEST_USER, USER_USER];

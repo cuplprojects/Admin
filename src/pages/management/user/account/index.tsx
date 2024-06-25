@@ -29,16 +29,16 @@ function UserAccount() {
     //   ),
     //   children: <NotificationsTab />,
     // },
-    {
-      key: '3',
-      label: (
-        <div className="flex items-center">
-          <Iconify icon="solar:key-minimalistic-square-3-bold-duotone" size={24} className="mr-2" />
-          <span>Security</span>
-        </div>
-      ),
-      children: <SecurityTab />,
-    },
+    // {
+    //   key: '3',
+    //   label: (
+    //     <div className="flex items-center">
+    //       <Iconify icon="solar:key-minimalistic-square-3-bold-duotone" size={24} className="mr-2" />
+    //       <span>Security</span>
+    //     </div>
+    //   ),
+    //   children: <SecurityTab />,
+    // },
     {
       key: '4', // Updated key to be unique
       label: (

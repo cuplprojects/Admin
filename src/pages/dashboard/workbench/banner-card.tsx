@@ -1,5 +1,6 @@
 import { Col, Row } from 'antd';
 import Color from 'color';
+import {t} from '@/locales/i18n'
 
 import Character3 from '@/assets/images/characters/character_3.png';
 // import { Iconify } from '@/components/icon';
@@ -26,15 +27,15 @@ export default function BannerCard() {
           className="mt-4 text-lg font-semibold md:text-xl"
           style={{ color: themeToken.colorPrimaryActive }}
         >
-          <h4>Welcome back 👋 </h4>
+          <h4>{t('pagedata.workbench.welcome')}</h4>
           <h4>{username}</h4>
         </div>
         <div
           style={{ color: themeToken.colorPrimaryTextActive }}
           className="mx-auto mb-6 mt-4 max-w-sm text-sm opacity-80 md:mx-0"
         >
-          Welcome! Explore all the dashboard activities of CUPL SPA for detailed insights and
-          updates on our latest features.
+         {t('pagedata.workbench.welcomedata')}
+         {t('pagedata.workbench.hello')}
           <div>
             {/* <a
               href="https://blog.slashspaces.com"

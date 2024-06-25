@@ -2,7 +2,7 @@ import { create } from 'zustand';
 
 type Store = {
   count: number;
-//Use the actions namespace to store all actions
+  // Use the actions namespace to store all actions
   actions: {
     increment: () => void;
     decrement: () => void;
