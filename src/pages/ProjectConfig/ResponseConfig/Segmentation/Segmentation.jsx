@@ -472,12 +472,14 @@ const Segmentation = () => {
   const handleNumQuestionsChange = (e, index) => {
     const newSections = [...sections];
     newSections[index].numQuestions = parseInt(e.target.value);
+    newSections[index].totalMarks = newSections[index].numQuestions * newSections[index].marksCorrect; // Update total marks
     setSections(newSections);
   };
 
   const handleMarksCorrectChange = (e, index) => {
     const newSections = [...sections];
     newSections[index].marksCorrect = parseFloat(e.target.value);
+    newSections[index].totalMarks = newSections[index].numQuestions * newSections[index].marksCorrect; // Update total marks
     setSections(newSections);
   };
 
@@ -750,7 +752,7 @@ const Segmentation = () => {
                         value={sections[index]?.totalMarks || ''}
                         onChange={(e) => handleTotalMarksChange(e, index)}
                         min="0"
-                        disabled={!isEditing}
+                        disabled
                         style={{
                           marginLeft: '10px',
                           padding: '5px',
