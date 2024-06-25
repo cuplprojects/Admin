@@ -58,7 +58,7 @@ const ImportOmr = () => {
 
       try {
         const response = await axios.post(
-          'http://localhost:5071/api/OMRData/upload-request?WhichDatabase=Local',
+          `${apiurl}/OMRData/upload-request?WhichDatabase=Local`,
           formData,
           {
             headers: {

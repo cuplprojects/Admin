@@ -12,6 +12,8 @@ import { useThemeToken } from '@/theme/hooks';
 import { color } from 'framer-motion';
 import ImportOmr from './OmrImport/ImportOmr';
 
+const apiurl = import.meta.env.VITE_API_URL_PROD;
+
 const Import = () => {
   const { colorPrimary } = useThemeToken();
   const [activetab, setActivetab] = useState('OMRImages');
@@ -98,7 +100,10 @@ const Import = () => {
         console.log('Mapped Data:', mappedData);
 
         try {
-          const response = await fetch('http://localhost:5071/api/Absentee/upload?WhichDatabase=Local', {
+
+          const response = await fetch(`${apiurl}/Absentee/upload?WhichDatabase=Local`, {
+
+
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -175,7 +180,10 @@ const Import = () => {
         console.log('Parsed data:', parsedData);
   
         try {
-          const response = await fetch('http://localhost:5071/api/OMRData/uploadcsv?WhichDatabase=Local', {
+
+          const response = await fetch(`${apiurl}/OMRData/uploadcsv?WhichDatabase=Local`, {
+
+
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -253,7 +261,10 @@ const Import = () => {
         });
 
         try {
-          const response = await axios.post('http://localhost:5071/api/Registration?WhichDatabase=Local', mappedData);
+
+          const response = await axios.post(`${apiurl}/Registration?WhichDatabase=Local`, mappedData);
+
+
           console.log('Registration data uploaded successfully:', response.data);
           setAlertMessage('Upload successful!');
           setAlertType('success');

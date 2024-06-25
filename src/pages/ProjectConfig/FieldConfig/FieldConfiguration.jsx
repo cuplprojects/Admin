@@ -5,7 +5,13 @@ import { Button, Table, Input, Select, Space, Popconfirm, message } from 'antd';
 import { DeleteOutlined } from '@ant-design/icons';
 import { useThemeToken } from '@/theme/hooks';
 
+
+
+const apiurl = import.meta.env.VITE_API_URL_PROD;
+
+
 const { Option } = Select;
+
 
 const FieldConfiguration = () => {
   const { colorPrimary } = useThemeToken();
@@ -40,7 +46,9 @@ const FieldConfiguration = () => {
   }, [formData.maxRange]);
 
   useEffect(() => {
-    axios.get('http://localhost:5071/api/Fields?WhichDatabase=Local')
+
+    axios.get(`${apiurl}/Fields?WhichDatabase=Local`)
+
       .then(response => {
         setFields(response.data);
       })
@@ -48,7 +56,9 @@ const FieldConfiguration = () => {
         console.error('Error fetching fields:', error);
       });
 
-    axios.get('http://localhost:5071/api/FieldConfigurations?WhichDatabase=Local')
+
+    axios.get(`${apiurl}/FieldConfigurations?WhichDatabase=Local`)
+
       .then(response => {
         setSavedData(response.data);
         setPagination({ ...pagination, total: response.data.length });
@@ -115,20 +125,21 @@ const FieldConfiguration = () => {
         setSelectedFieldIndex(-1);
         showAlert('Field configuration updated successfully.', 'success');
     } else {
-        axios.post('http://localhost:5071/api/FieldConfigurations?WhichDatabase=Local', newConfig)
-            .then(response => {
-                const newFieldConfig = response.data;
-                setSavedData([...savedData, newFieldConfig]);
-                showAlert('Field configuration saved successfully.', 'success');
-                setPagination({ ...pagination, total: savedData.length + 1 });
-            })
-            .catch(error => {
-                console.error('Error saving field configuration:', error);
-                showAlert('Error saving field configuration. Please try again later.', 'danger');
-                if (error.response) {
-                    console.error('Response data:', error.response.data);
-                }
-            });
+
+      // Add new field configuration
+      axios.post(`${apiurl}/FieldConfigurations?WhichDatabase=Local`, newConfig)
+        .then(response => {
+          setSavedData([...savedData, response.data]);
+          showAlert('Field configuration saved successfully.', 'success');
+        })
+        .catch(error => {
+          console.error('Error saving field configuration:', error);
+          showAlert('Error saving field configuration. Please try again later.', 'danger');
+          if (error.response) {
+            console.error('Response data:', error.response.data);
+          }
+        });
+
     }
 
     setFormData({
@@ -149,8 +160,9 @@ const FieldConfiguration = () => {
     }
   }, [savedData]);
 
-  const handleDelete = (fieldConfigurationId) => {
-    axios.delete(`http://localhost:5071/api/FieldConfigurations/${fieldConfigurationId}?WhichDatabase=Local`)
+
+    axios.all(selectedIds.map(id => axios.delete(`${apiurl}/FieldConfigurations/${id}?WhichDatabase=Local`)))
+
       .then(() => {
         setSavedData(savedData.filter(item => item.fieldConfigurationId !== fieldConfigurationId));
         message.success('Field configuration deleted successfully.');

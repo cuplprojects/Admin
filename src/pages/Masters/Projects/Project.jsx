@@ -49,7 +49,7 @@ const Project = () => {
 
   const fetchData = async () => {
     try {
-      const response = await fetch('http://localhost:5071/api/Projects?WhichDatabase=Local');
+      const response = await fetch(`${apiurl}apiurl/Projects?WhichDatabase=Local`);
       const data = await response.json();
       setData(data.map((item, index) => ({ ...item, key: index.toString(), serialNo: index + 1 })));
     } catch (error) {
@@ -114,7 +114,7 @@ const Project = () => {
 
   const updateRow = async (updatedRow) => {
     try {
-      const response = await fetch(`http://localhost:5071/api/Projects/${updatedRow.projectId}?WhichDatabase=Local`, {
+      const response = await fetch(`${apiurl}/Projects/${updatedRow.projectId}?WhichDatabase=Local`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -132,7 +132,7 @@ const Project = () => {
 
   const addRow = async (newRow) => {
     try {
-      const response = await fetch('http://localhost:5071/api/Projects?WhichDatabase=Local', {
+      const response = await fetch(`${apiurl}/Projects?WhichDatabase=Local`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

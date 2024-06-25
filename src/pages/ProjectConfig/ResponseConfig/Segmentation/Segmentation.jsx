@@ -418,6 +418,8 @@ import React, { useState, useEffect } from 'react';
 import { Button, Alert } from 'antd';
 import { useThemeToken } from '@/theme/hooks';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const Segmentation = () => {
   const { colorPrimary } = useThemeToken();
   const [isDivided, setIsDivided] = useState(null); // State to hold the selected option
@@ -428,6 +430,9 @@ const Segmentation = () => {
   const [responseOption, setResponseOption] = useState('ABC'); // State for selected response option
   const [numBlocks, setNumBlocks] = useState(4); // State for number of blocks
 
+
+
+ 
   // Effect to reset form state when switching between yes/no options
   useEffect(() => {
     if (isDivided === 'no') {
@@ -516,7 +521,7 @@ const Segmentation = () => {
       };
 
       // Example API endpoint (replace with your actual endpoint)
-      const apiUrl = 'https://example.com/api/save';
+      const apiUrl = 'https://example.com/save';
 
       const handleSave = () => {
         // Check if there are any empty required fields
