@@ -253,7 +253,7 @@ const Import = () => {
         });
 
         try {
-          const response = await axios.post('http://localhost:5071/api/Registration', mappedData);
+          const response = await axios.post('http://localhost:5071/api/Registration?WhichDatabase=Local', mappedData);
           console.log('Registration data uploaded successfully:', response.data);
           setAlertMessage('Upload successful!');
           setAlertType('success');

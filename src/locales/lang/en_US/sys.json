@@ -123,6 +123,7 @@
       "imageannotation": "Image Annotation",
       "Imports" : "Imports",
       "AllImports" : "All Imports",
+      "GenerateScore" : "Generate Score",
 
       "menulevel": {
         "index": "Menu Level",
