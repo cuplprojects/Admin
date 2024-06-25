@@ -80,7 +80,7 @@ const Field = () => {
     // Remove the last row if Project Name is blank
     const newData = [...data];
     newData.pop();
-    setData(newData);
+    setData(newData);  
   }
     setEditingKey('');
   };

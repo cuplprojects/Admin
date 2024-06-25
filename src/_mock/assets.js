@@ -35,6 +35,16 @@ const DASHBOARD_PERMISSION = {
     },
   ],
 };
+const DEVELOPER_PERMISSION = {
+  id: '4359580910369984',
+  parentId: '0249937641030250',
+  label: 'sys.menu.system.permission',
+  name: 'Permission',
+  type: PermissionType.MENU,
+  route: 'permission', // This is the route for managing permissions
+  component: '/management/system/permission/index.tsx',
+};
+
 const MANAGEMENT_PERMISSION = {
   id: '0901673425580518',
   parentId: '',
@@ -351,9 +361,6 @@ const MENU_LEVEL_PERMISSION = {
   ],
 };
 
-
-  
-   
 const ERRORS_PERMISSION = {
   id: '9406067785553476',
   parentId: '',
@@ -391,7 +398,6 @@ const ERRORS_PERMISSION = {
       route: '500',
       component: '/sys/error/Page500.tsx',
     },
-    
   ],
 };
 const OTHERS_PERMISSION = [
@@ -418,49 +424,49 @@ const OTHERS_PERMISSION = [
     route: 'AllImports',
     component: '/Imports/index.tsx',
   },
-//   {
-//     id: '3981225257359246',
-//     parentId: '',
-//     label: 'sys.menu.calendar',
-//     name: 'Calendar',
-//     icon: 'solar:calendar-bold-duotone',
-//     type: PermissionType.MENU,
-//     route: 'calendar',
-//     component: '/sys/others/calendar/index.tsx',
-//   },
-//   {
-//     id: '3513985683886393',
-//     parentId: '',
-//     label: 'sys.menu.kanban',
-//     name: 'kanban',
-//     icon: 'solar:clipboard-bold-duotone',
-//     type: PermissionType.MENU,
-//     route: 'kanban',
-//     component: '/sys/others/kanban/index.tsx',
-//   },
-//   {
-//     id: '5455837930804461',
-//     parentId: '',
-//     label: 'sys.menu.disabled',
-//     name: 'Disabled',
-//     icon: 'ic_disabled',
-//     type: PermissionType.MENU,
-//     route: 'disabled',
-//     status: BasicStatus.DISABLE,
-//     component: '/sys/others/calendar/index.tsx',
-//   },
-//   {
-//     id: '7728048658221587',
-//     parentId: '',
-//     label: 'sys.menu.label',
-//     name: 'Label',
-//     icon: 'ic_label',
-//     type: PermissionType.MENU,
-//     route: 'label',
-//     newFeature: true,
-//     component: '/sys/others/blank.tsx',
-//   },
-
+  // correctin window
+  // {
+  //   id: '3981225257359246',
+  //   parentId: '',
+  //   label: 'sys.menu.correctionwindow',
+  //   name: 'correction',
+  //   icon: 'solar:document-add-bold-duotone',
+  //   type: PermissionType.MENU,
+  //   route: 'correction',
+  //   component: '/correction/index.tsx',
+  // },
+  //   {
+  //     id: '3513985683886393',
+  //     parentId: '',
+  //     label: 'sys.menu.kanban',
+  //     name: 'kanban',
+  //     icon: 'solar:clipboard-bold-duotone',
+  //     type: PermissionType.MENU,
+  //     route: 'kanban',
+  //     component: '/sys/others/kanban/index.tsx',
+  //   },
+  //   {
+  //     id: '5455837930804461',
+  //     parentId: '',
+  //     label: 'sys.menu.disabled',
+  //     name: 'Disabled',
+  //     icon: 'ic_disabled',
+  //     type: PermissionType.MENU,
+  //     route: 'disabled',
+  //     status: BasicStatus.DISABLE,
+  //     component: '/sys/others/calendar/index.tsx',
+  //   },
+  //   {
+  //     id: '7728048658221587',
+  //     parentId: '',
+  //     label: 'sys.menu.label',
+  //     name: 'Label',
+  //     icon: 'ic_label',
+  //     type: PermissionType.MENU,
+  //     route: 'label',
+  //     newFeature: true,
+  //     component: '/sys/others/blank.tsx',
+  //   },
 
   // {
   //   id: '3981225257359246',
@@ -546,7 +552,6 @@ const OTHERS_PERMISSION = [
   //   route: 'blank',
   //   component: '/sys/others/blank.tsx',
   // },
-
 ];
 
 export const PERMISSION_LIST = [
@@ -580,7 +585,16 @@ const TEST_ROLE = {
   desc: 'test',
   permission: [DASHBOARD_PERMISSION, COMPONENTS_PERMISSION, FUNCTIONS_PERMISSION],
 };
-export const ROLE_LIST = [ADMIN_ROLE, TEST_ROLE];
+const DEVELOPER_ROLE = {
+  id: '9931665660771472',
+  name: 'Developer',
+  label: 'developer',
+  status: BasicStatus.ENABLE,
+  order: 2,
+  desc: 'developer',
+  permission: [...PERMISSION_LIST, DEVELOPER_PERMISSION],
+};
+export const ROLE_LIST = [ADMIN_ROLE, TEST_ROLE, DEVELOPER_ROLE];
 
 /**
  * User data mock
@@ -588,7 +602,7 @@ export const ROLE_LIST = [ADMIN_ROLE, TEST_ROLE];
 export const DEFAULT_USER = {
   id: 'b34719e1-ce46-457e-9575-99505ecee828',
   username: 'admin',
-  email: "shivom@chandrakala.co.in",
+  email: 'shivom@chandrakala.co.in',
   avatar: faker.image.avatarLegacy(),
   createdAt: faker.date.anytime(),
   updatedAt: faker.date.recent(),
@@ -601,22 +615,22 @@ export const TEST_USER = {
   username: 'test',
   password: 'demo1234',
   // email: faker.internet.email(),
-  email: "shivom@chandrakala.co.in",
+  email: 'shivom@chandrakala.co.in',
   avatar: faker.image.avatarLegacy(),
   createdAt: faker.date.anytime(),
   updatedAt: faker.date.recent(),
   role: TEST_ROLE,
   permissions: TEST_ROLE.permission,
-}
-export const USER_USER = {
+};
+export const DEVELOPER_USER = {
   id: 'efaa20ea-4dc5-47ee-a200-8a899be54213',
   username: 'shivom',
   password: 'demo1234',
-  email: "shivom@chandrakala.co.in",
+  email: 'shivom@chandrakala.co.in',
   avatar: faker.image.avatarLegacy(),
   createdAt: faker.date.anytime(),
   updatedAt: faker.date.recent(),
-  // role: TEST_ROLE,
-  permissions: TEST_ROLE.permission,
+  role: DEVELOPER_ROLE,
+  permissions: DEVELOPER_ROLE.permission,
 };
-export const USER_LIST = [DEFAULT_USER, TEST_USER, USER_USER];
+export const USER_LIST = [DEFAULT_USER, TEST_USER, DEVELOPER_USER];

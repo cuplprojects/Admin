@@ -179,10 +179,10 @@ const AnnotationPage = () => {
         ImageUrl: 'Url-String',
         annotations: annotations.map(annotation => ({
           FieldName: annotation.FieldName,
-          coordinates: JSON.stringify(annotation.coordinates).replace(/\"/g, "'"), // Convert coordinates to JSON string
+          coordinates: annotation.coordinates, // Convert coordinates to JSON string
         }))
       };
-  
+
       console.log('Submitting annotations:', postData);
   
       // Make POST request using Axios
