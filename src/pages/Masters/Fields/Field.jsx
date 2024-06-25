@@ -94,7 +94,7 @@ const Field = () => {
       if (index > -1) {
         const item = newData[index];
         if (item.method === 'POST') {
-          await addRow({ ...item, ...row });
+          await fetchData();
         } else {
           newData.splice(index, 1, { ...item, ...row });
           await updateRow(newData[index]);
@@ -123,6 +123,7 @@ const Field = () => {
       if (!response.ok) {
         throw new Error('Failed to update field');
       }
+      fetchData();
       // Handle success
     } catch (error) {
       console.error('Error updating field:', error);
@@ -141,7 +142,7 @@ const Field = () => {
       if (!response.ok) {
         throw new Error('Failed to add new field');
       }
-      // Handle success
+      fetchData();
     } catch (error) {
       console.error('Error adding new field:', error);
     }
