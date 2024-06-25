@@ -435,7 +435,7 @@ const OTHERS_PERMISSION = [
     route: 'GenerateScore',
     component: '/ScoreProcessing/index.tsx',
 
-
+  },
   //Audit
   {
     id: '3981225257359246',
