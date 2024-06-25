@@ -3,12 +3,18 @@ import axios from 'axios';
 import { Button } from 'antd';
 import localforage from 'localforage';
 
+
+//const apiurl = import.meta.env.VITE_API_URL_PROD;
+const apiurl = import.meta.env.VITE_API_URL;
+
 const ImportOmr = () => {
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currentFileIndex, setCurrentFileIndex] = useState(0);
   const [showSkipBtn, setShowSkipBtn] = useState(false);
   const [currentFileName, setCurrentFileName] = useState('');
+
+  
 
   // UseEffect to load files and currentFileIndex from localforage on component mount
   useEffect(() => {

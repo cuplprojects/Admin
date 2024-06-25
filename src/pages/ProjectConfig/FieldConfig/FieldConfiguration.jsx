@@ -6,7 +6,7 @@ import {Iconify, IconButton} from './../../../components/icon'
 import { useThemeToken } from '@/theme/hooks';
 
 
-const apiurl = import.meta.env.VITE_API_URL_PROD;
+const apiurl = import.meta.env.VITE_API_URL;
 
 
 const FieldConfiguration = () => {

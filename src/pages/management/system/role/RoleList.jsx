@@ -9,6 +9,7 @@ import {t} from '@/locales/i18n'
 
 
 const apiurl = import.meta.env.VITE_API_URL;
+//const apiurl = import.meta.env.VITE_API_URL_PROD;
 
 const RoleList = () => {
   const [roles, setRoles] = useState([]);
