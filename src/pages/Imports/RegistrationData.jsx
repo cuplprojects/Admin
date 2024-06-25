@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
-const Registration = ({ handleFileUpload, handleRegistrationUpload, selectedFile, headers, registrationMapping, handleRegistrationMappingChange }) => {
+const Registration = ({ handleFileUpload, handleRegistrationUpload, selectedFile, headers, registrationMapping, handleRegistrationMappingChange,alertMessage,
+  alertType,loading }) => {
   const [isValidData, setIsValidData] = useState(false);
 
   useEffect(() => {
@@ -46,9 +47,14 @@ const Registration = ({ handleFileUpload, handleRegistrationUpload, selectedFile
       )}
       <div className="d-flex justify-content-center mt-4">{
         selectedFile &&
-        <button className="btn btn-primary align-items-center" onClick={handleRegistrationUpload} disabled={!isValidData}>
-          Upload
+        <button className="btn btn-primary" onClick={handleRegistrationUpload} disabled={!isValidData || loading}>
+          {loading ? 'Uploading...' : 'Upload'}
         </button>}
+        {alertMessage && (
+        <div className={`alert alert-${alertType} mt-3`} role="alert">
+          {alertMessage}
+        </div>
+      )}
       </div>
     </div>
   );

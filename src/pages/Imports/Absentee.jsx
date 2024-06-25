@@ -1,18 +1,29 @@
 import React, { useEffect, useState } from 'react';
+import './style.css';
 
-const Absentee = ({ handleFileUpload, handleAbsenteeUpload, selectedFile, headers, mapping, handleMappingChange }) => {
-    const [isValidData, setIsValidData] = useState(false);
-    useEffect(() => {
-        // Check if all properties in mapping have a corresponding header in headers
-        const isValid = Object.values(mapping).every(value => headers.includes(value));
-        setIsValidData(isValid);
-      }, [headers, mapping]);
+const Absentee = ({
+  handleFileUpload,
+  handleAbsenteeUpload,
+  selectedFile,
+  headers,
+  mapping,
+  handleMappingChange,
+  loading,
+  alertMessage,
+  alertType,
+}) => {
+  const [isValidData, setIsValidData] = useState(false);
+  
 
-
+  useEffect(() => {
+    // Check if all properties in mapping have a corresponding header in headers
+    const isValid = Object.values(mapping).every((value) => headers.includes(value));
+    setIsValidData(isValid);
+  }, [headers, mapping]);
 
   return (
     <div className={`tab-pane active d-flex align-items-center justify-content-around py-3 mt-5`}  id="absentee">
-      <h3 className="head text-center fs-3">Upload Absentee </h3>
+      <h3 className="head text-center fs-3">Upload Absentee</h3>
       <div className="d-flex justify-content-center align-items-center">
         <p>
           <input type="file" onChange={handleFileUpload} accept=".xlsx" />
@@ -35,7 +46,9 @@ const Absentee = ({ handleFileUpload, handleAbsenteeUpload, selectedFile, header
                     <select value={mapping[property]} onChange={(e) => handleMappingChange(e, property)}>
                       <option value="">Select Header</option>
                       {headers.map((header, index) => (
-                        <option key={index} value={header}>{header}</option>
+                        <option key={index} value={header}>
+                          {header}
+                        </option>
                       ))}
                     </select>
                   </td>
@@ -45,11 +58,16 @@ const Absentee = ({ handleFileUpload, handleAbsenteeUpload, selectedFile, header
           </table>
         </div>
       )}
-     {selectedFile && headers.length > 0 && isValidData && (
+      {selectedFile && headers.length > 0 && isValidData && (
         <div className="d-flex justify-content-center mt-4">
-          <button className="btn btn-primary align-items-center" onClick={handleAbsenteeUpload}>
+          <button className="btn btn-primary" onClick={handleAbsenteeUpload}>
             Upload
           </button>
+        </div>
+      )}
+      {alertMessage && (
+        <div className={`alert alert-${alertType} mt-3`} role="alert">
+          {alertMessage}
         </div>
       )}
     </div>

@@ -16,7 +16,7 @@ const Import = () => {
   const { colorPrimary } = useThemeToken();
   const [activetab, setActivetab] = useState('OMRImages');
   const [selectedFile, setSelectedFile] = useState(null);
- 
+  const [loading, setLoading] = useState(false);
   const [headers, setHeaders] = useState([]);
   const [mapping, setMapping] = useState({
     district: '',
@@ -24,29 +24,31 @@ const Import = () => {
     bookletCode: '',
     status: '',
     name: '',
-    projectId: '',
     rollNo: ''
   });
   const [registrationMapping, setRegistrationMapping] = useState({
     rollNo: ''
   });
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertType, setAlertType] = useState('');
 
+  
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (file && activetab === 'OMRImages') {
       console.log('Files uploaded:', e.target.files);
       setSelectedFile(file);
-        
+
     } else if (file && ['scanned', 'registration', 'absentee'].includes(activetab)) {
       if (activetab === 'scanned' && (file.type === 'text/csv' || file.type === 'application/dat')) {
         console.log('File uploaded:', file);
         setSelectedFile(file);
-      
+
       } else if ((activetab === 'registration' || activetab === 'absentee') && file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
         console.log('File uploaded:', file);
         setSelectedFile(file);
-        
+
         const reader = new FileReader();
         reader.onload = (event) => {
           const data = new Uint8Array(event.target.result);
@@ -67,10 +69,11 @@ const Import = () => {
   };
 
 
- 
+
 
   const handleAbsenteeUpload = async () => {
     if (selectedFile) {
+      setLoading(true);
       const reader = new FileReader();
 
       reader.onload = async (event) => {
@@ -95,7 +98,7 @@ const Import = () => {
         console.log('Mapped Data:', mappedData);
 
         try {
-          const response = await fetch('http://localhost:5071/api/Absentee/upload', {
+          const response = await fetch('http://localhost:5071/api/Absentee/upload?WhichDatabase=Local', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -104,30 +107,41 @@ const Import = () => {
           });
           const data = await response.json();
           console.log('Response from server:', data);
+          setAlertMessage('Upload successful!');
+          setAlertType('success');
         } catch (error) {
           console.error('Error uploading data:', error);
+          setLoading(false);
+          setAlertMessage('Error uploading data.');
+          setAlertType('danger');
         }
       };
 
       reader.readAsArrayBuffer(selectedFile);
     } else {
       console.error('No file selected.');
+      setAlertMessage('No file selected.');
+      setAlertType('warning');
     }
 
     setSelectedFile(null); // Reset selected file after upload
+    setLoading(false);
   };
 
 
   const handleScannedUpload = () => {
     console.log('Uploading file:', selectedFile);
-
+    
     if (selectedFile) {
+     
+      setLoading(true);
+      
       const reader = new FileReader();
-
+  
       reader.onload = async (event) => {
         const content = event.target.result;
         const rows = content.split('\n').map((row) => row.split(','));
-
+  
         // Assuming the first row contains headers
         const headers = rows[0].map((header) => header.trim().replace(/"/g, '')); // Clean up headers
         const parsedData = rows.slice(1).map((row) => {
@@ -136,12 +150,12 @@ const Import = () => {
             const cleanedValue = value.trim().replace(/"/g, ''); // Clean up values
             rowData[headers[index]] = cleanedValue;
           });
-
+  
           // Process ANS field separately to create a nested object
           if (rowData['ANS']) {
             const answers = {};
             const ansArray = rowData['ANS'].split('');
-
+  
             // Ensure we have 100 entries, filling in with empty strings if necessary
             for (let i = 0; i < 100; i++) {
               if (i < ansArray.length) {
@@ -150,40 +164,57 @@ const Import = () => {
                 answers[i + 1] = "''"; // Fill remaining slots with empty strings
               }
             }
-
+  
             rowData['answers'] = JSON.stringify(answers).replace(/"/g, '');
             delete rowData['ANS']; // Remove the original ANS field
           }
-
+  
           return rowData;
         });
-
+  
         console.log('Parsed data:', parsedData);
-
+  
         try {
-          const response = await fetch('http://localhost:5071/api/OMRData/uploadcsv', {
+          const response = await fetch('http://localhost:5071/api/OMRData/uploadcsv?WhichDatabase=Local', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify(parsedData),
           });
-          const data = await response.json();
-          console.log('Response from server:', data);
+  
+          const contentType = response.headers.get('content-type');
+  
+          if (contentType && contentType.indexOf('application/json') !== -1) {
+            const data = await response.json();
+            console.log('Response from server:', data);
+            setAlertMessage('Upload successful!');
+            setAlertType('success');
+          } else {
+            const text = await response.text();
+            console.log('Response from server:', text);
+            setAlertMessage('Upload successful!');
+            setAlertType('success');
+          }
         } catch (error) {
           console.error('Error uploading data:', error);
+          setLoading(false);
+          setAlertMessage('Error uploading data.');
+          setAlertType('danger');
+        } finally {
+          setSelectedFile(null); // Reset selected file after upload
         }
       };
-
+  
       reader.readAsText(selectedFile);
     } else {
       console.error('No file selected.');
+      setAlertMessage('No file selected.');
+      setAlertType('warning');
     }
-
-
-
-    setSelectedFile(null); // Reset selected file after upload
+    setLoading(false);
   };
+  
 
 
 
@@ -200,6 +231,7 @@ const Import = () => {
     event.preventDefault();
 
     if (selectedFile) {
+      setLoading(true);
       const reader = new FileReader();
 
       reader.onload = async (e) => {
@@ -223,15 +255,23 @@ const Import = () => {
         try {
           const response = await axios.post('http://localhost:5071/api/Registration', mappedData);
           console.log('Registration data uploaded successfully:', response.data);
+          setAlertMessage('Upload successful!');
+          setAlertType('success');
         } catch (error) {
           console.error('Error uploading registration data:', error);
+          setLoading(false);
+          setAlertMessage('Error uploading data.');
+          setAlertType('danger');
         }
       };
 
       reader.readAsBinaryString(selectedFile);
     } else {
       console.error('No file selected.');
+      setAlertMessage('No file selected.');
+      setAlertType('warning');
     }
+    setLoading(false);
   };
 
 
@@ -246,40 +286,40 @@ const Import = () => {
 
   return (
     <div>
-      <section style={{height:"70vh"}} className=' container-fluid pb-4 border border-2 rounded'>
+      <section style={{ height: "70vh" }} className=' container-fluid pb-4 border border-2 rounded'>
         <div className="container">
           <div className="row">
             <div className="board-pq">
               <div className="">
                 <ul className="d-flex align-items-center justify-content-around my-4" id="myTab">
-                  <li style={{border:`2px solid ${colorPrimary}`}} className='tabcircle' onClick={() => {setActivetab('OMRImages');setSelectedFile(null);}}>
-                    <a  data-toggle="tab" title="welcome">
+                  <li style={{ border: `2px solid ${colorPrimary}` }} className='tabcircle' onClick={() => { setActivetab('OMRImages'); setSelectedFile(null); }}>
+                    <a data-toggle="tab" title="welcome">
                       <span className="round-tabs-pq one-pq">
-                        <i className="fa-regular fa-image " style={{color:colorPrimary}}></i>
+                        <i className="fa-regular fa-image " style={{ color: colorPrimary }}></i>
                       </span>
                     </a>
                   </li>
-                  <span  className='tabline'></span>
-                  <li style={{border:`2px solid ${colorPrimary}`}} className='tabcircle' onClick={() => {setActivetab('scanned'); setSelectedFile(null);}}>
+                  <span className='tabline'></span>
+                  <li style={{ border: `2px solid ${colorPrimary}` }} className='tabcircle' onClick={() => { setActivetab('scanned'); setSelectedFile(null);  setAlertMessage(null);setAlertType(null);}}>
                     <a data-toggle="tab" title="scanned">
                       <span className="round-tabs-pq two-pq">
-                        <i className="fa-solid fa-file-csv" style={{color:colorPrimary}}></i>
+                        <i className="fa-solid fa-file-csv" style={{ color: colorPrimary }}></i>
                       </span>
                     </a>
                   </li>
                   <span className='tabline'></span>
-                  <li style={{border:`2px solid ${colorPrimary}`}} className='tabcircle' onClick={() => {setActivetab('registration'); setSelectedFile(null); setHeaders([])}}>
-                    <a  data-toggle="tab" title="registration">
+                  <li style={{ border: `2px solid ${colorPrimary}` }} className='tabcircle' onClick={() => { setActivetab('registration'); setSelectedFile(null); setHeaders([]); setAlertMessage(null);setAlertType(null); }}>
+                    <a data-toggle="tab" title="registration">
                       <span className="round-tabs-pq three-pq">
-                        <i className="fa-regular fa-id-card" style={{color:colorPrimary}}></i>
+                        <i className="fa-regular fa-id-card" style={{ color: colorPrimary }}></i>
                       </span>
                     </a>
                   </li>
                   <span className='tabline'></span>
-                  <li style={{border:`2px solid ${colorPrimary}`}} className='tabcircle' onClick={() =>  { setActivetab('absentee'); setSelectedFile(null); setHeaders([])}}>
-                    <a  data-toggle="tab" title="absentee">
+                  <li style={{ border: `2px solid ${colorPrimary}` }} className='tabcircle' onClick={() => { setActivetab('absentee'); setSelectedFile(null); setHeaders([]); setAlertMessage(null);setAlertType(null); }}>
+                    <a data-toggle="tab" title="absentee">
                       <span className="round-tabs-pq four-pq ">
-                        <i className="fa-solid fa-file-excel" style={{color:colorPrimary}} ></i>
+                        <i className="fa-solid fa-file-excel" style={{ color: colorPrimary }} ></i>
                       </span>
                     </a>
                   </li>
@@ -287,16 +327,38 @@ const Import = () => {
               </div>
               <div className="tab-content-pq">
                 {activetab === 'OMRImages' && <ImportOmr />}
-                {activetab === 'scanned' && <Scanned handleFileUpload={handleFileUpload} handleScannedUpload={handleScannedUpload} selectedFile={selectedFile} />}
-                {activetab === 'registration' && <Registration handleFileUpload={handleFileUpload} handleRegistrationUpload={handleRegistrationUpload} selectedFile={selectedFile} headers={headers} registrationMapping={registrationMapping} handleRegistrationMappingChange={handleRegistrationMappingChange} />}
+                {activetab === 'scanned' &&
+                  <Scanned
+                    handleFileUpload={handleFileUpload}
+                    handleScannedUpload={handleScannedUpload}
+                    selectedFile={selectedFile}
+                    alertMessage={alertMessage}
+                    alertType={alertType}
+                    loading={loading}
+                  />}
+                {activetab === 'registration' &&
+                  <Registration
+                    handleFileUpload={handleFileUpload}
+                    handleRegistrationUpload={handleRegistrationUpload}
+                    selectedFile={selectedFile}
+                    alertMessage={alertMessage}
+                    alertType={alertType}
+                    headers={headers}
+                    registrationMapping={registrationMapping}
+                    handleRegistrationMappingChange={handleRegistrationMappingChange}
+                    loading={loading}
+                  />}
                 {activetab === 'absentee' && (
                   <Absentee
                     handleFileUpload={handleFileUpload}
                     handleAbsenteeUpload={handleAbsenteeUpload}
                     selectedFile={selectedFile}
+                    alertMessage={alertMessage}
+                    alertType={alertType}
                     headers={headers}
                     mapping={mapping}
                     handleMappingChange={handleMappingChange}
+                    loading={loading}
                   />)}
                 <div className="clearfix-pq"></div>
               </div>
@@ -306,7 +368,7 @@ const Import = () => {
       </section>
     </div>
   );
-  
+
 };
 
 export default Import;

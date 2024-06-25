@@ -304,7 +304,7 @@ const FieldConfiguration = () => {
               disabled
             />
           </div>
-          <div className='text-end mt-2'>
+          <div className='text-end mt-2 mb-2'>
           <Button type="primary" htmlType="submit">
             Save Configuration
           </Button>

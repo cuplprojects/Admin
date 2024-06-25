@@ -418,6 +418,17 @@ const OTHERS_PERMISSION = [
     route: 'AllImports',
     component: '/Imports/index.tsx',
   },
+  //Audit
+  {
+    id: '3981225257359246',
+    parentId: '',
+    label: 'sys.menu.Audit',
+    name: 'Audit',
+    icon: 'solar:calendar-bold-duotone',
+    type: PermissionType.MENU,
+    route: 'AuditPage/Audit',
+    component: '/AuditPage/index.tsx',
+  },
 //   {
 //     id: '3981225257359246',
 //     parentId: '',

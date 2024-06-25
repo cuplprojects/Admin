@@ -217,3 +217,8 @@ li.active span.round-tabs.five-pq{
 .modal-footer-pq {
     padding: 20px;
 }
+
+.alert-success {
+    color: green;
+    font-weight: bold;
+  }
