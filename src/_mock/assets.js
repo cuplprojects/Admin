@@ -63,15 +63,15 @@ const MANAGEMENT_PERMISSION = {
       type: PermissionType.CATALOGUE,
       route: 'user',
       children: [
-        {
-          id: '4754063958766648',
-          parentId: '2781684678535711',
-          label: 'sys.menu.profile',
-          name: 'Profile',
-          type: PermissionType.MENU,
-          route: 'profile',
-          component: '/management/user/profile/index.tsx',
-        },
+        // {
+        //   id: '4754063958766648',
+        //   parentId: '2781684678535711',
+        //   label: 'sys.menu.profile',
+        //   name: 'Profile',
+        //   type: PermissionType.MENU,
+        //   route: 'profile',
+        //   component: '/management/user/profile/index.tsx',
+        // },
         {
           id: '2516598794787938',
           parentId: '2781684678535711',
@@ -371,15 +371,15 @@ const ERRORS_PERMISSION = {
   route: 'error',
   order: 6,
   children: [
-    {
-      id: '8557056851997154',
-      parentId: '9406067785553476',
-      label: 'sys.menu.error.403',
-      name: '403',
-      type: PermissionType.MENU,
-      route: '403',
-      component: '/sys/error/Page403.tsx',
-    },
+    // {
+    //   id: '8557056851997154',
+    //   parentId: '9406067785553476',
+    //   label: 'sys.menu.error.403',
+    //   name: '403',
+    //   type: PermissionType.MENU,
+    //   route: '403',
+    //   component: '/sys/error/Page403.tsx',
+    // },
     {
       id: '5095669208159005',
       parentId: '9406067785553476',
