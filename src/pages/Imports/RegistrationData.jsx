@@ -11,9 +11,9 @@ const Registration = ({ handleFileUpload, handleRegistrationUpload, selectedFile
   }, [headers, registrationMapping]);
 
   return (
-    <div className="tab-pane active" id="registration">
-      <h3 className="head text-center">Upload Registration Data</h3>
-      <div className="d-flex justify-content-center mt-4">
+    <div className="tab-pane active d-flex align-items-center justify-content-around py-3 mt-5 " id="registration">
+      <h3 className="head text-center fs-3">Upload Registration Data</h3>
+      <div className="d-flex justify-content-center align-items-center">
         <p>
           <input type="file" onChange={handleFileUpload} accept=".xlsx" />
         </p>

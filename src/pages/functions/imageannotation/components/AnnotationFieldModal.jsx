@@ -13,7 +13,7 @@ const AnnotationFieldModal = ({ inputFields, mappedFields, setSelectedInputField
             <li key={field}>
               <Button
                 onClick={() => setSelectedInputField(field)}
-                disabled={mappedFields[field]}
+                disabled={mappedFields[field]} // Disable the button if the field is already mapped
               >
                 {field}
               </Button>
