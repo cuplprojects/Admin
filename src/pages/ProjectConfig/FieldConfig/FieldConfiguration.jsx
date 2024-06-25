@@ -7,8 +7,7 @@ import { useThemeToken } from '@/theme/hooks';
 
 
 
-const apiurl = import.meta.env.VITE_API_URL_PROD;
-
+const apiurl = import.meta.env.VITE_API_URL;
 
 const { Option } = Select;
 
@@ -171,7 +170,7 @@ const FieldConfiguration = () => {
         console.error('Error deleting field configuration:', error);
         message.error('Error deleting field configuration. Please try again later.');
       });
-  };
+  
 
   const handleFieldSelection = (record, rowIndex) => {
     setFormVisible(true);

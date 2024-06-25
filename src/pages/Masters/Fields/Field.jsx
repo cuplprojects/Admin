@@ -4,7 +4,7 @@ import Draggable from 'react-draggable';
 import './../Projects/Project.css';
 
 
-const apiurl = import.meta.env.VITE_API_URL_PROD;
+const apiurl = import.meta.env.VITE_API_URL;
 
 
 const EditableCell = ({

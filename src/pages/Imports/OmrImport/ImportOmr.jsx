@@ -3,6 +3,10 @@ import axios from 'axios';
 import { Button } from 'antd';
 import localforage from 'localforage';
 
+
+//const apiurl = import.meta.env.VITE_API_URL_PROD;
+const apiurl = import.meta.env.VITE_API_URL;
+
 const ImportOmr = () => {
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
