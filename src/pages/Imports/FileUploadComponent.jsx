@@ -173,21 +173,21 @@ const FileUploadComponent = () => {
     };
     return (
       <div>
-        <div className="tab-pane active" id="OMRImages">
-          <h3 className="head text-center">Upload OMR Images</h3>
-          <div className="d-flex justify-content-center mt-4">
+        <div className="tab-pane active d-flex align-items-center justify-content-around py-3 mt-5" id="OMRImages">
+          <h3 className="head text-center fs-3">Upload OMR Images</h3>
+          <div className="d-flex justify-content-center align-items-center">
             <p>
               <input type="file" multiple onChange={handleFilesChange} accept=".jpg,.jpeg" />
             </p>
           </div>
           <div className="d-flex justify-content-center mt-4">
             {selectedFiles.length > 0 && (
-              <button className="btn btn-primary" onClick={handleUpload}>Upload</button>
+              <button className="btn btn-primary align-items-center" onClick={handleUpload}>Upload</button>
             )}
           </div>
           <div className="d-flex justify-content-center mt-4">
           {resumeButtonVisible && (
-            <button className="btn btn-success" onClick={handleResumeUpload}>Resume Upload</button>
+            <button className="btn btn-success align-items-center" onClick={handleResumeUpload}>Resume Upload</button>
           )}
         </div>
         </div>
