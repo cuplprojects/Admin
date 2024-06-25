@@ -47,7 +47,11 @@ const RoleList = () => {
       title: 'Label',
       dataIndex: 'label',
     },
-    { title: 'Order', dataIndex: 'order', width: 60 },
+    {
+      title: 'Order',
+      dataIndex: 'order',
+      width: 60,
+    },
     {
       title: 'Status',
       dataIndex: 'status',
@@ -59,7 +63,10 @@ const RoleList = () => {
         </ProTag>
       ),
     },
-    { title: 'Description', dataIndex: 'desc' },
+    {
+      title: 'Description',
+      dataIndex: 'desc',
+    },
     {
       title: 'Action',
       key: 'operation',

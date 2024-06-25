@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
-const Registration = ({ handleFileUpload, handleRegistrationUpload, selectedFile, headers, registrationMapping, handleRegistrationMappingChange }) => {
+const Registration = ({ handleFileUpload, handleRegistrationUpload, selectedFile, headers, registrationMapping, handleRegistrationMappingChange,alertMessage,
+  alertType,loading }) => {
   const [isValidData, setIsValidData] = useState(false);
 
   useEffect(() => {
@@ -10,9 +11,9 @@ const Registration = ({ handleFileUpload, handleRegistrationUpload, selectedFile
   }, [headers, registrationMapping]);
 
   return (
-    <div className="tab-pane active" id="registration">
-      <h3 className="head text-center">Upload Registration Data</h3>
-      <div className="d-flex justify-content-center mt-4">
+    <div className="tab-pane active d-flex align-items-center justify-content-around py-3 mt-5 " id="registration">
+      <h3 className="head text-center fs-3">Upload Registration Data</h3>
+      <div className="d-flex justify-content-center align-items-center">
         <p>
           <input type="file" onChange={handleFileUpload} accept=".xlsx" />
         </p>
@@ -46,9 +47,14 @@ const Registration = ({ handleFileUpload, handleRegistrationUpload, selectedFile
       )}
       <div className="d-flex justify-content-center mt-4">{
         selectedFile &&
-        <button className="btn btn-primary" onClick={handleRegistrationUpload} disabled={!isValidData}>
-          Upload
+        <button className="btn btn-primary" onClick={handleRegistrationUpload} disabled={!isValidData || loading}>
+          {loading ? 'Uploading...' : 'Upload'}
         </button>}
+        {alertMessage && (
+        <div className={`alert alert-${alertType} mt-3`} role="alert">
+          {alertMessage}
+        </div>
+      )}
       </div>
     </div>
   );

@@ -263,14 +263,14 @@ export default function MultiTabs({ offsetTop = false }: Props) {
   );
 
   /**
-   * 所有tab
+   *All tabs
    */
 
   const tabItems = useMemo(() => {
     return tabs?.map((tab) => ({
       label: renderTabLabel(tab),
       key: tab.key,
-      closable: tabs.length > 1, // 保留一个
+      closable: tabs.length > 1, //keep one
       children: (
         <div ref={tabContentRef} key={tab.timeStamp}>
           {tab.children}
@@ -280,14 +280,14 @@ export default function MultiTabs({ offsetTop = false }: Props) {
   }, [tabs, renderTabLabel]);
 
   /**
-   * 拖拽结束事件
+   *Drag end event
    */
   const onDragEnd: OnDragEndResponder = ({ destination, source }) => {
-    // 拖拽到非法非 droppable区域
+    // Drag and drop to an illegal non-droppable area
     if (!destination) {
       return;
     }
-    // 原地放下
+    //Put it down in place
     if (destination.droppableId === source.droppableId && destination.index === source.index) {
       return;
     }
@@ -299,7 +299,7 @@ export default function MultiTabs({ offsetTop = false }: Props) {
   };
 
   /**
-   * 渲染 tabbar
+   * render tabbar
    */
   const { themeLayout } = useSettings();
   const { colorBorder, colorBgElevated } = useThemeToken();
@@ -372,7 +372,7 @@ export default function MultiTabs({ offsetTop = false }: Props) {
   };
 
   /**
-   * 路由变化时，滚动到指定tab
+   * When the route changes, scroll to the specified tab
    */
   useEffect(() => {
     if (!scrollContainer || !scrollContainer.current) {
@@ -389,7 +389,7 @@ export default function MultiTabs({ offsetTop = false }: Props) {
   }, [activeTabRoutePath, tabs]);
 
   /**
-   * scrollContainer 监听wheel事件
+   *scrollContainer listens to wheel events
    */
   useEffect(() => {
     function handleMouseWheel(event: WheelEvent) {
@@ -438,15 +438,15 @@ const StyledMultiTabs = styled.div`
     }
   }
 
-  /* 隐藏滚动条 */
+  /*Hide scroll bar */
   .hide-scrollbar {
     overflow: scroll;
     flex-shrink: 0;
-    scrollbar-width: none; /* 隐藏滚动条 Firefox */
-    -ms-overflow-style: none; /* 隐藏滚动条 IE/Edge */
+    scrollbar-width: none; /*Hide scroll bar Firefox */
+    -ms-overflow-style: none; /*Hide scroll bar IE/Edge */
   }
 
   .hide-scrollbar::-webkit-scrollbar {
-    display: none; /* 隐藏滚动条 Chrome/Safari/Opera */
+    display: none; /*Hide scroll bar Chrome/Safari/Opera */
   }
 `;
