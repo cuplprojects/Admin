@@ -7,6 +7,10 @@ import ProTag from '@/theme/antd/components/tag';
 import { BasicStatus } from '#/enum';
 import {t} from '@/locales/i18n'
 
+
+const apiurl = import.meta.env.VITE_API_URL;
+//const apiurl = import.meta.env.VITE_API_URL_PROD;
+
 const RoleList = () => {
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,7 +24,7 @@ const RoleList = () => {
   useEffect(() => {
     const fetchRoles = async () => {
       try {
-        const response = await axios.get('https://localhost:7290/api/Roles');
+        const response = await axios.get(`${apiurl}/Roles?WhichDatabase=Local`);
         setRoles(response.data);
       } catch (error) {
         setError(error);
@@ -43,7 +47,11 @@ const RoleList = () => {
       title: 'Label',
       dataIndex: 'label',
     },
-    { title: 'Order', dataIndex: 'order', width: 60 },
+    {
+      title: 'Order',
+      dataIndex: 'order',
+      width: 60,
+    },
     {
       title: 'Status',
       dataIndex: 'status',
@@ -55,7 +63,10 @@ const RoleList = () => {
         </ProTag>
       ),
     },
-    { title: 'Description', dataIndex: 'desc' },
+    {
+      title: 'Description',
+      dataIndex: 'desc',
+    },
     {
       title: 'Action',
       key: 'operation',
@@ -111,7 +122,7 @@ const RoleList = () => {
 
     try {
       if (roleModalProps.role && roleModalProps.role.roleId !== 0) {
-        await axios.put(`https://localhost:7290/api/Roles/${roleModalProps.role.roleId}`, rolePayload, {
+        await axios.put(`${apiurl}/Roles/${roleModalProps.role.roleId}?WhichDatabase=Local`, rolePayload, {
           headers: {
             'Content-Type': 'application/json',
           },
@@ -121,7 +132,7 @@ const RoleList = () => {
         );
         message.success('Role updated successfully');
       } else {
-        const response = await axios.post('https://localhost:7290/api/Roles', rolePayload, {
+        const response = await axios.post(`${apiurl}/Roles?WhichDatabase=Local`, rolePayload, {
           headers: {
             'Content-Type': 'application/json',
           },
@@ -151,7 +162,7 @@ const RoleList = () => {
 
   const onDelete = async (roleId) => {
     try {
-      await axios.delete(`https://localhost:7290/api/Roles/${roleId}`);
+      await axios.delete(`${apiurl}/${roleId}?WhichDatabase=Local`);
       setRoles((prevRoles) => prevRoles.filter((role) => role.roleId !== roleId));
       message.success('Role deleted successfully');
     } catch (error) {

@@ -22,9 +22,9 @@ const Absentee = ({
   }, [headers, mapping]);
 
   return (
-    <div className={`tab-pane active`} id="absentee">
-      <h3 className="head text-center">Upload Absentee</h3>
-      <div className="d-flex justify-content-center mt-4">
+    <div className={`tab-pane active d-flex align-items-center justify-content-around py-3 mt-5`}  id="absentee">
+      <h3 className="head text-center fs-3">Upload Absentee</h3>
+      <div className="d-flex justify-content-center align-items-center">
         <p>
           <input type="file" onChange={handleFileUpload} accept=".xlsx" />
         </p>
@@ -60,8 +60,8 @@ const Absentee = ({
       )}
       {selectedFile && headers.length > 0 && isValidData && (
         <div className="d-flex justify-content-center mt-4">
-          <button className="btn btn-primary" onClick={handleAbsenteeUpload} disabled={loading}>
-            {loading ? 'Uploading...' : 'Upload'}
+          <button className="btn btn-primary" onClick={handleAbsenteeUpload}>
+            Upload
           </button>
         </div>
       )}

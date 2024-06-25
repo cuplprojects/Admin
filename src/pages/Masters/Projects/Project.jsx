@@ -39,6 +39,7 @@ const Project = () => {
   const [form] = Form.useForm();
   const [data, setData] = useState([]);
   const [editingKey, setEditingKey] = useState('');
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [sortedInfo, setSortedInfo] = useState({});
   const isEditing = (record) => record.key === editingKey;
 
@@ -48,7 +49,7 @@ const Project = () => {
 
   const fetchData = async () => {
     try {
-      const response = await fetch('http://localhost:5071/api/Projects?WhichDatabase=Local');
+      const response = await fetch(`${apiurl}apiurl/Projects?WhichDatabase=Local`);
       const data = await response.json();
       setData(data.map((item, index) => ({ ...item, key: index.toString(), serialNo: index + 1 })));
     } catch (error) {
@@ -79,6 +80,7 @@ const Project = () => {
       const newData = [...data];
       newData.pop();
       setData(newData);
+      setHasUnsavedChanges(false);
     }
   };
 
@@ -98,10 +100,12 @@ const Project = () => {
         }
         setData(newData);
         setEditingKey('');
+        setHasUnsavedChanges(false);
       } else {
         await addRow(row);
         setData([...newData, row]);
         setEditingKey('');
+        setHasUnsavedChanges(false);
       }
     } catch (errInfo) {
       console.log('Validate Failed:', errInfo);
@@ -110,7 +114,7 @@ const Project = () => {
 
   const updateRow = async (updatedRow) => {
     try {
-      const response = await fetch(`http://localhost:5071/api/Projects/${updatedRow.projectId}?WhichDatabase=Local`, {
+      const response = await fetch(`${apiurl}/Projects/${updatedRow.projectId}?WhichDatabase=Local`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -128,7 +132,7 @@ const Project = () => {
 
   const addRow = async (newRow) => {
     try {
-      const response = await fetch('http://localhost:5071/api/Projects?WhichDatabase=Local', {
+      const response = await fetch(`${apiurl}/Projects?WhichDatabase=Local`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -136,11 +140,14 @@ const Project = () => {
         body: JSON.stringify(newRow),
       });
       if (!response.ok) {
+        cancel()
         throw new Error('Failed to add new project');
       }
       fetchData()
       // Handle success
+      setHasUnsavedChanges(false);
     } catch (error) {
+      
       console.error('Error adding new project:', error);
     }
   };
@@ -155,6 +162,7 @@ const Project = () => {
     };
     setData([...data, newData]);
     setEditingKey(newRowKey.toString());
+    setHasUnsavedChanges(true);
   };
 
   const columns = [
@@ -227,7 +235,7 @@ const Project = () => {
 
   return (
     <div className='mt-5'>
-      <Button onClick={handleAdd} type="primary" style={{ marginBottom: 16 }}>
+      <Button onClick={handleAdd} type="primary" style={{ marginBottom: 16 }} disabled={hasUnsavedChanges}>
         Add a row
       </Button>
       <Form form={form} component={false}>

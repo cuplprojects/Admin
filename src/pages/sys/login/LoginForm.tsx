@@ -1,9 +1,9 @@
 import { Alert, Button, Checkbox, Col, Divider, Form, Input, Row } from 'antd';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AiFillGithub, AiFillGoogleCircle, AiFillWechat } from 'react-icons/ai';
+// import { AiFillGithub, AiFillGoogleCircle, AiFillWechat } from 'react-icons/ai';
 
-import { DEFAULT_USER, TEST_USER, USER_USER } from '@/_mock/assets';
+import { DEFAULT_USER, TEST_USER, DEVELOPER_USER } from '@/_mock/assets';
 import { SignInReq } from '@/api/services/userService';
 import { useSignIn } from '@/store/userStore';
 import ProTag from '@/theme/antd/components/tag';
@@ -146,4 +146,4 @@ function LoginForm() {
   );
 }
 
-export default LoginForm;4
+export default LoginForm;

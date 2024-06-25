@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 const ResponseConfig = () => {
   const [responseOption, setResponseOption] = useState('ABC'); // State for selected response option
-  const [numBlocks, setNumBlocks] = useState(1); // State for number of blocks
+  const [numBlocks, setNumBlocks] = useState(4); // State for number of blocks
 
   const handleResponseOptionChange = (e) => {
     setResponseOption(e.target.value);
@@ -26,15 +26,6 @@ const ResponseConfig = () => {
           />
           ABC
         </label>
-        <label style={{ marginRight: '10px' }}>
-          <input
-            type="radio"
-            value="abc"
-            checked={responseOption === 'abc'}
-            onChange={handleResponseOptionChange}
-          />
-          abc
-        </label>
         <label>
           <input
             type="radio"
@@ -54,6 +45,7 @@ const ResponseConfig = () => {
         <select
           id="numBlocks"
           value={numBlocks}
+          
           onChange={handleNumBlocksChange}
           style={{ marginRight: '10px', padding: '5px', borderRadius: '3px', border: '1px solid #ccc' }}
         >

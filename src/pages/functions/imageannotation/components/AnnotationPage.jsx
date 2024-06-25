@@ -6,6 +6,11 @@ import Toolkit from './Toolkit';
 import { CloseOutlined } from '@ant-design/icons';
 import axios from 'axios';
 
+
+//const apiurl = import.meta.env.VITE_API_URL_PROD;
+const apiurl = import.meta.env.VITE_API_URL;
+
+
 const { Option } = Select; // Destructure Option from Select for ease of use
 
 const AnnotationPage = () => {
@@ -21,9 +26,25 @@ const AnnotationPage = () => {
   const [openModal, setOpenModal] = useState(false);
   const [modalFields, setModalFields] = useState([]);
   const [coordinates, setCoordinates] = useState([]);
+  const [inputFields, setInputFields] = useState([]);
+  //const inputFields = ['Roll No', 'Booklet No', 'Booklet Series/Set', 'Year/Semester'];
 
-  const inputFields = ['Roll No', 'Booklet No', 'Booklet Series/Set', 'Year/Semester'];
 
+  useEffect(() => {
+    // Fetch input fields from API
+    axios.get(`${apiurl}/Fields?WhichDatabase=Local`)
+      .then((response) => {
+        console.log(response.data);
+        const fieldNames = response.data.map(field => field.fieldName); // Extract field names
+        setInputFields(fieldNames);
+      })
+      .catch((error) => {
+        console.error('Error fetching input fields:', error);
+      });
+  }, []);
+
+
+  
   useEffect(() => {
     const mappedFieldsObj = {};
     annotations.forEach((annotation) => {
@@ -179,14 +200,14 @@ const AnnotationPage = () => {
         ImageUrl: 'Url-String',
         annotations: annotations.map(annotation => ({
           FieldName: annotation.FieldName,
-          coordinates: JSON.stringify(annotation.coordinates).replace(/\"/g, "'"), // Convert coordinates to JSON string
+          coordinates: JSON.stringify(annotation.coordinates).replace(/\"/g,"'"), // Convert coordinates to JSON string
         }))
       };
-  
+
       console.log('Submitting annotations:', postData);
   
       // Make POST request using Axios
-      const response = await axios.post('your_api_endpoint_here', postData, {
+      const response = await axios.post(`${apiurl}/ImageConfigs?WhichDatabase=Local`, postData, {
         headers: {
           'Content-Type': 'application/json'
         }

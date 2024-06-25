@@ -3,6 +3,10 @@ import { Button, Form, Input, InputNumber, Modal, Popconfirm, Table, Typography 
 import Draggable from 'react-draggable';
 import './../Projects/Project.css';
 
+
+const apiurl = import.meta.env.VITE_API_URL;
+
+
 const EditableCell = ({
   editing,
   dataIndex,
@@ -59,7 +63,7 @@ const Field = () => {
 
   const fetchData = async () => {
     try {
-      const response = await fetch('http://localhost:5071/api/Fields?WhichDatabase=Local');
+      const response = await fetch(`${apiurl}/Fields?WhichDatabase=Local`);
       const data = await response.json();
       setData(data.map((item, index) => ({ ...item, key: index.toString(), serialNo: index + 1 })));
     } catch (error) {
@@ -80,7 +84,7 @@ const Field = () => {
     // Remove the last row if Project Name is blank
     const newData = [...data];
     newData.pop();
-    setData(newData);
+    setData(newData);  
   }
     setEditingKey('');
   };
@@ -113,7 +117,7 @@ const Field = () => {
 
   const updateRow = async (updatedRow) => {
     try {
-      const response = await fetch(`http://localhost:5071/api/Fields/${updatedRow.fieldId}?WhichDatabase=Local`, {
+      const response = await fetch(`${apiurl}/Fields/${updatedRow.fieldId}?WhichDatabase=Local`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -132,7 +136,7 @@ const Field = () => {
 
   const addRow = async (newRow) => {
     try {
-      const response = await fetch('http://localhost:5071/api/Fields?WhichDatabase=Local', {
+      const response = await fetch(`${apiurl}/Fields?WhichDatabase=Local`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

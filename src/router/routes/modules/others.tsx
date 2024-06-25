@@ -4,15 +4,20 @@ import Card from '@/components/card';
 import { Iconify, SvgIcon } from '@/components/icon';
 import { CircleLoading } from '@/components/loading';
 import ProTag from '@/theme/antd/components/tag';
-
 import { AppRouteObject } from '#/router';
 import Import from '@/pages/Imports/AllImports';
+
 
 const ExternalLink = lazy(() => import('@/pages/sys/others/iframe/external-link'));
 const Iframe = lazy(() => import('@/pages/sys/others/iframe'));
 const Calendar = lazy(() => import('@/pages/sys/others/calendar'));
 const Kanban = lazy(() => import('@/pages/sys/others/kanban'));
 const ProjectConfig = lazy(() => import('@/pages/ProjectConfig'));
+
+const Audit = lazy(() => import('@/pages/AuditPage/Audit'));
+
+const Correction = lazy(() => import('@/pages/correction/CorrectionPage'));
+
 
 
 function Wrapper({ children }: any) {
@@ -45,6 +50,33 @@ const others: AppRouteObject[] = [
       label: 'sys.menu.AllImports',
       icon: <Iconify icon="solar:calendar-bold-duotone" size={24} />,
       key: '/AllImports',
+    },
+  },
+  // Correction Window
+  {
+    path: 'correction',
+    element: (
+      <Wrapper>
+        <Correction />
+      </Wrapper>
+    ),
+    meta: {
+      label: 'sys.menu.correctionwindow',
+      icon: <Iconify icon="solar:document-add-bold-duotone" size={24} />,
+      key: '/correction',
+    },
+  },
+  {
+    path: 'Audit',
+    element: (
+      <Wrapper>
+        <Audit />
+      </Wrapper>
+    ),
+    meta: {
+      label: 'sys.menu.Audit',
+      icon: <Iconify icon="solar:calendar-bold-duotone" size={24} />,
+      key: '/Audit',
     },
   },
   {
