@@ -425,16 +425,17 @@ const OTHERS_PERMISSION = [
     component: '/Imports/index.tsx',
   },
   // correctin window
-  // {
-  //   id: '3981225257359246',
-  //   parentId: '',
-  //   label: 'sys.menu.correctionwindow',
-  //   name: 'correction',
-  //   icon: 'solar:document-add-bold-duotone',
-  //   type: PermissionType.MENU,
-  //   route: 'correction',
-  //   component: '/correction/index.tsx',
-  // },
+  {
+    id: '3981225257359246',
+    parentId: '',
+    label: 'sys.menu.correctionwindow',
+    name: 'correction',
+    icon: 'solar:document-add-bold-duotone',
+    type: PermissionType.MENU,
+    route: 'correction',
+    component: '/correction/index.tsx',
+  },
+
   //   {
   //     id: '3513985683886393',
   //     parentId: '',
