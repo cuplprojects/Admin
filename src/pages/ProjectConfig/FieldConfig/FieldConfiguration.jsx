@@ -30,7 +30,7 @@ const FieldConfiguration = () => {
   const [selectedFields, setSelectedFields] = useState([]);
 
   useEffect(() => {
-    axios.get('apiurl/Fields')
+    axios.get(`${apiurl}/Fields?WhichDatabase=Local`)
       .then(response => {
         setFields(response.data);
       })
@@ -38,7 +38,7 @@ const FieldConfiguration = () => {
         console.error('Error fetching fields:', error);
       });
 
-    axios.get('apiurl/FieldConfigurations')
+    axios.get(`${apiurl}/FieldConfigurations?WhichDatabase=Local`)
       .then(response => {
         setSavedData(response.data);
       })
@@ -110,7 +110,7 @@ const FieldConfiguration = () => {
       setSelectedFields(selectedFields.filter(field => field !== savedData[selectedFieldIndex].attributeDetails.field));
     } else {
       // Add new field configuration
-      axios.post('apiurl/FieldConfigurations', newConfig)
+      axios.post(`${apiurl}/FieldConfigurations?WhichDatabase=Local`, newConfig)
         .then(response => {
           setSavedData([...savedData, response.data]);
           showAlert('Field configuration saved successfully.', 'success');
@@ -148,7 +148,7 @@ const FieldConfiguration = () => {
       .filter((_, index) => selectedRows[index])
       .map(item => item.fieldConfigurationId);
 
-    axios.all(selectedIds.map(id => axios.delete(`apiurl/FieldConfigurations/${id}`)))
+    axios.all(selectedIds.map(id => axios.delete(`${apiurl}/FieldConfigurations/${id}?WhichDatabase=Local`)))
       .then(() => {
         setSavedData(savedData.filter((_, index) => !selectedRows[index]));
         setSelectedRows({});

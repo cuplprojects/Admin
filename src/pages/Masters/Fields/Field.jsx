@@ -63,7 +63,7 @@ const Field = () => {
 
   const fetchData = async () => {
     try {
-      const response = await fetch('apiurl/Fields?WhichDatabase=Local');
+      const response = await fetch(`${apiurl}/Fields?WhichDatabase=Local`);
       const data = await response.json();
       setData(data.map((item, index) => ({ ...item, key: index.toString(), serialNo: index + 1 })));
     } catch (error) {
@@ -117,7 +117,7 @@ const Field = () => {
 
   const updateRow = async (updatedRow) => {
     try {
-      const response = await fetch(`apiurl/Fields/${updatedRow.fieldId}?WhichDatabase=Local`, {
+      const response = await fetch(`${apiurl}/Fields/${updatedRow.fieldId}?WhichDatabase=Local`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -135,7 +135,7 @@ const Field = () => {
 
   const addRow = async (newRow) => {
     try {
-      const response = await fetch('apiurl/Fields?WhichDatabase=Local', {
+      const response = await fetch(`${apiurl}/Fields?WhichDatabase=Local`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

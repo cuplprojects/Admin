@@ -97,7 +97,7 @@ const Import = () => {
         console.log('Mapped Data:', mappedData);
 
         try {
-          const response = await fetch('http://localhost:5071/api/Absentee/upload', {
+          const response = await fetch(`${apiurl}/Absentee/upload`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -163,7 +163,7 @@ const Import = () => {
         console.log('Parsed data:', parsedData);
 
         try {
-          const response = await fetch('http://localhost:5071/api/OMRData/uploadcsv', {
+          const response = await fetch(`${apiurl}/OMRData/uploadcsv`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -223,7 +223,7 @@ const Import = () => {
         });
 
         try {
-          const response = await axios.post('http://localhost:5071/api/Registration', mappedData);
+          const response = await axios.post(`${apiurl}/Registration?WhichDatabase=Local`, mappedData);
           console.log('Registration data uploaded successfully:', response.data);
         } catch (error) {
           console.error('Error uploading registration data:', error);

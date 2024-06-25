@@ -23,7 +23,7 @@ const RoleList = () => {
   useEffect(() => {
     const fetchRoles = async () => {
       try {
-        const response = await axios.get('apiurl/Roles');
+        const response = await axios.get(`${apiurl}/Roles?WhichDatabase=Local`);
         setRoles(response.data);
       } catch (error) {
         setError(error);
@@ -114,7 +114,7 @@ const RoleList = () => {
 
     try {
       if (roleModalProps.role && roleModalProps.role.roleId !== 0) {
-        await axios.put(`apiurl/Roles/${roleModalProps.role.roleId}`, rolePayload, {
+        await axios.put(`${apiurl}/Roles/${roleModalProps.role.roleId}?WhichDatabase=Local`, rolePayload, {
           headers: {
             'Content-Type': 'application/json',
           },
@@ -124,7 +124,7 @@ const RoleList = () => {
         );
         message.success('Role updated successfully');
       } else {
-        const response = await axios.post('apiurl/Roles', rolePayload, {
+        const response = await axios.post(`${apiurl}/Roles?WhichDatabase=Local`, rolePayload, {
           headers: {
             'Content-Type': 'application/json',
           },
@@ -154,7 +154,7 @@ const RoleList = () => {
 
   const onDelete = async (roleId) => {
     try {
-      await axios.delete(`apiurl/${roleId}`);
+      await axios.delete(`${apiurl}/${roleId}?WhichDatabase=Local`);
       setRoles((prevRoles) => prevRoles.filter((role) => role.roleId !== roleId));
       message.success('Role deleted successfully');
     } catch (error) {
