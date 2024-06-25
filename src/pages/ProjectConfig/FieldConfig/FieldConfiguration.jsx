@@ -5,6 +5,10 @@ import { Button } from 'antd';
 import {Iconify, IconButton} from './../../../components/icon'
 import { useThemeToken } from '@/theme/hooks';
 
+
+const apiurl = import.meta.env.VITE_API_URL_PROD;
+
+
 const FieldConfiguration = () => {
   const { colorPrimary } = useThemeToken();
   const [isFormVisible, setFormVisible] = useState(false);
@@ -26,7 +30,7 @@ const FieldConfiguration = () => {
   const [selectedFields, setSelectedFields] = useState([]);
 
   useEffect(() => {
-    axios.get('http://localhost:5071/api/Fields')
+    axios.get('apiurl/Fields')
       .then(response => {
         setFields(response.data);
       })
@@ -34,7 +38,7 @@ const FieldConfiguration = () => {
         console.error('Error fetching fields:', error);
       });
 
-    axios.get('http://localhost:5071/api/FieldConfigurations')
+    axios.get('apiurl/FieldConfigurations')
       .then(response => {
         setSavedData(response.data);
       })
@@ -106,7 +110,7 @@ const FieldConfiguration = () => {
       setSelectedFields(selectedFields.filter(field => field !== savedData[selectedFieldIndex].attributeDetails.field));
     } else {
       // Add new field configuration
-      axios.post('http://localhost:5071/api/FieldConfigurations', newConfig)
+      axios.post('apiurl/FieldConfigurations', newConfig)
         .then(response => {
           setSavedData([...savedData, response.data]);
           showAlert('Field configuration saved successfully.', 'success');
@@ -144,7 +148,7 @@ const FieldConfiguration = () => {
       .filter((_, index) => selectedRows[index])
       .map(item => item.fieldConfigurationId);
 
-    axios.all(selectedIds.map(id => axios.delete(`http://localhost:5071/api/FieldConfigurations/${id}`)))
+    axios.all(selectedIds.map(id => axios.delete(`apiurl/FieldConfigurations/${id}`)))
       .then(() => {
         setSavedData(savedData.filter((_, index) => !selectedRows[index]));
         setSelectedRows({});

@@ -12,6 +12,8 @@ import { useThemeToken } from '@/theme/hooks';
 import { color } from 'framer-motion';
 import ImportOmr from './OmrImport/ImportOmr';
 
+const apiurl = import.meta.env.VITE_API_URL_PROD;
+
 const Import = () => {
   const { colorPrimary } = useThemeToken();
   const [activetab, setActivetab] = useState('OMRImages');
