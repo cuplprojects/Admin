@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
-import { Flex, message, Upload } from 'antd';
+import { Upload, Button } from 'antd';
+
+const apiurl = import.meta.env.VITE_API_URL;
 
 const GenerateScore = () => {
   const [loading, setLoading] = useState(false);
-  const [imageUrl, setImageUrl] = useState();
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertType, setAlertType] = useState('');
+  const [file, setFile] = useState(null);
 
-  const getBase64 = (img, callback) => {
-    const reader = new FileReader();
-    reader.addEventListener('load', () => callback(reader.result));
-    reader.readAsDataURL(img);
-  };
+  
 
   const beforeUpload = (file) => {
     const isXlsx = file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
@@ -18,32 +18,55 @@ const GenerateScore = () => {
       message.error('You can only upload XLSX file!');
       return false;
     }
-    
     return isXlsx;
   };
 
-  const handleChange = (info) => {
-    if (info.file.status === 'uploading') {
-      setLoading(true);
+  const handleFileChange = ({ file }) => {
+    if (beforeUpload(file)) {
+      setFile(file);
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!file) {
+      message.error('Please select a file first!');
       return;
     }
-    if (info.file.status === 'done') {
-      // Get this url from response in real world.
-      getBase64(info.file.originFileObj, (url) => {
-        setLoading(false);
-        setImageUrl(url);
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      setLoading(true);
+      const response = await fetch(`${apiurl}/Scores/upload?WhichDatabase=Local`, {
+        method: 'POST',
+        body: formData,
       });
+      const result = await response.json();
+
+      if (result.message) {
+        setAlertMessage('All files uploaded successfully!');
+          setAlertType('success');
+        getBase64(file, (url) => {
+          setLoading(false);
+         
+          setFile(null); // Reset file after successful upload
+        });
+      } else {
+        setAlertMessage('Error uploading file!');
+          setAlertType('danger');
+        setLoading(false);
+        setFile(null); // Reset file after unsuccessful upload
+      }
+    } catch (error) {
+      
+      setLoading(false);
+      setFile(null); // Reset file after unsuccessful upload
     }
   };
 
   const uploadButton = (
-    <button
-      style={{
-        border: 0,
-        background: 'none',
-      }}
-      type="button"
-    >
+    <div>
       {loading ? <LoadingOutlined /> : <PlusOutlined />}
       <div
         style={{
@@ -52,33 +75,37 @@ const GenerateScore = () => {
       >
         Upload Key
       </div>
-    </button>
+    </div>
   );
 
   return (
-    <Flex gap="middle" wrap>
+    <div>
       <Upload
         name="file"
         listType="picture-card"
         className="file-uploader"
         showUploadList={false}
-        action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload"
         beforeUpload={beforeUpload}
-        onChange={handleChange}
+        customRequest={({ file }) => handleFileChange({ file })}
       >
-        {imageUrl ? (
-          <img
-            src={imageUrl}
-            alt="file"
-            style={{
-              width: '100%',
-            }}
-          />
-        ) : (
-          uploadButton
-        )}
+        {file ? file.name : uploadButton}
       </Upload>
-    </Flex>
+      {file && (
+        <Button
+          type="primary"
+          onClick={handleUpload}
+          disabled={loading}
+          style={{ marginTop: 16 }}
+        >
+          {loading ? 'Uploading...' : 'Upload'}
+        </Button>
+      )}
+      {alertMessage && (
+        <div className={`alert alert-${alertType} mt-3`} role="alert">
+          {alertMessage}
+        </div>
+      )}
+    </div>
   );
 };
 
