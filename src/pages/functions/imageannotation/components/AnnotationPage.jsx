@@ -24,12 +24,7 @@ const AnnotationPage = () => {
   const [openModal, setOpenModal] = useState(false);
   const [modalFields, setModalFields] = useState([]);
   const [coordinates, setCoordinates] = useState([]);
-  const [inputFields, setInputFields] = useState([
-    'Roll No',
-    'Booklet No',
-    'Booklet Series/Set',
-    'Year/Semester',
-  ]);
+  const [inputFields, setInputFields] = useState([]);
   //const inputFields = ['Roll No', 'Booklet No', 'Booklet Series/Set', 'Year/Semester'];
 
   useEffect(() => {
@@ -196,7 +191,7 @@ const AnnotationPage = () => {
       // Prepare data for POST request
       const postData = {
         projectId: 1,
-        ImageUrl: 'Url-String',
+        ImageUrl: imageUrl,
         annotations: annotations.map((annotation) => ({
           FieldName: annotation.FieldName,
           coordinates: JSON.stringify(annotation.coordinates).replace(/\"/g, "'"), // Convert coordinates to JSON string

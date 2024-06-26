@@ -139,7 +139,6 @@ const Import = () => {
     console.log('Uploading file:', selectedFile);
     
     if (selectedFile) {
-     
       setLoading(true);
       
       const reader = new FileReader();
@@ -181,10 +180,7 @@ const Import = () => {
         console.log('Parsed data:', parsedData);
   
         try {
-
           const response = await fetch(`${apiurl}/OMRData/uploadcsv?WhichDatabase=Local`, {
-
-
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -207,10 +203,10 @@ const Import = () => {
           }
         } catch (error) {
           console.error('Error uploading data:', error);
-          setLoading(false);
           setAlertMessage('Error uploading data.');
           setAlertType('danger');
         } finally {
+          setLoading(false);
           setSelectedFile(null); // Reset selected file after upload
         }
       };
@@ -220,14 +216,11 @@ const Import = () => {
       console.error('No file selected.');
       setAlertMessage('No file selected.');
       setAlertType('warning');
+      setLoading(false);
     }
-    setLoading(false);
   };
   
-
-
-
-
+  
   const handleRegistrationMappingChange = (e, property) => {
     setRegistrationMapping({
       ...registrationMapping,
@@ -238,53 +231,53 @@ const Import = () => {
 
   const handleRegistrationUpload = async (event) => {
     event.preventDefault();
-
+  
     if (selectedFile) {
       setLoading(true);
       const reader = new FileReader();
-
+  
       reader.onload = async (e) => {
         const data = e.target.result;
         const workbook = XLSX.read(data, { type: 'binary' });
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
         const jsonData = XLSX.utils.sheet_to_json(sheet);
-
+  
         const mappedData = jsonData.map((item) => {
-          console.log(item)
+          // console.log(item)
           let mappedItem = {
             "rollNumber": item[registrationMapping.rollNo].toString(),
             "registrationsData": JSON.stringify(item).replace(/\"/g, "'"), // Assuming item already contains the desired structure
           };
-
+  
           // console.log(mappedItem);
           return mappedItem;
         });
-
+  
         try {
-
           const response = await axios.post(`${apiurl}/Registration?WhichDatabase=Local`, mappedData);
-
-
+  
           console.log('Registration data uploaded successfully:', response.data);
           setAlertMessage('Upload successful!');
           setAlertType('success');
         } catch (error) {
           console.error('Error uploading registration data:', error);
-          setLoading(false);
           setAlertMessage('Error uploading data.');
           setAlertType('danger');
+        } finally {
+          setLoading(false);
         }
       };
-
+  
       reader.readAsBinaryString(selectedFile);
     } else {
       console.error('No file selected.');
       setAlertMessage('No file selected.');
       setAlertType('warning');
+      setLoading(false);
     }
-    setLoading(false);
   };
+  
 
 
 
@@ -305,7 +298,7 @@ const Import = () => {
               <div className="">
                 <ul className="d-flex align-items-center justify-content-around my-4" id="myTab">
                   <li style={{ border: `2px solid ${colorPrimary}` }} className='tabcircle' onClick={() => { setActivetab('OMRImages'); setSelectedFile(null); }}>
-                    <a data-toggle="tab" title="welcome">
+                    <a data-toggle="tab" title="OMR Images">
                       <span className="round-tabs-pq one-pq">
                         <i className="fa-regular fa-image " style={{ color: colorPrimary }}></i>
                       </span>
@@ -313,7 +306,7 @@ const Import = () => {
                   </li>
                   <span className='tabline'></span>
                   <li style={{ border: `2px solid ${colorPrimary}` }} className='tabcircle' onClick={() => { setActivetab('scanned'); setSelectedFile(null);  setAlertMessage(null);setAlertType(null);}}>
-                    <a data-toggle="tab" title="scanned">
+                    <a data-toggle="tab" title="Scanned Data">
                       <span className="round-tabs-pq two-pq">
                         <i className="fa-solid fa-file-csv" style={{ color: colorPrimary }}></i>
                       </span>
@@ -321,7 +314,7 @@ const Import = () => {
                   </li>
                   <span className='tabline'></span>
                   <li style={{ border: `2px solid ${colorPrimary}` }} className='tabcircle' onClick={() => { setActivetab('registration'); setSelectedFile(null); setHeaders([]); setAlertMessage(null);setAlertType(null); }}>
-                    <a data-toggle="tab" title="registration">
+                    <a data-toggle="tab" title="Registration Data">
                       <span className="round-tabs-pq three-pq">
                         <i className="fa-regular fa-id-card" style={{ color: colorPrimary }}></i>
                       </span>
@@ -329,7 +322,7 @@ const Import = () => {
                   </li>
                   <span className='tabline'></span>
                   <li style={{ border: `2px solid ${colorPrimary}` }} className='tabcircle' onClick={() => { setActivetab('absentee'); setSelectedFile(null); setHeaders([]); setAlertMessage(null);setAlertType(null); }}>
-                    <a data-toggle="tab" title="absentee">
+                    <a data-toggle="tab" title="Absentee Data">
                       <span className="round-tabs-pq four-pq ">
                         <i className="fa-solid fa-file-excel" style={{ color: colorPrimary }} ></i>
                       </span>

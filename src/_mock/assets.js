@@ -425,6 +425,17 @@ const OTHERS_PERMISSION = [
     component: '/Imports/index.tsx',
   },
 
+  {
+    id: '3981225257359246',
+    parentId: '',
+    label: 'sys.menu.GenerateScore',
+    name: 'ScoreProcessing',
+    icon: 'solar:calendar-bold-duotone',
+    type: PermissionType.MENU,
+    route: 'GenerateScore',
+    component: '/ScoreProcessing/index.tsx',
+
+  },
   //Audit
   {
     id: '3981225257359246',
@@ -435,6 +446,7 @@ const OTHERS_PERMISSION = [
     type: PermissionType.MENU,
     route: 'AuditPage/Audit',
     component: '/AuditPage/index.tsx',
+
   },
 //   {
 //     id: '3981225257359246',
@@ -615,7 +627,7 @@ export const PERMISSION_LIST = [
   DASHBOARD_PERMISSION,
   MANAGEMENT_PERMISSION,
   // COMPONENTS_PERMISSION,
-  FUNCTIONS_PERMISSION,
+  //FUNCTIONS_PERMISSION,
   MENU_LEVEL_PERMISSION,
   // ERRORS_PERMISSION,
   ...OTHERS_PERMISSION,

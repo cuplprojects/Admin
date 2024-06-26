@@ -27,25 +27,7 @@ export default function GeneralTab() {
   useEffect(() => {
     const fetchUsersAndRoles = async () => {
       try {
-        const [usersRes, rolesRes] = await Promise.all([
-          axios.get('https://localhost:7290/api/Users?WhichDatabase=local'),
-          axios.get('https://localhost:7290/api/Roles'),
-        ]);
-
-        // Create a role map to easily map roleId to roleName
-        const roleMap = rolesRes.data.reduce((acc, role) => {
-          acc[role.roleId] = role.roleName;
-          return acc;
-        }, {});
-
-        // Map role names to users
-        const usersWithRoleNames = usersRes.data.map(user => ({
-          ...user,
-          roleName: roleMap[user.roleId]
-        }));
-
-        setUserList(usersWithRoleNames);
-        setRoles(rolesRes.data);
+       axios.get('https://localhost:7290/api/Users?WhichDatabase=Local')
       } catch (error) {
         console.log(error.message);
       }
@@ -67,7 +49,7 @@ export default function GeneralTab() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('https://localhost:7290/api/Users?WhichDatabase=local', userData);
+      await axios.post('https://localhost:7290/api/Users?WhichDatabase=Local', userData);
       setUserData({
         firstName: '',
         lastName: '',
@@ -79,7 +61,7 @@ export default function GeneralTab() {
         message: 'User added successfully!',
         duration: 3,
       });
-      const res = await axios.get('https://localhost:7290/api/Users?WhichDatabase=local');
+      const res = await axios.get('https://localhost:7290/api/Users?WhichDatabase=Local');
       setUserList(res.data);
     } catch (error) {
       console.log(error.message);
@@ -93,7 +75,7 @@ export default function GeneralTab() {
 
   const handleSave = async (userId) => {
     try {
-      await axios.put(`https://localhost:7290/api/Users/${userId}?WhichDatabase=local`, userData);
+      await axios.put(`https://localhost:7290/api/Users/${userId}?WhichDatabase=Local`, userData);
       setEditingUserId(null);
       setUserData({
         firstName: '',
@@ -106,7 +88,7 @@ export default function GeneralTab() {
         message: 'User updated successfully!',
         duration: 3,
       });
-      const res = await axios.get('https://localhost:7290/api/Users?WhichDatabase=local');
+      const res = await axios.get('https://localhost:7290/api/Users?WhichDatabase=Local');
       setUserList(res.data);
     } catch (error) {
       console.log(error.message);
@@ -131,12 +113,12 @@ export default function GeneralTab() {
 
   const handleDelete = async () => {
     try {
-      await axios.delete(`https://localhost:7290/api/Users/${userIdToDelete}?WhichDatabase=local`);
+      await axios.delete(`https://localhost:7290/api/Users/${userIdToDelete}?WhichDatabase=Local`);
       notification.success({
         message: 'User deleted successfully!',
         duration: 3,
       });
-      const res = await axios.get('https://localhost:7290/api/Users?WhichDatabase=local');
+      const res = await axios.get('https://localhost:7290/api/Users?WhichDatabase=Local');
       setUserList(res.data);
       setDeleteModalVisible(false);
     } catch (error) {
@@ -192,24 +174,16 @@ export default function GeneralTab() {
                         user.email
                       )}
                     </td>
-                    
+
                     <td>
                       {editingUserId === user.userId ? (
-                        <Select
-                          value={userData.roleId}
-                          onChange={handleRoleChange}
-                          style={{ width: 120 }}
-                        >
-                          {roles.map((role) => (
-                            <Select.Option key={role.roleId} value={role.roleId}>
-                              {role.roleName}
-                            </Select.Option>
-                          ))}
-                        </Select>
+                        <Input name="roleName" value={userData.roleName} onChange={handleChange} />
                       ) : (
                         user.roleName
                       )}
                     </td>
+                    
+                    
                     <td>
                       {editingUserId === user.userId ? (
                         <>

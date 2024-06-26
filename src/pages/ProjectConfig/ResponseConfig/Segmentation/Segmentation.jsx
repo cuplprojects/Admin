@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Alert } from 'antd';
 import { useThemeToken } from '@/theme/hooks';
+import axios from 'axios';
 
 const APIURL = import.meta.env.VITE_API_URL;
 //const APIURL = import.meta.env.VITE_API_URL_PROD;
@@ -91,24 +92,7 @@ const Segmentation = () => {
     setSections(newSections);
   };
 
-  const handleSave = () => {
-    // Check if there are any empty required fields
-    const isValid = validateFields();
-    if (isValid) {
-      setIsEditing(false); // Disable editing after saving
-      setShowAlert(false); // Hide alert if shown
-
-      // Combine sections and responseOption into a single object
-      const dataToSend = {
-        sections,
-        responseOption,
-        numberOfBlocks : numBlocks
-      };
-
-      // Example API endpoint (replace with your actual endpoint)
-     
-
-      const handleSave = () => {
+     const handleSave = () => {
         // Check if there are any empty required fields
         const isValid = validateFields();
         if (isValid) {
@@ -121,6 +105,7 @@ const Segmentation = () => {
             numberOfBlocks : numBlocks,
             projectId : 1,
           };
+          console.log(dataToSend)
       
           // Example POST request using axios
           axios.post(`${APIURL}/ResponseConfigs?WhichDatabase=Local`, dataToSend, {
@@ -143,12 +128,6 @@ const Segmentation = () => {
         }
       };
       
-      console.log(dataToSend)
-    } else {
-      setShowAlert(true); // Show alert for empty fields
-    }
-  };
-
   const validateFields = () => {
     if (isDivided === 'yes') {
       if (numSections === 0) {
@@ -523,7 +502,7 @@ const Segmentation = () => {
         <h2>Range</h2>
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <label htmlFor="numBlocks" style={{ marginRight: '10px' }}>
-            Number of Blocks:
+            Number of Options:
           </label>
           <select
             id="numBlocks"
