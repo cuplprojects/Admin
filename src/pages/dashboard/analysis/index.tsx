@@ -1,4 +1,4 @@
-import { Card, Col, Row, Typography } from 'antd';
+import { Col, Row, Typography } from 'antd';
 import Color from 'color';
 
 import glass_bag from '@/assets/images/glass/ic_glass_bag.png';
