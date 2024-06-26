@@ -160,7 +160,7 @@ const FieldConfiguration = () => {
   }, [savedData]);
 
 
-    axios.all(selectedIds.map(id => axios.delete(`${apiurl}/FieldConfigurations/${id}?WhichDatabase=Local`)))
+    axios.all(selectedIds?.map(id => axios.delete(`${apiurl}/FieldConfigurations/${id}?WhichDatabase=Local`)))
 
       .then(() => {
         setSavedData(savedData.filter(item => item.fieldConfigurationId !== fieldConfigurationId));
