@@ -4,6 +4,7 @@ import './FieldConfig.css';
 import { Button, Table, Input, Select, Space, Popconfirm, message } from 'antd';
 import { DeleteOutlined } from '@ant-design/icons';
 import { useThemeToken } from '@/theme/hooks';
+import { Col, Row } from 'react-bootstrap';
 
 
 const APIURL = import.meta.env.VITE_API_URL;
@@ -85,62 +86,62 @@ const FieldConfiguration = () => {
     e.preventDefault();
 
     if (!formData.field || !formData.maxRange || !formData.numberOfBlocks) {
-        showAlert('Please fill in all fields.', 'danger');
-        return;
+      showAlert('Please fill in all fields.', 'danger');
+      return;
     }
 
     if (parseInt(formData.minRange) > parseInt(formData.maxRange)) {
-        showAlert('Maximum range cannot be less than minimum range.', 'danger');
-        return;
+      showAlert('Maximum range cannot be less than minimum range.', 'danger');
+      return;
     }
 
     const newConfig = {
-        fieldConfigurationId: 0, // Adjust as needed
-        projectId: 1, // Adjust as needed
-        fieldAttributesJson: "",
-        fieldAttributes: [{
-            field: formData.field,
-            minRange: formData.minRange,
-            maxRange: formData.maxRange,
-            responses: formData.responses,
-            numberOfBlocks: formData.numberOfBlocks.toString()
-        }]
+      fieldConfigurationId: 0, // Adjust as needed
+      projectId: 1, // Adjust as needed
+      fieldAttributesJson: "",
+      fieldAttributes: [{
+        field: formData.field,
+        minRange: formData.minRange,
+        maxRange: formData.maxRange,
+        responses: formData.responses,
+        numberOfBlocks: formData.numberOfBlocks.toString()
+      }]
     };
 
     // Log the payload to the console for debugging
     console.log("Payload to be sent:", JSON.stringify(newConfig, null, 2));
 
     if (selectedFieldIndex !== -1) {
-        const updatedData = [...savedData];
-        updatedData[selectedFieldIndex] = { ...updatedData[selectedFieldIndex], ...newConfig };
-        setSavedData(updatedData);
-        setSelectedFieldIndex(-1);
-        showAlert('Field configuration updated successfully.', 'success');
+      const updatedData = [...savedData];
+      updatedData[selectedFieldIndex] = { ...updatedData[selectedFieldIndex], ...newConfig };
+      setSavedData(updatedData);
+      setSelectedFieldIndex(-1);
+      showAlert('Field configuration updated successfully.', 'success');
     } else {
-        axios.post(`${APIURL}/FieldConfigurations?WhichDatabase=Local`, newConfig)
-            .then(response => {
-                const newFieldConfig = response.data;
-                setSavedData([...savedData, newFieldConfig]);
-                showAlert('Field configuration saved successfully.', 'success');
-                setPagination({ ...pagination, total: savedData.length + 1 });
-            })
-            .catch(error => {
-                console.error('Error saving field configuration:', error);
-                showAlert('Error saving field configuration. Please try again later.', 'danger');
-                if (error.response) {
-                    console.error('Response data:', error.response.data);
-                }
-            });
+      axios.post(`${APIURL}/FieldConfigurations?WhichDatabase=Local`, newConfig)
+        .then(response => {
+          const newFieldConfig = response.data;
+          setSavedData([...savedData, newFieldConfig]);
+          showAlert('Field configuration saved successfully.', 'success');
+          setPagination({ ...pagination, total: savedData.length + 1 });
+        })
+        .catch(error => {
+          console.error('Error saving field configuration:', error);
+          showAlert('Error saving field configuration. Please try again later.', 'danger');
+          if (error.response) {
+            console.error('Response data:', error.response.data);
+          }
+        });
     }
 
     setFormData({
-        field: '',
-        minRange: '',
-        maxRange: '',
-        responses: '',
-        numberOfBlocks: ''
+      field: '',
+      minRange: '',
+      maxRange: '',
+      responses: '',
+      numberOfBlocks: ''
     });
-};
+  };
 
 
   useEffect(() => {
@@ -249,9 +250,9 @@ const FieldConfiguration = () => {
     <div className="field-config-container">
 
       <div className='text-end'>
-      <Button type="primary" onClick={toggleFormVisibility} style={{ marginBottom: 16 }}>
-        {isFormVisible ? 'Hide Form' : 'Add New Configuration'}
-      </Button>
+        <Button type="primary" onClick={toggleFormVisibility} style={{ marginBottom: 16 }}>
+          {isFormVisible ? 'Hide Form' : 'Add New Configuration'}
+        </Button>
       </div>
 
       {isFormVisible && (
@@ -260,7 +261,7 @@ const FieldConfiguration = () => {
             <label htmlFor="field">Field Name</label>
             <Select
               id="field"
-              style={{width: '140px', marginLeft: '2rem'}}
+              style={{ width: '140px', marginLeft: '2rem' }}
               value={formData.field}
               onChange={(value) => setFormData({ ...formData, field: value })}
             >
@@ -269,47 +270,60 @@ const FieldConfiguration = () => {
               ))}
             </Select>
           </div>
-          <div className="form-group">
-            <label htmlFor="maxRange">Max Range</label>
-            <Input
-              id="maxRange"
-              type="number"
-              value={formData.maxRange}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="minRange">Min Range</label>
-            <Input
-              id="minRange"
-              type="number"
-              value={formData.minRange}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="responses">Preferred Responses</label>
-            <Input
-              id="responses"
-              type="text"
-              value={formData.responses}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="numberOfBlocks">Number of Blocks</label>
-            <Input
-              id="numberOfBlocks"
-              type="text"
-              value={formData.numberOfBlocks}
-              readOnly
-              disabled
-            />
-          </div>
+
+          <Row>
+            <Col>
+              <div className="form-group">
+                <label htmlFor="maxRange">Max Range</label>
+                <Input
+                  id="maxRange"
+                  type="number"
+                  value={formData.maxRange}
+                  onChange={handleInputChange}
+                />
+              </div>
+            </Col>
+            <Col>
+              <div className="form-group">
+                <label htmlFor="minRange">Min Range</label>
+                <Input
+                  id="minRange"
+                  type="number"
+                  value={formData.minRange}
+                  onChange={handleInputChange}
+                />
+              </div>
+            </Col>
+          </Row>
+          <Row>
+            <Col>
+              <div className="form-group">
+                <label htmlFor="responses">Preferred Responses</label>
+                <Input
+                  id="responses"
+                  type="text"
+                  value={formData.responses}
+                  onChange={handleInputChange}
+                />
+              </div>
+            </Col>
+            <Col>
+              <div className="form-group">
+                <label htmlFor="numberOfBlocks">Number of Blocks</label>
+                <Input
+                  id="numberOfBlocks"
+                  type="text"
+                  value={formData.numberOfBlocks}
+                  readOnly
+                  disabled
+                />
+              </div>
+            </Col>
+          </Row>
           <div className='text-end mt-2 mb-2'>
-          <Button type="primary" htmlType="submit">
-            Save Configuration
-          </Button>
+            <Button type="primary" htmlType="submit">
+              Save Configuration
+            </Button>
           </div>
         </form>
       )}
