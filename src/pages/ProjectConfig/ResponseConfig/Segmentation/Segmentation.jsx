@@ -502,7 +502,7 @@ const Segmentation = () => {
         <h2>Range</h2>
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <label htmlFor="numBlocks" style={{ marginRight: '10px' }}>
-            Number of Blocks:
+            Number of Options:
           </label>
           <select
             id="numBlocks"
