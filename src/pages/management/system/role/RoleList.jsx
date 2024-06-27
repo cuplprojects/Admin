@@ -5,6 +5,10 @@ import { Icon } from '@iconify/react';
 import editOutlined from '@iconify/icons-ant-design/edit-outlined';
 import deleteOutlined from '@iconify/icons-ant-design/delete-outlined';
 
+
+const apiurl = import.meta.env.VITE_API_URL;
+//const apiurl = import.meta.env.VITE_API_URL_PROD;
+
 const RoleList = () => {
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -16,7 +20,9 @@ const RoleList = () => {
   useEffect(() => {
     const fetchRoles = async () => {
       try {
-        const response = await axios.get('https://localhost:7290/api/Roles?WhichDatabase=Local');
+
+        const response = await axios.get(`${apiurl}/Roles?WhichDatabase=Local`);
+
         setRoles(response.data);
       } catch (error) {
         setError(error);
@@ -89,8 +95,10 @@ const RoleList = () => {
 
   const handleModalOk = async () => {
     try {
+
       if (modalRole.roleId !== 0) {
-        await axios.put(`https://localhost:7290/api/Roles/${modalRole.roleId}?WhichDatabase=Local`, modalRole, {
+        await axios.put(`${apiurl}/Roles/${roleModalProps.role.roleId}?WhichDatabase=Local`, modalRole, {
+
           headers: {
             'Content-Type': 'application/json',
           },
@@ -100,7 +108,9 @@ const RoleList = () => {
         );
         message.success('Role updated successfully');
       } else {
-        const response = await axios.post('https://localhost:7290/api/Roles?WhichDatabase=Local', modalRole, {
+
+        const response = await axios.post(`${apiurl}/Roles?WhichDatabase=Local`, modalRole, {
+
           headers: {
             'Content-Type': 'application/json',
           },
@@ -122,7 +132,9 @@ const RoleList = () => {
 
   const onDelete = async (roleId) => {
     try {
-      await axios.delete(`https://localhost:7290/api/Roles/${roleId}?WhichDatabase=Local`);
+
+      await axios.delete(`${apiurl}/${roleId}?WhichDatabase=Local`);
+
       setRoles((prevRoles) => prevRoles.filter((role) => role.roleId !== roleId));
       message.success('Role deleted successfully');
     } catch (error) {

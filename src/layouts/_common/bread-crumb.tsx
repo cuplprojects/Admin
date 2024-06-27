@@ -10,7 +10,7 @@ import { menuFilter } from '@/router/utils';
 import { AppRouteObject } from '#/router';
 
 /**
- * 动态面包屑解决方案：https://github.com/MinjieChang/myblog/issues/29
+ * Dynamic breadcrumbs solution: https://github.com/MinjieChang/myblog/issues/29
  */
 export default function BreadCrumb() {
   const { t } = useTranslation();

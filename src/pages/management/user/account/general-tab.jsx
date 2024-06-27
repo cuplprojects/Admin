@@ -58,6 +58,7 @@ export default function GeneralTab() {
               lastName: '',
               email: '',
               roleId: '',
+              isActive: true
             }} // Set initialValues to populate the form
             labelCol={{ span: 8 }}
             className="w-full"

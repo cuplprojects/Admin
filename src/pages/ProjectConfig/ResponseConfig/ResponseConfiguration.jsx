@@ -6,7 +6,7 @@ const ResponseConfiguration = () => {
   return (
     <div>
       <Segmentation />
-      <ResponseConfig />
+      {/* <ResponseConfig /> */}
     </div>
   );
 };

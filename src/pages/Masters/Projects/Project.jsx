@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
 import { Button, Form, Input, InputNumber, Popconfirm, Table, Typography } from 'antd';
+import React, { useState, useEffect } from 'react';
+
 import './Project.css';
 
-const EditableCell = ({
+const apiurl = import.meta.env.VITE_API_URL;
+function EditableCell({
   editing,
   dataIndex,
   title,
@@ -11,7 +13,7 @@ const EditableCell = ({
   index,
   children,
   ...restProps
-}) => {
+}) {
   const inputNode = inputType === 'number' ? <InputNumber /> : <Input />;
   return (
     <td {...restProps}>
@@ -33,12 +35,13 @@ const EditableCell = ({
       )}
     </td>
   );
-};
+}
 
-const Project = () => {
+function Project() {
   const [form] = Form.useForm();
   const [data, setData] = useState([]);
   const [editingKey, setEditingKey] = useState('');
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [sortedInfo, setSortedInfo] = useState({});
   const isEditing = (record) => record.key === editingKey;
 
@@ -48,7 +51,7 @@ const Project = () => {
 
   const fetchData = async () => {
     try {
-      const response = await fetch('http://localhost:5071/api/Projects?WhichDatabase=Local');
+      const response = await fetch(`${apiurl}/Projects?WhichDatabase=Local`);
       const data = await response.json();
       setData(data.map((item, index) => ({ ...item, key: index.toString(), serialNo: index + 1 })));
     } catch (error) {
@@ -79,6 +82,7 @@ const Project = () => {
       const newData = [...data];
       newData.pop();
       setData(newData);
+      setHasUnsavedChanges(false);
     }
   };
 
@@ -98,10 +102,12 @@ const Project = () => {
         }
         setData(newData);
         setEditingKey('');
+        setHasUnsavedChanges(false);
       } else {
         await addRow(row);
         setData([...newData, row]);
         setEditingKey('');
+        setHasUnsavedChanges(false);
       }
     } catch (errInfo) {
       console.log('Validate Failed:', errInfo);
@@ -110,25 +116,28 @@ const Project = () => {
 
   const updateRow = async (updatedRow) => {
     try {
-      const response = await fetch(`http://localhost:5071/api/Projects/${updatedRow.projectId}?WhichDatabase=Local`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `${apiurl}/Projects/${updatedRow.projectId}?WhichDatabase=Local`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(updatedRow),
         },
-        body: JSON.stringify(updatedRow),
-      });
+      );
       if (!response.ok) {
         throw new Error('Failed to update project');
       }
       // Handle success
     } catch (error) {
-      console.error('Error updating project:', error)
+      console.error('Error updating project:', error);
     }
   };
 
   const addRow = async (newRow) => {
     try {
-      const response = await fetch('http://localhost:5071/api/Projects?WhichDatabase=Local', {
+      const response = await fetch(`${apiurl}/Projects?WhichDatabase=Local`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -136,10 +145,12 @@ const Project = () => {
         body: JSON.stringify(newRow),
       });
       if (!response.ok) {
+        cancel();
         throw new Error('Failed to add new project');
       }
-      fetchData()
+      fetchData();
       // Handle success
+      setHasUnsavedChanges(false);
     } catch (error) {
       console.error('Error adding new project:', error);
     }
@@ -155,6 +166,7 @@ const Project = () => {
     };
     setData([...data, newData]);
     setEditingKey(newRowKey.toString());
+    setHasUnsavedChanges(true);
   };
 
   const columns = [
@@ -172,9 +184,7 @@ const Project = () => {
       editable: true,
       sorter: (a, b) => a.projectName.length - b.projectName.length,
       sortOrder: sortedInfo.columnKey === 'projectName' && sortedInfo.order,
-      render: (_, record) => (
-        <span>{record.projectName}</span>
-      ),
+      render: (_, record) => <span>{record.projectName}</span>,
     },
     {
       title: 'Operation',
@@ -185,10 +195,7 @@ const Project = () => {
           <div>
             {editable ? (
               <span>
-                <Typography.Link
-                  onClick={() => save(record.key)}
-                  style={{ marginRight: 8 }}
-                >
+                <Typography.Link onClick={() => save(record.key)} style={{ marginRight: 8 }}>
                   Save
                 </Typography.Link>
                 <Popconfirm title="Sure to cancel?" onConfirm={cancel}>
@@ -206,7 +213,7 @@ const Project = () => {
           </div>
         );
       },
-    }
+    },
   ];
 
   const mergedColumns = columns.map((col) => {
@@ -226,8 +233,13 @@ const Project = () => {
   });
 
   return (
-    <div className='mt-5'>
-      <Button onClick={handleAdd} type="primary" style={{ marginBottom: 16 }}>
+    <div className="mt-5">
+      <Button
+        onClick={handleAdd}
+        type="primary"
+        style={{ marginBottom: 16 }}
+        disabled={hasUnsavedChanges}
+      >
         Add a row
       </Button>
       <Form form={form} component={false}>
@@ -249,6 +261,6 @@ const Project = () => {
       </Form>
     </div>
   );
-};
+}
 
 export default Project;

@@ -18,6 +18,7 @@ import { NAV_COLLAPSED_WIDTH, NAV_WIDTH, HEADER_HEIGHT, OFFSET_HEADER_HEIGHT } f
 import Nav from './nav'; // Importing Nav component
 
 import { ThemeLayout } from '#/enum'; // Importing ThemeLayout enum
+import Sync from './Sync';
 
 // Define the Props type for the Header component
 type Props = {
@@ -88,6 +89,7 @@ export default function Header({ className = '', offsetTop = false }: Props) {
           </div>
 
           <div className="flex">
+            <Sync/>
             <SearchBar /> {/* Search bar component */}
             <LocalePicker /> {/* Locale picker component */}
             {/* <NoticeButton /> Notifications button */}
