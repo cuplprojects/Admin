@@ -22,6 +22,7 @@ const Scanned = ({
   // Get already mapped headers
   const mappedHeaders = Object.values(fieldMappings);
 
+
   return (
     <div className="tab-pane active d-flex align-items-center justify-content-around py-3 mt-5" id="scanned">
       <h3 className="head text-center fs-3">Upload Scanned Data</h3>

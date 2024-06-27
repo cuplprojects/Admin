@@ -60,19 +60,20 @@ const Absentee = ({
           </table>
         </div>
       )}
-      {selectedFile && headers.length > 0 && isValidData && (
-        <div className="d-flex justify-content-center mt-4">
-          <button className="btn btn-primary" onClick={handleAbsenteeUpload} disabled={loading}>
-            {loading ? 'Uploading...' : 'Upload'}
-          </button>
-        </div>
-      )}
+        {selectedFile && headers.length > 0 && isValidData && (
+          <div className="d-flex justify-content-center mt-4">
+            <button className="btn btn-primary" onClick={handleAbsenteeUpload} disabled={loading}>
+              {loading ? 'Uploading' : 'Upload'}
+            </button>
+          </div>
+        )}
+      </div>
       {alertMessage && (
         <div className={`alert alert-${alertType} mt-3`} role="alert">
           {alertMessage}
         </div>
       )}
-    </div>
+    </>
   );
 };
 
