@@ -19,6 +19,9 @@ const Scanned = ({
     setIsValidData(isValid);
   }, [headers, fieldMappings]);
 
+  // Get already mapped headers
+  const mappedHeaders = Object.values(fieldMappings);
+
   return (
     <div className="tab-pane active d-flex align-items-center justify-content-around py-3 mt-5" id="scanned">
       <h3 className="head text-center fs-3">Upload Scanned Data</h3>
@@ -46,10 +49,9 @@ const Scanned = ({
                       onChange={e => handleFieldMappingChange(e, field)}
                     >
                       <option value="">Select Header</option>
-                      {headers.map((header, index) => (
+                      {headers.filter(header => !mappedHeaders.includes(header) || header === fieldMappings[field]).map((header, index) => (
                         <option key={index} value={header}>{header}</option>
                       ))}
-                        
                     </select>
                   </td>
                 </tr>

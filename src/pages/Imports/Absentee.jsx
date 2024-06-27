@@ -13,7 +13,6 @@ const Absentee = ({
   alertType,
 }) => {
   const [isValidData, setIsValidData] = useState(false);
-  
 
   useEffect(() => {
     // Check if all properties in mapping have a corresponding header in headers
@@ -21,8 +20,11 @@ const Absentee = ({
     setIsValidData(isValid);
   }, [headers, mapping]);
 
+  // Get already mapped headers
+  const mappedHeaders = Object.values(mapping);
+
   return (
-    <div className={`tab-pane active d-flex align-items-center justify-content-around py-3 mt-5`}  id="absentee">
+    <div className={`tab-pane active d-flex align-items-center justify-content-around py-3 mt-5`} id="absentee">
       <h3 className="head text-center fs-3">Upload Absentee</h3>
       <div className="d-flex justify-content-center align-items-center">
         <p>
@@ -45,7 +47,7 @@ const Absentee = ({
                   <td>
                     <select value={mapping[property]} onChange={(e) => handleMappingChange(e, property)}>
                       <option value="">Select Header</option>
-                      {headers.map((header, index) => (
+                      {headers.filter(header => !mappedHeaders.includes(header) || header === mapping[property]).map((header, index) => (
                         <option key={index} value={header}>
                           {header}
                         </option>
@@ -60,8 +62,8 @@ const Absentee = ({
       )}
       {selectedFile && headers.length > 0 && isValidData && (
         <div className="d-flex justify-content-center mt-4">
-          <button className="btn btn-primary" onClick={handleAbsenteeUpload}>
-            Upload
+          <button className="btn btn-primary" onClick={handleAbsenteeUpload} disabled={loading}>
+            {loading ? 'Uploading...' : 'Upload'}
           </button>
         </div>
       )}

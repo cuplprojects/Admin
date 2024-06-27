@@ -137,16 +137,19 @@ const Import = () => {
   };
 
   useEffect(() => {
-    if (selectedFile) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const content = event.target.result;
-        const rows = content.split('\n').map(row => row.split(','));
-        const headersFromFile = rows[0].map(header => header.trim().replace(/"/g, ''));
-        setHeaders(headersFromFile);
-      };
-      reader.readAsText(selectedFile);
+    if (activetab === "scanned") {
+      if (selectedFile) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const content = event.target.result;
+          const rows = content.split('\n').map(row => row.split(','));
+          const headersFromFile = rows[0].map(header => header.trim().replace(/"/g, ''));
+          setHeaders(headersFromFile);
+        };
+        reader.readAsText(selectedFile);
+      }
     }
+
   }, [selectedFile]);
 
   useEffect(() => {
@@ -201,7 +204,7 @@ const Import = () => {
           }
         });
 
-        const parsedData = rows.slice(1,-1).map((row) => {
+        const parsedData = rows.slice(1, -1).map((row) => {
           const rowData = {};
           row.forEach((value, index) => {
             const cleanedValue = value.trim().replace(/"/g, '');
@@ -236,7 +239,7 @@ const Import = () => {
             body: JSON.stringify(parsedData),
           });
           const contentType = response.headers.get('content-type');
-  
+
           if (contentType && contentType.indexOf('application/json') !== -1) {
             const data = await response.json();
             console.log('Response from server:', data);
@@ -248,7 +251,7 @@ const Import = () => {
             setAlertMessage('Upload successful!');
             setAlertType('success');
           }
-         
+
         } catch (error) {
           console.error('Error uploading data:', error);
           setAlertMessage('Error uploading data.');
@@ -265,7 +268,7 @@ const Import = () => {
       setAlertType('warning');
       setLoading(false);
     }
-    
+
   };
 
 
@@ -340,7 +343,7 @@ const Import = () => {
   return (
     <div>
 
-      <section style={{ height: "70vh" }} className=' container-fluid pb-4 border border-2 rounded'>
+      <section style={{ minHeight: "70vh" }} className=' container-fluid pb-4 border border-2 rounded'>
         <div className="container">
           <div className="row">
             <div className="board-pq">
