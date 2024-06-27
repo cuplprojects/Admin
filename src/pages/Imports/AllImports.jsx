@@ -1,6 +1,4 @@
-import React, { useState } from 'react';
-// import './Import.css';
-// import OMRImages from './OMRImages';
+import React, { useState, useEffect } from 'react';
 import Scanned from './ScannedData';
 import Registration from './RegistrationData';
 import Absentee from './Absentee';
@@ -21,6 +19,10 @@ const Import = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [headers, setHeaders] = useState([]);
+
+  const [fieldMappings, setFieldMappings] = useState({});
+
+
   const [mapping, setMapping] = useState({
     district: '',
     centerCode: '',
@@ -34,8 +36,8 @@ const Import = () => {
   });
   const [alertMessage, setAlertMessage] = useState('');
   const [alertType, setAlertType] = useState('');
+  const [fieldNamesArray, setFieldNamesArray] = useState([]);
 
-  
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
@@ -134,64 +136,105 @@ const Import = () => {
     setLoading(false);
   };
 
-
-  const handleScannedUpload = () => {
-    console.log('Uploading file:', selectedFile);
-    
+  useEffect(() => {
     if (selectedFile) {
-     
-      setLoading(true);
-      
       const reader = new FileReader();
-  
+      reader.onload = (event) => {
+        const content = event.target.result;
+        const rows = content.split('\n').map(row => row.split(','));
+        const headersFromFile = rows[0].map(header => header.trim().replace(/"/g, ''));
+        setHeaders(headersFromFile);
+      };
+      reader.readAsText(selectedFile);
+    }
+  }, [selectedFile]);
+
+  useEffect(() => {
+    // Fetch field mappings from the backend
+    const fetchFieldMappings = async () => {
+      try {
+        const response = await fetch(`${apiurl}/FieldConfigurations?WhichDatabase=Local`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch field mappings');
+        }
+        const data = await response.json();
+        console.log(data)
+        const mappings = data.map((item) => ({
+          field: item.fieldAttributes[0].field
+
+        }));
+
+        mappings.push({ field: "Answers" });
+        mappings.push({ field: "Barcode" });
+        mappings.push({ field: "NCS" });
+
+        console.log(mappings)
+        setFieldMappings(mappings.reduce((acc, current) => ({ ...acc, [current.field]: current }), {}));
+      } catch (error) {
+        console.error('Error fetching field mappings:', error);
+      }
+    };
+    fetchFieldMappings();
+  }, []);
+
+  const handleFieldMappingChange = (e, field) => {
+    setFieldMappings((prevMappings) => ({ ...prevMappings, [field]: e.target.value }));
+  };
+
+
+  const handleScannedUpload = async () => {
+    if (selectedFile) {
+      setLoading(true);
+      const reader = new FileReader();
       reader.onload = async (event) => {
         const content = event.target.result;
         const rows = content.split('\n').map((row) => row.split(','));
-  
-        // Assuming the first row contains headers
-        const headers = rows[0].map((header) => header.trim().replace(/"/g, '')); // Clean up headers
-        const parsedData = rows.slice(1).map((row) => {
+        const headers = rows[0].map((header) => header.trim().replace(/"/g, ''));
+        const mappingObject = {};
+
+        headers.forEach((header) => {
+          const matchingField = Object.keys(fieldMappings).find(key => fieldMappings[key] === header);
+          if (matchingField) {
+            mappingObject[header] = matchingField;
+          } else {
+            console.warn(`No matching field found for header "${header}"`);
+          }
+        });
+
+        const parsedData = rows.slice(1,-1).map((row) => {
           const rowData = {};
           row.forEach((value, index) => {
-            const cleanedValue = value.trim().replace(/"/g, ''); // Clean up values
-            rowData[headers[index]] = cleanedValue;
+            const cleanedValue = value.trim().replace(/"/g, '');
+            const matchingField = mappingObject[headers[index]];
+            if (matchingField) {
+              rowData[matchingField] = cleanedValue;
+            }
           });
-  
-          // Process ANS field separately to create a nested object
-          if (rowData['ANS']) {
+
+          if (rowData['Answers']) {
             const answers = {};
-            const ansArray = rowData['ANS'].split('');
-  
-            // Ensure we have 100 entries, filling in with empty strings if necessary
+            const ansArray = rowData['Answers'].split('');
             for (let i = 0; i < 100; i++) {
               if (i < ansArray.length) {
                 answers[i + 1] = `'${ansArray[i]}'`;
               } else {
-                answers[i + 1] = "''"; // Fill remaining slots with empty strings
+                answers[i + 1] = "''";
               }
             }
-  
-            rowData['answers'] = JSON.stringify(answers).replace(/"/g, '');
-            delete rowData['ANS']; // Remove the original ANS field
+            rowData['Answers'] = JSON.stringify(answers).replace(/"/g, '');
           }
-  
+
           return rowData;
         });
-  
-        console.log('Parsed data:', parsedData);
-  
+        console.log(parsedData)
         try {
-
           const response = await fetch(`${apiurl}/OMRData/uploadcsv?WhichDatabase=Local`, {
-
-
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify(parsedData),
           });
-  
           const contentType = response.headers.get('content-type');
   
           if (contentType && contentType.indexOf('application/json') !== -1) {
@@ -205,27 +248,25 @@ const Import = () => {
             setAlertMessage('Upload successful!');
             setAlertType('success');
           }
+         
         } catch (error) {
           console.error('Error uploading data:', error);
-          setLoading(false);
           setAlertMessage('Error uploading data.');
           setAlertType('danger');
         } finally {
-          setSelectedFile(null); // Reset selected file after upload
+          setLoading(false);
+          setSelectedFile(null)
         }
       };
-  
       reader.readAsText(selectedFile);
     } else {
       console.error('No file selected.');
       setAlertMessage('No file selected.');
       setAlertType('warning');
+      setLoading(false);
     }
-    setLoading(false);
+    
   };
-  
-
-
 
 
   const handleRegistrationMappingChange = (e, property) => {
@@ -298,6 +339,7 @@ const Import = () => {
 
   return (
     <div>
+
       <section style={{ height: "70vh" }} className=' container-fluid pb-4 border border-2 rounded'>
         <div className="container">
           <div className="row">
@@ -312,7 +354,7 @@ const Import = () => {
                     </a>
                   </li>
                   <span className='tabline'></span>
-                  <li style={{ border: `2px solid ${colorPrimary}` }} className='tabcircle' onClick={() => { setActivetab('scanned'); setSelectedFile(null);  setAlertMessage(null);setAlertType(null);}}>
+                  <li style={{ border: `2px solid ${colorPrimary}` }} className='tabcircle' onClick={() => { setActivetab('scanned'); setSelectedFile(null); setAlertMessage(null); setAlertType(null); setHeaders([]); }}>
                     <a data-toggle="tab" title="scanned">
                       <span className="round-tabs-pq two-pq">
                         <i className="fa-solid fa-file-csv" style={{ color: colorPrimary }}></i>
@@ -320,7 +362,7 @@ const Import = () => {
                     </a>
                   </li>
                   <span className='tabline'></span>
-                  <li style={{ border: `2px solid ${colorPrimary}` }} className='tabcircle' onClick={() => { setActivetab('registration'); setSelectedFile(null); setHeaders([]); setAlertMessage(null);setAlertType(null); }}>
+                  <li style={{ border: `2px solid ${colorPrimary}` }} className='tabcircle' onClick={() => { setActivetab('registration'); setSelectedFile(null); setHeaders([]); setAlertMessage(null); setAlertType(null); }}>
                     <a data-toggle="tab" title="registration">
                       <span className="round-tabs-pq three-pq">
                         <i className="fa-regular fa-id-card" style={{ color: colorPrimary }}></i>
@@ -328,7 +370,7 @@ const Import = () => {
                     </a>
                   </li>
                   <span className='tabline'></span>
-                  <li style={{ border: `2px solid ${colorPrimary}` }} className='tabcircle' onClick={() => { setActivetab('absentee'); setSelectedFile(null); setHeaders([]); setAlertMessage(null);setAlertType(null); }}>
+                  <li style={{ border: `2px solid ${colorPrimary}` }} className='tabcircle' onClick={() => { setActivetab('absentee'); setSelectedFile(null); setHeaders([]); setAlertMessage(null); setAlertType(null); }}>
                     <a data-toggle="tab" title="absentee">
                       <span className="round-tabs-pq four-pq ">
                         <i className="fa-solid fa-file-excel" style={{ color: colorPrimary }} ></i>
@@ -338,6 +380,9 @@ const Import = () => {
                 </ul>
               </div>
               <div className="tab-content-pq">
+                {fieldNamesArray.map((item) => {
+                  console.log(item.field)
+                })}
                 {activetab === 'OMRImages' && <ImportOmr />}
                 {activetab === 'scanned' &&
                   <Scanned
@@ -347,6 +392,9 @@ const Import = () => {
                     alertMessage={alertMessage}
                     alertType={alertType}
                     loading={loading}
+                    headers={headers}
+                    fieldMappings={fieldMappings}
+                    handleFieldMappingChange={handleFieldMappingChange}
                   />}
                 {activetab === 'registration' &&
                   <Registration
