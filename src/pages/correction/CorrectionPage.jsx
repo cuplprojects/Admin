@@ -1,8 +1,34 @@
 import { Button, Image } from 'antd';
 import React from 'react';
 import { Table } from 'react-bootstrap';
+import omr1 from '@/assets/images/omrs/100001.jpg';
+import ZoomedImage from './ZoomedImage';
 
 const CorrectionPage = () => {
+
+  const image = {
+    src: 'path/to/your/image.jpg',
+    projectId: 1,
+    annotations: [
+      {
+        FieldName: 'Booklet No',
+        coordinates: '{"x":38,"y":143,"width":142,"height":209}',
+      },
+    ],
+  };
+  
+  const imageurl = omr1;
+  const styles = {
+    image: {
+      width: '100%',
+    },
+    field:{
+      width: '500px',
+      top: '0',
+      left: '0',
+      backgroundColor:'red'
+    }
+  };
   return (
     <>
       <div className="text-end">
@@ -28,10 +54,14 @@ const CorrectionPage = () => {
           </tbody>
         </Table>
       </div>
-      <div className=" w-75 h-75 m-auto border">
-        {/* <img src={} /> */}
+      <div className=" w-75 position-relative m-auto border" style={{ overflow: 'hidden' }}>
+        {/* image zoom mode  */}
+       <ZoomedImage src={imageurl}/>
+        {/* <div className="position-absolute" style={styles.field}>
+          Lorem ipsum, dolor sit amet consectetur adipisicing elit. Nihil, reprehenderit?
+        </div> */}
       </div>
-      <div className="text-end m-1">
+      <div className="m-1 text-end">
         <Button type="primary">Save and Next</Button>
       </div>
     </>

@@ -24,7 +24,7 @@ const AnnotationPage = () => {
   const [openModal, setOpenModal] = useState(false);
   const [modalFields, setModalFields] = useState([]);
   const [coordinates, setCoordinates] = useState([]);
-  const [inputFields, setInputFields] = useState([]);
+  const [inputFields, setInputFields] = useState(['Roll No', 'Booklet No', 'Booklet Series/Set', 'Year/Semester']);
   //const inputFields = ['Roll No', 'Booklet No', 'Booklet Series/Set', 'Year/Semester'];
 
   useEffect(() => {

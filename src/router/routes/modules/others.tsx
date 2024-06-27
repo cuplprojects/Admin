@@ -48,7 +48,7 @@ const others: AppRouteObject[] = [
     ),
     meta: {
       label: 'sys.menu.AllImports',
-      icon: <Iconify icon="solar:calendar-bold-duotone" size={24} />,
+      icon: <Iconify icon="solar:upload-square-bold-duotone" size={24} />,
       key: '/AllImports',
     },
   },
