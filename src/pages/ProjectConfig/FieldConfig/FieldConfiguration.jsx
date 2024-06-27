@@ -31,6 +31,7 @@ const FieldConfiguration = () => {
     showSizeChanger: true,
     pageSizeOptions: ['10', '20', '30', '50'],
   });
+  const[rangeError, setRangeError] = useState(false)
 
   // useEffect(() => {
   //   if (formData.maxRange) {
@@ -69,21 +70,34 @@ const FieldConfiguration = () => {
   const handleInputChange = (e) => {
     const { id, value } = e.target;
     setFormData({
-      ...formData,
+     ...formData,
       [id]: value,
     });
-
-    if (
-      (id === 'minRange' && value > formData.maxRange) ||
-      (id === 'maxRange' && value < formData.minRange)
-    ) {
-      showAlert('Maximum range cannot be less than minimum range.', 'danger');
-      setFormData((prevState) => ({
-        ...prevState,
-        [id]: id === 'minRange' ? formData.minRange : formData.maxRange,
-      }));
-    }
+  
+    // if (id === 'inRange' && value > formData.maxRange) {
+    //   showAlert('Minimum range cannot be greater than maximum range.', 'danger');
+    //   setFormData((prevState) => ({
+    //    ...prevState,
+    //     [id]: formData.maxRange,
+    //   }));
+    // } else if (id === 'axRange' && value < formData.minRange) {
+    //   showAlert('Maximum range cannot be less than minimum range.', 'danger');
+    //   setFormData((prevState) => ({
+    //    ...prevState,
+    //     [id]: formData.minRange,
+    //   }));
+    // }
   };
+  useEffect(() => {
+    const minRangeInt = parseInt(formData.minRange, 10);
+    const maxRangeInt = parseInt(formData.maxRange, 10);
+  
+    if (minRangeInt > maxRangeInt) {
+      setRangeError(true);
+    } else {
+      setRangeError(false);
+    }
+  }, [formData.minRange, formData.maxRange]);
 
   const handleSave = (e) => {
     e.preventDefault();
@@ -184,15 +198,15 @@ const FieldConfiguration = () => {
     });
   };
 
-  const showAlert = (message, type) => {
-    setAlertMessage(message);
-    setAlertType(type);
+  // const showAlert = (message, type) => {
+  //   setAlertMessage(message);
+  //   setAlertType(type);
 
-    setTimeout(() => {
-      setAlertMessage('');
-      setAlertType('');
-    }, 3000);
-  };
+  //   setTimeout(() => {
+  //     setAlertMessage('');
+  //     setAlertType('');
+  //   }, 3000);
+  // };
 
   const columns = [
     {
@@ -289,6 +303,17 @@ const FieldConfiguration = () => {
             </Select>
           </div>
           <Row>
+          <Col>
+              <div className="form-group">
+                <label htmlFor="minRange">Min Range</label>
+                <Input
+                  id="minRange"
+                  type="number"
+                  value={formData.minRange}
+                  onChange={handleInputChange}
+                />
+              </div>
+            </Col>
             <Col>
               <div className="form-group">
                 <label htmlFor="maxRange">Max Range</label>
@@ -300,19 +325,15 @@ const FieldConfiguration = () => {
                 />
               </div>
             </Col>
-            <Col>
-              <div className="form-group">
-                <label htmlFor="minRange">Min Range</label>
-                <Input
-                  id="minRange"
-                  type="number"
-                  value={formData.minRange}
-                  onChange={handleInputChange}
-                />
-              </div>
-            </Col>
+            {
+              rangeError && (
+                 <p className='text-danger'>
+                  Minimum range cannot be more than maximum range
+                 </p>
+              )
+            }
+           
           </Row>
-
           <Row>
             <Col>
               <div className="form-group">
