@@ -173,24 +173,16 @@ export default function GeneralTab() {
                         user.email
                       )}
                     </td>
-                    
+
                     <td>
                       {editingUserId === user.userId ? (
-                        <Select
-                          value={userData.roleId}
-                          onChange={handleRoleChange}
-                          style={{ width: 120 }}
-                        >
-                          {roles.map((role) => (
-                            <Select.Option key={role.roleId} value={role.roleId}>
-                              {role.roleName}
-                            </Select.Option>
-                          ))}
-                        </Select>
+                        <Input name="roleName" value={userData.roleName} onChange={handleChange} />
                       ) : (
                         user.roleName
                       )}
                     </td>
+                    
+                    
                     <td>
                       {editingUserId === user.userId ? (
                         <>
