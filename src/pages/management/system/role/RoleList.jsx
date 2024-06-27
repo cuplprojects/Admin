@@ -1,26 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Card, Table, Popconfirm, message, Spin } from 'antd';
-import RoleModal from './RoleModal';
+import { Button, Card, Table, Popconfirm, message, Switch, Modal, Form, Input } from 'antd';
 import axios from 'axios';
-import { IconButton, Iconify } from '@/components/icon';
-import ProTag from '@/theme/antd/components/tag';
-import { BasicStatus } from '#/enum';
-import {t} from '@/locales/i18n'
+import { Icon } from '@iconify/react';
+import editOutlined from '@iconify/icons-ant-design/edit-outlined';
+import deleteOutlined from '@iconify/icons-ant-design/delete-outlined';
 
 const RoleList = () => {
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [roleModalProps, setRoleModalProps] = useState({
-    visible: false,
-    title: 'New',
-    role: null,
-  });
+  const [roleModalVisible, setRoleModalVisible] = useState(false);
+  const [modalTitle, setModalTitle] = useState('New');
+  const [modalRole, setModalRole] = useState(null);
 
   useEffect(() => {
     const fetchRoles = async () => {
       try {
-        const response = await axios.get('https://localhost:7290/api/Roles');
+        const response = await axios.get('https://localhost:7290/api/Roles?WhichDatabase=Local');
         setRoles(response.data);
       } catch (error) {
         setError(error);
@@ -40,49 +36,35 @@ const RoleList = () => {
       width: 300,
     },
     {
-      title: 'Label',
-      dataIndex: 'label',
-    },
-    {
-      title: 'Order',
-      dataIndex: 'order',
-      width: 60,
-    },
-    {
       title: 'Status',
-      dataIndex: 'status',
+      dataIndex: 'isActive',
       align: 'center',
       width: 120,
-      render: (status) => (
-        <ProTag color={status === 'DISABLE' ? 'error' : 'success'}>
-          {status === 'DISABLE' ? 'Disable' : 'Enable'}
-        </ProTag>
+      render: (isActive, record) => (
+        <Switch
+          checked={isActive}
+          onChange={(checked) => handleStatusChange(record.roleId, checked)}
+          checkedChildren="Enabled"
+          unCheckedChildren="Disabled"
+        />
       ),
     },
     {
-      title: 'Description',
-      dataIndex: 'desc',
-    },
-    {
-      title: 'Action',
+      title: 'Actions',
       key: 'operation',
       align: 'center',
       width: 100,
       render: (_, record) => (
         <div className="flex w-full justify-center text-gray">
-          <IconButton onClick={() => onEdit(record)}>
-            <Iconify icon="solar:pen-bold-duotone" size={18} />
-          </IconButton>
+          <Button type="primary" onClick={() => onEdit(record)}>Edit</Button>
           <Popconfirm
-            title="Delete the Role"
+            title="Delete the Role?"
             onConfirm={() => onDelete(record.roleId)}
             okText="Yes"
             cancelText="No"
             placement="left"
           >
-            <IconButton>
-              <Iconify icon="mingcute:delete-2-fill" size={18} className="text-error" />
-            </IconButton>
+            <Button danger icon={<Icon icon={deleteOutlined} />} style={{ marginLeft: 8 }} />
           </Popconfirm>
         </div>
       ),
@@ -90,45 +72,35 @@ const RoleList = () => {
   ];
 
   const onCreate = () => {
-    setRoleModalProps({
-      visible: true,
-      title: 'Create New',
-      role: {
-        roleId: 0,
-        roleName: '',
-        label: '',
-        order: 0,
-        status: 'enable',
-        desc: '',
-      },
+    setModalTitle('Create New');
+    setModalRole({
+      roleId: 0,
+      roleName: '',
+      isActive: true,
     });
+    setRoleModalVisible(true);
   };
 
   const onEdit = (role) => {
-    setRoleModalProps({
-      visible: true,
-      title: 'Edit',
-      role,
-    });
+    setModalTitle('Edit');
+    setModalRole(role);
+    setRoleModalVisible(true);
   };
 
-  const handleRoleModalOk = async (updatedRole) => {
-    const { roleId, roleName, label, order, status, desc } = updatedRole;
-    const rolePayload = { roleId, roleName, label, order, status, desc };
-
+  const handleModalOk = async () => {
     try {
-      if (roleModalProps.role && roleModalProps.role.roleId !== 0) {
-        await axios.put(`https://localhost:7290/api/Roles/${roleModalProps.role.roleId}`, rolePayload, {
+      if (modalRole.roleId !== 0) {
+        await axios.put(`https://localhost:7290/api/Roles/${modalRole.roleId}?WhichDatabase=Local`, modalRole, {
           headers: {
             'Content-Type': 'application/json',
           },
         });
         setRoles((prevRoles) =>
-          prevRoles.map((role) => (role.roleId === updatedRole.roleId ? updatedRole : role))
+          prevRoles.map((role) => (role.roleId === modalRole.roleId ? modalRole : role))
         );
         message.success('Role updated successfully');
       } else {
-        const response = await axios.post('https://localhost:7290/api/Roles', rolePayload, {
+        const response = await axios.post('https://localhost:7290/api/Roles?WhichDatabase=Local', modalRole, {
           headers: {
             'Content-Type': 'application/json',
           },
@@ -140,25 +112,17 @@ const RoleList = () => {
       console.error('Error saving role:', error.response?.data || error.message);
       message.error('Failed to save role');
     } finally {
-      setRoleModalProps({
-        visible: false,
-        title: 'New',
-        role: null,
-      });
+      setRoleModalVisible(false);
     }
   };
 
-  const handleRoleModalCancel = () => {
-    setRoleModalProps({
-      visible: false,
-      title: 'New',
-      role: null,
-    });
+  const handleModalCancel = () => {
+    setRoleModalVisible(false);
   };
 
   const onDelete = async (roleId) => {
     try {
-      await axios.delete(`https://localhost:7290/api/Roles/${roleId}`);
+      await axios.delete(`https://localhost:7290/api/Roles/${roleId}?WhichDatabase=Local`);
       setRoles((prevRoles) => prevRoles.filter((role) => role.roleId !== roleId));
       message.success('Role deleted successfully');
     } catch (error) {
@@ -167,13 +131,38 @@ const RoleList = () => {
     }
   };
 
-  if (loading) {
-    return <Spin size="large" />;
-  }
+  const handleStatusChange = async (roleId, isActive) => {
+    try {
+      // Find the role to update
+      const roleToUpdate = roles.find((role) => role.roleId === roleId);
+      
+      // Update the isActive status of the role
+      const updatedRole = { ...roleToUpdate, isActive };
+      
+      // Send the updated role object to the API
+      await axios.put(`https://localhost:7290/api/Roles/${roleId}?WhichDatabase=Local`, updatedRole, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
-  if (error) {
-    return <p className='text-center text-danger mt-4'>{t('pagedata.rolepage.failedtoloaderror')}</p>;
-  }
+      // Update local state after successful update
+      setRoles((prevRoles) =>
+        prevRoles.map((role) => (role.roleId === roleId ? updatedRole : role))
+      );
+
+      message.success(`Role ${isActive ? 'enabled' : 'disabled'} successfully`);
+    } catch (error) {
+      if (error.response && error.response.status === 400) {
+        // Handle validation errors
+        console.error('Validation errors:', error.response.data.errors);
+        message.error('Validation errors occurred');
+      } else {
+        console.error('Error updating role status:', error.response?.data || error.message);
+        message.error('Failed to update role status');
+      }
+    }
+  };
 
   return (
     <Card
@@ -192,14 +181,31 @@ const RoleList = () => {
         columns={columns}
         dataSource={roles}
       />
-      <RoleModal
-        visible={roleModalProps.visible}
-        title={roleModalProps.title}
-        role={roleModalProps.role}
-        permissions={[]} // You can fetch and pass permissions here
-        onOk={handleRoleModalOk}
-        onCancel={handleRoleModalCancel}
-      />
+      <Modal
+        title={modalTitle}
+        visible={roleModalVisible}
+        onOk={handleModalOk}
+        onCancel={handleModalCancel}
+        okText="Save"
+        cancelText="Cancel"
+      >
+        <Form layout="vertical">
+          <Form.Item label="Role Name">
+            <Input
+              value={modalRole?.roleName}
+              onChange={(e) => setModalRole({ ...modalRole, roleName: e.target.value })}
+            />
+          </Form.Item>
+          <Form.Item label="Status">
+            <Switch
+              checked={modalRole?.isActive}
+              onChange={(checked) => setModalRole({ ...modalRole, isActive: checked })}
+              checkedChildren="Enabled"
+              unCheckedChildren="Disabled"
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
     </Card>
   );
 };

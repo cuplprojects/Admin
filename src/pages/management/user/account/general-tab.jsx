@@ -12,7 +12,7 @@ export default function GeneralTab() {
   useEffect(() => {
     const fetchRoles = async () => {
       try {
-        const res = await axios.get('https://localhost:7290/api/Roles'); // Adjust the API endpoint as needed
+        const res = await axios.get('https://localhost:7290/api/Roles?WhichDatabase=Local'); // Adjust the API endpoint as needed
         setRoles(res.data);
       } catch (error) {
         console.log(error.message);
@@ -24,7 +24,7 @@ export default function GeneralTab() {
 
   const handleSubmit = async (values) => {
     try {
-      await axios.post("https://localhost:7290/api/Users?WhichDatabase=local", values);
+      await axios.post("https://localhost:7290/api/Users?WhichDatabase=Local", values);
       form.resetFields(); // Reset form fields
       notification.success({
         message: 'User added successfully!',

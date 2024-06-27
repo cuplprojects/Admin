@@ -1,6 +1,6 @@
-import { Button, Col, Form, Input, Row, Select, notification, Modal, Popconfirm } from 'antd';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Button, Col, Input, Row, Select, notification, Modal, Popconfirm, Switch } from 'antd';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useRouter } from '@/router/hooks';
 import { Icon } from '@iconify/react';
@@ -15,6 +15,7 @@ export default function GeneralTab() {
     email: '',
     roleId: '',
     roleName: '',
+    isActive: false,
   });
 
   const [userList, setUserList] = useState([]);
@@ -27,26 +28,25 @@ export default function GeneralTab() {
     const fetchUsersAndRoles = async () => {
       try {
         const [usersRes, rolesRes] = await Promise.all([
-          axios.get('https://localhost:7290/api/Users?WhichDatabase=local'),
-          axios.get('https://localhost:7290/api/Roles'),
+          axios.get('https://localhost:7290/api/Users?WhichDatabase=Local'),
+          axios.get('https://localhost:7290/api/Roles?WhichDatabase=Local'),
         ]);
 
-        // Create a role map to easily map roleId to roleName
         const roleMap = rolesRes.data.reduce((acc, role) => {
           acc[role.roleId] = role.roleName;
           return acc;
         }, {});
 
-        // Map role names to users
         const usersWithRoleNames = usersRes.data.map(user => ({
           ...user,
-          roleName: roleMap[user.roleId]
+          roleName: roleMap[user.roleId],
+          isActive: user.isActive,
         }));
 
         setUserList(usersWithRoleNames);
         setRoles(rolesRes.data);
       } catch (error) {
-        console.log(error.message);
+        console.error('Error fetching users and roles:', error.message);
       }
     };
 
@@ -63,25 +63,51 @@ export default function GeneralTab() {
     setUserData((prev) => ({ ...prev, roleId: value, roleName: selectedRole?.roleName }));
   };
 
+  const handleStatusChange = async (checked, userId) => {
+    try {
+      const user = userList.find(user => user.userId === userId);
+
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      const updatedUser = { ...user, isActive: checked };
+
+      await axios.put(`https://localhost:7290/api/Users/${userId}?WhichDatabase=Local`, updatedUser);
+      
+      setUserList((prev) =>
+        prev.map((user) => (user.userId === userId ? { ...user, isActive: checked } : user))
+      );
+
+      notification.success({
+        message: 'User status updated successfully!',
+        duration: 3,
+      });
+    } catch (error) {
+      console.error('Error updating user status:', error.message);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('https://localhost:7290/api/Users?WhichDatabase=local', userData);
+      await axios.post('https://localhost:7290/api/Users?WhichDatabase=Local', userData);
       setUserData({
         firstName: '',
         lastName: '',
         email: '',
         roleId: '',
         roleName: '',
+        isActive: false,
       });
       notification.success({
         message: 'User added successfully!',
         duration: 3,
       });
-      const res = await axios.get('https://localhost:7290/api/Users?WhichDatabase=local');
+      const res = await axios.get('https://localhost:7290/api/Users?WhichDatabase=Local');
       setUserList(res.data);
     } catch (error) {
-      console.log(error.message);
+      console.error('Error adding user:', error.message);
     }
   };
 
@@ -92,7 +118,7 @@ export default function GeneralTab() {
 
   const handleSave = async (userId) => {
     try {
-      await axios.put(`https://localhost:7290/api/Users/${userId}?WhichDatabase=local`, userData);
+      await axios.put(`https://localhost:7290/api/Users/${userId}?WhichDatabase=Local`, userData);
       setEditingUserId(null);
       setUserData({
         firstName: '',
@@ -100,15 +126,16 @@ export default function GeneralTab() {
         email: '',
         roleId: '',
         roleName: '',
+        isActive: false,
       });
       notification.success({
         message: 'User updated successfully!',
         duration: 3,
       });
-      const res = await axios.get('https://localhost:7290/api/Users?WhichDatabase=local');
+      const res = await axios.get('https://localhost:7290/api/Users?WhichDatabase=Local');
       setUserList(res.data);
     } catch (error) {
-      console.log(error.message);
+      console.error('Error updating user:', error.message);
     }
   };
 
@@ -120,6 +147,7 @@ export default function GeneralTab() {
       email: '',
       roleId: '',
       roleName: '',
+      isActive: false,
     });
   };
 
@@ -130,16 +158,16 @@ export default function GeneralTab() {
 
   const handleDelete = async () => {
     try {
-      await axios.delete(`https://localhost:7290/api/Users/${userIdToDelete}?WhichDatabase=local`);
+      await axios.delete(`https://localhost:7290/api/Users/${userIdToDelete}?WhichDatabase=Local`);
       notification.success({
         message: 'User deleted successfully!',
         duration: 3,
       });
-      const res = await axios.get('https://localhost:7290/api/Users?WhichDatabase=local');
+      const res = await axios.get('https://localhost:7290/api/Users?WhichDatabase=Local');
       setUserList(res.data);
       setDeleteModalVisible(false);
     } catch (error) {
-      console.log(error.message);
+      console.error('Error deleting user:', error.message);
     }
   };
 
@@ -163,6 +191,7 @@ export default function GeneralTab() {
                   <th scope="col">Last Name</th>
                   <th scope="col">Email</th>
                   <th scope="col">Role</th>
+                  <th scope="col">Status</th>
                   <th scope="col">Actions</th>
                 </tr>
               </thead>
@@ -191,7 +220,6 @@ export default function GeneralTab() {
                         user.email
                       )}
                     </td>
-                    
                     <td>
                       {editingUserId === user.userId ? (
                         <Select
@@ -210,17 +238,16 @@ export default function GeneralTab() {
                       )}
                     </td>
                     <td>
+                      <Switch
+                        checked={user.isActive}
+                        onChange={(checked) => handleStatusChange(checked, user.userId)}
+                      />
+                    </td>
+                    <td>
                       {editingUserId === user.userId ? (
                         <>
-                          <Popconfirm
-                            title="Are you sure you want to save changes?"
-                            onConfirm={() => handleSave(user.userId)}
-                            okText="Yes"
-                            cancelText="No"
-                          >
-                            <Button type="primary">Save</Button>
-                          </Popconfirm>
-                          <Button danger onClick={handleCancel} style={{ marginLeft: 8 }}>Cancel</Button>
+                          <Button type="primary" onClick={() => handleSave(user.userId)} style={{ marginRight: 8 }}>Save</Button>
+                          <Button onClick={handleCancel}>Cancel</Button>
                         </>
                       ) : (
                         <>
