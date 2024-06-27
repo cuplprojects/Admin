@@ -24,6 +24,7 @@ const Absentee = ({
   const mappedHeaders = Object.values(mapping);
 
   return (
+    <>
     <div className={`tab-pane active d-flex align-items-center justify-content-around py-3 mt-5`} id="absentee">
       <h3 className="head text-center fs-3">Upload Absentee</h3>
       <div className="d-flex justify-content-center align-items-center">
