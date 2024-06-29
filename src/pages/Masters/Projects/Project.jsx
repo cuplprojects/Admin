@@ -1,9 +1,9 @@
-import { Button, Form, Input, InputNumber, Popconfirm, Table, Typography } from 'antd';
 import React, { useState, useEffect } from 'react';
-
+import { Button, Form, Input, InputNumber, Popconfirm, Table, Typography, message } from 'antd';
 import './Project.css';
 
 const apiurl = import.meta.env.VITE_API_URL;
+
 function EditableCell({
   editing,
   dataIndex,
@@ -43,7 +43,7 @@ function Project() {
   const [editingKey, setEditingKey] = useState('');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [sortedInfo, setSortedInfo] = useState({});
-  const isEditing = (record) => record.key === editingKey;
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     fetchData();
@@ -66,6 +66,8 @@ function Project() {
       columnKey: sorter.field,
     });
   };
+
+  const isEditing = (record) => record.key === editingKey;
 
   const edit = (record) => {
     form.setFieldsValue({
@@ -93,6 +95,13 @@ function Project() {
       const index = newData.findIndex((item) => key === item.key);
 
       if (index > -1) {
+        // Check for duplicate projectName
+        const isDuplicate = newData.some((item, idx) => idx !== index && item.projectName === row.projectName);
+        if (isDuplicate) {
+          message.error('Project name already exists. Please enter a unique name.');
+          return;
+        }
+
         const item = newData[index];
         if (item.method === 'POST') {
           await addRow({ ...item, ...row });
@@ -104,6 +113,13 @@ function Project() {
         setEditingKey('');
         setHasUnsavedChanges(false);
       } else {
+        // Check for duplicate projectName before adding
+        const isDuplicate = newData.some((item) => item.projectName === row.projectName);
+        if (isDuplicate) {
+          message.error('Project name already exists. Please enter a unique name.');
+          return;
+        }
+
         await addRow(row);
         setData([...newData, row]);
         setEditingKey('');
@@ -156,12 +172,21 @@ function Project() {
     }
   };
 
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+    // Filter data based on projectName containing searchTerm
+    const filteredData = data.filter(item =>
+      item.projectName.toLowerCase().includes(e.target.value.toLowerCase())
+    );
+    setData(filteredData);
+  };
+
   const handleAdd = () => {
     const newRowKey = data.length + 1;
     const newData = {
       key: newRowKey.toString(),
       serialNo: newRowKey,
-      projectName: '',
+      projectName: '', // Start with blank projectName
       method: 'POST',
     };
     setData([...data, newData]);
@@ -234,14 +259,23 @@ function Project() {
 
   return (
     <div className="mt-5">
+      <div className="d-flex align-items-center justify-content-between w-100"  style={{ marginBottom: 16 }}>
       <Button
         onClick={handleAdd}
         type="primary"
         style={{ marginBottom: 16 }}
         disabled={hasUnsavedChanges}
-      >
-        Add a row
+        >
+        Add Project
       </Button>
+        <Input
+          placeholder="Search Project"
+          value={searchTerm}
+          onChange={handleSearchChange}
+          style={{ width: 100, marginRight: 8 }}
+        />
+      
+        </div>
       <Form form={form} component={false}>
         <Table
           components={{
