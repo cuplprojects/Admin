@@ -24,11 +24,8 @@ const Import = () => {
 
 
   const [mapping, setMapping] = useState({
-    district: '',
+    districtCode: '',
     centerCode: '',
-    bookletCode: '',
-    status: '',
-    name: '',
     rollNo: ''
   });
   const [registrationMapping, setRegistrationMapping] = useState({
