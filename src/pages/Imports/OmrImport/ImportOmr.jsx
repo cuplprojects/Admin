@@ -12,6 +12,7 @@ const ImportOmr = () => {
   const [loading, setLoading] = useState(false);
   const [currentFileIndex, setCurrentFileIndex] = useState(0);
   const [showSkipBtn, setShowSkipBtn] = useState(false);
+  const [showReplaceBtn, setShowReplaceBtn] = useState(false);
   const [currentFileName, setCurrentFileName] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
   const [alertType, setAlertType] = useState('');
@@ -50,8 +51,15 @@ const ImportOmr = () => {
       console.error('Error removing data from localforage:', error);
     }
   };
+  const removeCurrentFileIndex = async () => {
+    try {
+      await localforage.removeItem('currentFileIndex');
+    } catch (error) {
+      console.error('Error removing currentFileIndex from localforage:', error);
+    }
+  };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e,replace = false) => {
     e.preventDefault();
     setLoading(true);
     const fileCount = files.length;
@@ -62,7 +70,7 @@ const ImportOmr = () => {
 
       try {
         const response = await axios.post(
-          `${apiurl}/OMRData/upload-request?WhichDatabase=Local`,
+          `${apiurl}/OMRData/upload-request?WhichDatabase=Local&replace=${replace}`,
           formData,
           {
             headers: {
@@ -80,12 +88,14 @@ const ImportOmr = () => {
         await localforage.setItem('currentFileIndex', nextFileIndex);
         if (nextFileIndex >= fileCount) {
           await localforage.removeItem('currentFileIndex');
+          await removeCurrentFileIndex();
           setAlertMessage('All files uploaded successfully!');
           setAlertType('success');
         }
       } catch (error) {
         if (error.response && error.response.status === 409) {
           setShowSkipBtn(true);
+          setShowReplaceBtn(true);
           setCurrentFileName(files[i].name);
           setAlertMessage('File with same name already exists!');
           setAlertType('danger');
@@ -104,13 +114,22 @@ const ImportOmr = () => {
   };
 
   const skipFile = async () => {
-    setShowSkipBtn(false);
+    
     await removeFromLocalForage(files[currentFileIndex]);
 
     const nextFileIndex = currentFileIndex + 1;
     setCurrentFileIndex(nextFileIndex);
     await localforage.setItem('currentFileIndex', nextFileIndex);
+    setShowSkipBtn(false);
+    setShowReplaceBtn(false);
     handleSubmit({ preventDefault: () => {} });
+  };
+
+  const replaceFile = async () => {
+    setShowReplaceBtn(false);
+    await removeFromLocalForage(files[currentFileIndex]);
+    setCurrentFileIndex(currentFileIndex + 1); // Move to the next file
+    handleSubmit({ preventDefault: () => {} }, true); // Pass true only for current file index
   };
 
   const handleResume = () => {
@@ -134,9 +153,14 @@ const ImportOmr = () => {
  
       {loading && <p>Loading...</p>}
       {showSkipBtn && (
+        <>
         <Button type="primary" onClick={skipFile}>
           Skip {currentFileName}
         </Button>
+        <Button type="primary" onClick={replaceFile}>
+        Replace {currentFileName}
+      </Button>
+      </>
       )}
       {alertMessage && (
         <div className={`alert alert-${alertType} mt-3`} role="alert">

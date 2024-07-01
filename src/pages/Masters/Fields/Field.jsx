@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Button, Form, Input, InputNumber, Modal, Popconfirm, Table, Typography } from 'antd';
+import { Button, Form, Input, InputNumber, Modal, Popconfirm, Table, Typography,message } from 'antd';
 import Draggable from 'react-draggable';
 import './../Projects/Project.css';
 
@@ -46,7 +46,9 @@ const Field = () => {
   const [editingKey, setEditingKey] = useState('');
   const [open, setOpen] = useState(false);
   const [sortedInfo, setSortedInfo] = useState({});
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [disabled, setDisabled] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
   const [bounds, setBounds] = useState({
     left: 0,
     top: 0,
@@ -80,12 +82,13 @@ const Field = () => {
 
   const cancel = () => {
     const lastRow = data[data.length - 1];
-  if (lastRow && lastRow.projectName.trim() === '') {
-    // Remove the last row if Project Name is blank
-    const newData = [...data];
-    newData.pop();
-    setData(newData);  
-  }
+    if (lastRow && lastRow.projectName.trim() === '') {
+      // Remove the last row if Project Name is blank
+      const newData = [...data];
+      newData.pop();
+      setData(newData);
+      setHasUnsavedChanges(false);
+    }
     setEditingKey('');
   };
 
@@ -94,8 +97,15 @@ const Field = () => {
       const row = await form.validateFields();
       const newData = [...data];
       const index = newData.findIndex((item) => key === item.key);
-
+  
       if (index > -1) {
+        // Editing existing row
+        const isDuplicate = newData.some((item, idx) => idx !== index && item.fieldName === row.fieldName);
+        if (isDuplicate) {
+          message.error('Field name already exists. Please enter a unique name.');
+          return;
+        }
+  
         const item = newData[index];
         if (item.method === 'POST') {
           await fetchData();
@@ -103,17 +113,26 @@ const Field = () => {
           newData.splice(index, 1, { ...item, ...row });
           await updateRow(newData[index]);
         }
-        setData(newData);
-        setEditingKey('');
       } else {
+        // Adding new row
+        const isDuplicate = newData.some((item) => item.fieldName === row.fieldName);
+        if (isDuplicate) {
+          message.error('Field name already exists. Please enter a unique name.');
+          return;
+        }
+  
         await addRow(row);
-        setData([...newData, row]);
-        setEditingKey('');
+        newData.push(row);
       }
+  
+      setData(newData); // Update state with new data
+      setEditingKey('');
+      setHasUnsavedChanges(false);
     } catch (errInfo) {
       console.log('Validate Failed:', errInfo);
     }
   };
+  
 
   const updateRow = async (updatedRow) => {
     try {
@@ -147,6 +166,7 @@ const Field = () => {
         throw new Error('Failed to add new field');
       }
       fetchData();
+      setHasUnsavedChanges(false);
     } catch (error) {
       console.error('Error adding new field:', error);
     }
@@ -154,6 +174,7 @@ const Field = () => {
 
   const handleAdd = () => {
     setOpen(true);
+    setHasUnsavedChanges(true);
   };
 
   const handleOk = async () => {
@@ -218,7 +239,7 @@ const Field = () => {
       ),
     },
     {
-      title: 'Operation',
+      title: 'Actions',
       dataIndex: 'operation',
       render: (_, record) => {
         const editable = isEditing(record);
@@ -249,7 +270,14 @@ const Field = () => {
       },
     }
   ];
-
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+    // Filter data based on projectName containing searchTerm
+    const filteredData = data.filter(item =>
+      item.fieldName.toLowerCase().includes(e.target.value.toLowerCase())
+    );
+    setData(filteredData);
+  };
   const mergedColumns = columns.map((col) => {
     if (!col.editable) {
       return col;
@@ -268,9 +296,18 @@ const Field = () => {
 
   return (
     <div className='mt-5'>
-      <Button onClick={handleAdd} type="primary" style={{ marginBottom: 16 }}>
-        Add Field
-      </Button>
+      <div className="d-flex align-items-center justify-content-between w-100" style={{ marginBottom: 16 }}>
+        <Button onClick={handleAdd} type="primary" style={{ marginBottom: 16 }}>
+          Add Field
+        </Button>
+        <Input
+          placeholder="Search Project"
+          value={searchTerm}
+          onChange={handleSearchChange}
+          style={{ width: 100, marginRight: 8 }}
+        />
+
+      </div>
       <Form form={form} component={false}>
         <Table
           components={{
@@ -304,7 +341,7 @@ const Field = () => {
               setDisabled(true);
             }}
           >
-            Add New Row
+            Add New Field
           </div>
         }
         open={open}

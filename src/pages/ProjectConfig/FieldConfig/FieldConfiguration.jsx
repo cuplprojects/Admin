@@ -18,6 +18,7 @@ const FieldConfiguration = () => {
     maxRange: '',
     responses: '',
     numberOfBlocks: '',
+    canBlank: false,
   });
   const [savedData, setSavedData] = useState([]);
   const [fields, setFields] = useState([]);
@@ -31,7 +32,8 @@ const FieldConfiguration = () => {
     showSizeChanger: true,
     pageSizeOptions: ['10', '20', '30', '50'],
   });
-  const[rangeError, setRangeError] = useState(false)
+  const [rangeError, setRangeError] = useState(false)
+
 
   // useEffect(() => {
   //   if (formData.maxRange) {
@@ -41,17 +43,11 @@ const FieldConfiguration = () => {
   //     }));
   //   }
   // }, [formData.maxRange]);
-
   useEffect(() => {
-    axios
-      .get(`${APIURL}/Fields?WhichDatabase=Local`)
-      .then((response) => {
-        setFields(response.data);
-      })
-      .catch((error) => {
-        console.error('Error fetching fields:', error);
-      });
-
+    getFields();
+  }, []);
+  
+  useEffect(() => {
     axios
       .get(`${APIURL}/FieldConfigurations?WhichDatabase=Local`)
       .then((response) => {
@@ -63,35 +59,57 @@ const FieldConfiguration = () => {
       });
   }, []);
 
+
+  const getFields = () => {
+    axios
+    .get(`${APIURL}/Fields?WhichDatabase=Local`)
+    .then((response) => {
+      setFields(response.data);
+    })
+    .catch((error) => {
+      console.error('Error fetching fields:', error);
+    });
+  }
+
   const toggleFormVisibility = () => {
     setFormVisible(!isFormVisible);
   };
 
   const handleInputChange = (e) => {
-    const { id, value } = e.target;
-    setFormData({
-     ...formData,
-      [id]: value,
-    });
-  
-    // if (id === 'inRange' && value > formData.maxRange) {
-    //   showAlert('Minimum range cannot be greater than maximum range.', 'danger');
-    //   setFormData((prevState) => ({
-    //    ...prevState,
-    //     [id]: formData.maxRange,
-    //   }));
-    // } else if (id === 'axRange' && value < formData.minRange) {
-    //   showAlert('Maximum range cannot be less than minimum range.', 'danger');
-    //   setFormData((prevState) => ({
-    //    ...prevState,
-    //     [id]: formData.minRange,
-    //   }));
-    // }
+    const { id, type, value, checked } = e.target;
+
+    if (type === 'checkbox') {
+      setFormData({
+        ...formData,
+        [id]: checked, // Update state with checked value for checkboxes
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [id]: value, // Update state with value for other input types
+      });
+    }
   };
+
+
+  // if (id === 'inRange' && value > formData.maxRange) {
+  //   showAlert('Minimum range cannot be greater than maximum range.', 'danger');
+  //   setFormData((prevState) => ({
+  //    ...prevState,
+  //     [id]: formData.maxRange,
+  //   }));
+  // } else if (id === 'axRange' && value < formData.minRange) {
+  //   showAlert('Maximum range cannot be less than minimum range.', 'danger');
+  //   setFormData((prevState) => ({
+  //    ...prevState,
+  //     [id]: formData.minRange,
+  //   }));
+  // }
+
   useEffect(() => {
     const minRangeInt = parseInt(formData.minRange, 10);
     const maxRangeInt = parseInt(formData.maxRange, 10);
-  
+
     if (minRangeInt > maxRangeInt) {
       setRangeError(true);
     } else {
@@ -180,6 +198,7 @@ const FieldConfiguration = () => {
       canBlank: false,
     });
   };
+
 
   useEffect(() => {
     if (savedData.length > 0) {
@@ -305,8 +324,9 @@ const FieldConfiguration = () => {
 
       {isFormVisible && (
         <form onSubmit={handleSave}>
-          <div className="form-group">
-            <label htmlFor="field">Field Name</label>
+          <div className="form-group d-flex align-items-center justify-content-between">
+            <div>
+              <label htmlFor="field">Field Name</label>
             <Select
               id="field"
               style={{ width: '140px', marginLeft: '2rem' }}
@@ -319,9 +339,23 @@ const FieldConfiguration = () => {
                 </Option>
               ))}
             </Select>
+            </div>
+            
+              <div className='d-flex align-items-center'>
+              <label className='me-2' htmlFor="canBlank">Allow Blank Values?</label>
+                 <input
+              id="canBlank"
+              type="checkbox"
+              checked={formData.canBlank} // Use checked attribute instead of value
+              onChange={handleInputChange}
+            />
+            
+
+              </div>
+           
           </div>
           <Row>
-          <Col>
+            <Col>
               <div className="form-group">
                 <label htmlFor="minRange">Min Range</label>
                 <Input
@@ -345,12 +379,12 @@ const FieldConfiguration = () => {
             </Col>
             {
               rangeError && (
-                 <p className='text-danger'>
+                <p className='text-danger'>
                   Minimum range cannot be more than maximum range
-                 </p>
+                </p>
               )
             }
-           
+
           </Row>
           <Row>
             <Col>

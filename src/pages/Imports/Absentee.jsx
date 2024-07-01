@@ -25,11 +25,8 @@ const Absentee = ({
 
   return (
     <>
-      <div
-        className={`tab-pane active d-flex align-items-center justify-content-around mt-5 py-3`}
-        id="absentee"
-      >
-        <h3 className="head fs-3 text-center">Upload Absentee</h3>
+      <div className={`tab-pane active d-flex align-items-center justify-content-around py-3 mt-5`} id="absentee">
+        <h3 className="head text-center fs-3">Upload Absentee</h3>
         <div className="d-flex justify-content-center align-items-center">
           <p>
             <input type="file" onChange={handleFileUpload} accept=".xlsx" />
@@ -37,7 +34,7 @@ const Absentee = ({
         </div>
         {headers.length > 0 && (
           <div className="d-flex justify-content-center mt-4">
-            <table className="table-bordered table">
+            <table className="table table-bordered">
               <thead>
                 <tr>
                   <th>Model Property</th>
@@ -49,21 +46,13 @@ const Absentee = ({
                   <tr key={property}>
                     <td>{property}</td>
                     <td>
-                      <select
-                        value={mapping[property]}
-                        onChange={(e) => handleMappingChange(e, property)}
-                      >
+                      <select value={mapping[property]} onChange={(e) => handleMappingChange(e, property)}>
                         <option value="">Select Header</option>
-                        {headers
-                          .filter(
-                            (header) =>
-                              !mappedHeaders.includes(header) || header === mapping[property],
-                          )
-                          .map((header, index) => (
-                            <option key={index} value={header}>
-                              {header}
-                            </option>
-                          ))}
+                        {headers.filter(header => !mappedHeaders.includes(header) || header === mapping[property]).map((header, index) => (
+                          <option key={index} value={header}>
+                            {header}
+                          </option>
+                        ))}
                       </select>
                     </td>
                   </tr>
@@ -72,14 +61,14 @@ const Absentee = ({
             </table>
           </div>
         )}
+        {selectedFile &&(
+          <div className="d-flex justify-content-center mt-4">
+            <button className="btn btn-primary" onClick={handleAbsenteeUpload} disabled={loading}>
+              {loading ? 'Uploading' : 'Upload'}
+            </button>
+          </div>
+        )}
       </div>
-      {selectedFile  && (
-        <div className="d-flex justify-content-center mt-4">
-          <button className="btn btn-primary" onClick={handleAbsenteeUpload} disabled={!isValidData || loading}>
-            {loading ? 'Uploading' : 'Upload'}
-          </button>
-        </div>
-      )}
       {alertMessage && (
         <div className={`alert alert-${alertType} mt-3`} role="alert">
           {alertMessage}
