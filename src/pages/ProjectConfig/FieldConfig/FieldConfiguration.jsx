@@ -112,10 +112,18 @@ const FieldConfiguration = () => {
       return;
     }
 
+    if (formData.maxRange) {
+      if (formData.numberOfBlocks !== formData.maxRange.toString().length.toString()) {
+        showAlert('Number of blocks must match the length of the max range.', 'danger');
+        return;
+      }
+    }
+
     const newConfig = {
-      fieldConfigurationId: 0, // Adjust as needed
+      fieldConfigurationId: selectedFieldIndex !== -1 ? savedData[selectedFieldIndex].fieldConfigurationId : 0, // Adjust as needed
       projectId: 1, // Adjust as needed
       fieldAttributesJson: '',
+      canBlank: formData.canBlank,
       fieldAttributes: [
         {
           field: formData.field,
@@ -127,16 +135,25 @@ const FieldConfiguration = () => {
       ],
     };
 
-    // Log the payload to the console for debugging
     console.log('Payload to be sent:', JSON.stringify(newConfig, null, 2));
 
     if (selectedFieldIndex !== -1) {
-      const updatedData = [...savedData];
-      updatedData[selectedFieldIndex] = { ...updatedData[selectedFieldIndex], ...newConfig };
-      setSavedData(updatedData);
-      setSelectedFieldIndex(-1);
-      showAlert('Field configuration updated successfully.', 'success');
+      // Update existing field configuration
+      axios
+        .put(`${APIURL}/FieldConfigurations/${newConfig.fieldConfigurationId}?WhichDatabase=Local`, newConfig)
+        .then((response) => {
+          const updatedData = [...savedData];
+          updatedData[selectedFieldIndex] = { ...updatedData[selectedFieldIndex], ...newConfig };
+          setSavedData(updatedData);
+          setSelectedFieldIndex(-1);
+          showAlert('Field configuration updated successfully.', 'success');
+        })
+        .catch((error) => {
+          console.error('Error updating field configuration:', error);
+          showAlert('Error updating field configuration. Please try again later.', 'danger');
+        });
     } else {
+      // Create new field configuration
       axios
         .post(`${APIURL}/FieldConfigurations?WhichDatabase=Local`, newConfig)
         .then((response) => {
@@ -160,6 +177,7 @@ const FieldConfiguration = () => {
       maxRange: '',
       responses: '',
       numberOfBlocks: '',
+      canBlank: false,
     });
   };
 
@@ -198,15 +216,15 @@ const FieldConfiguration = () => {
     });
   };
 
-  // const showAlert = (message, type) => {
-  //   setAlertMessage(message);
-  //   setAlertType(type);
+  const showAlert = (message, type) => {
+    setAlertMessage(message);
+    setAlertType(type);
 
-  //   setTimeout(() => {
-  //     setAlertMessage('');
-  //     setAlertType('');
-  //   }, 3000);
-  // };
+    setTimeout(() => {
+      setAlertMessage('');
+      setAlertType('');
+    }, 3000);
+  };
 
   const columns = [
     {
