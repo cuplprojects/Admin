@@ -47,25 +47,46 @@ const AuditButton = () => {
             <Card style={{ height: 'auto' }}>
                 <Row>
                     <Col>
+                        <Row>
+                            <Col>
+                                <Card className='mt-3 ml-3 mr-3'>
+                                    <div className='justify-content-center align-items-center'>
+                                        <ChartComponent
+                                            chartId={`chart-global`}
+                                            series={76} // Example series data
+                                            labels={['Average Results']}
+                                        />
+                                        <div>
+                                            <p className='fs-2 text-center'>dfgfgf</p>
+                                        </div>
+                                    </div>
 
-                        <ChartComponent
-                            chartId={`chart-global`}
-                            series={76} // Example series data
-                            labels={['Average Results']} />
+                                </Card>
+                            </Col>
+                        </Row>
+                        {/* <Row>
+                        <Card className='mt-5 mb-3'>
+                            <div>
+                                <p>dfgvfgbf</p>
+                            </div>
+
+                        </Card>
+                    </Row> */}
+
 
                     </Col>
                     <Col>
 
-                        <Row>
-
-                        </Row>
-                        <Card className='mb-3' style={{ height: '60px' }}>
-                            <h2 className='align-items-center'>Errors</h2>
+                        <Card className='mb-5 mt-3 mr-3' style={{ height: '60px' }}>
+                            <div className='d-flex align-itmes-center'>
+                                <h2>Errors</h2>
+                            </div>
 
                         </Card>
-                        <Row>
 
-                            <Row>
+                        <h2 className='fs-3 ' style={{ color: 'grey', textShadow: '0px 2px 4px grey' }}>Error Reports</h2>
+                        <Card className='mb-3 mr-3'>
+                            <Row className='mt-4 ml-4 mr-4'>
                                 {fieldConfigs.map((config, index) => {
                                     let fieldAttributes = [];
                                     try {
@@ -76,14 +97,9 @@ const AuditButton = () => {
 
                                     return (
                                         <Col md={4} key={index}>
-                                            <Card className="mb-4">
-                                                {/* <ChartComponent
-                                        chartId={`chart-${index}`}
-                                        series={76} // Example series data
-                                        labels={['Average Results']} // Example labels
-                                    /> */}
+                                            <Card className="d-flex align-items-center mb-4">
                                                 <Card.Body>
-                                                    <p className='fs-6 text-center' style={{ height: '20px', position: 'inherit' }}>
+                                                    <p className='fs-6 text-center m-auto' style={{ height: '40px', position: 'inherit' }}>
                                                         {fieldAttributes.map((attr, attrIndex) => (
                                                             <span key={attrIndex}>{attr.Field}</span>
                                                         ))}
@@ -94,10 +110,7 @@ const AuditButton = () => {
                                     );
                                 })}
                             </Row>
-                        </Row>
-
-
-
+                        </Card>
                     </Col>
 
                 </Row>
