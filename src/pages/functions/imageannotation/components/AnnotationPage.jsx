@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Modal, Select, notification } from 'antd'; // Import Select and Button from Ant Design
+import { Button, Modal, Select, notification } from 'antd';
 import ImageUploader from './ImageUploader';
 import AnnotationCanvas from './AnnotationCanvas';
 import Toolkit from './Toolkit';
@@ -9,7 +9,7 @@ import axios from 'axios';
 //const apiurl = import.meta.env.VITE_API_URL_PROD;
 const apiurl = import.meta.env.VITE_API_URL;
 
-const { Option } = Select; // Destructure Option from Select for ease of use
+const { Option } = Select;
 
 const AnnotationPage = () => {
   const [imageUrl, setImageUrl] = useState(null);
@@ -24,8 +24,12 @@ const AnnotationPage = () => {
   const [openModal, setOpenModal] = useState(false);
   const [modalFields, setModalFields] = useState([]);
   const [coordinates, setCoordinates] = useState([]);
-  const [inputFields, setInputFields] = useState(['Roll No', 'Booklet No', 'Booklet Series/Set', 'Year/Semester']);
-  //const inputFields = ['Roll No', 'Booklet No', 'Booklet Series/Set', 'Year/Semester'];
+  const [inputFields, setInputFields] = useState([
+    'Roll No',
+    'Booklet No',
+    'Booklet Series/Set',
+    'Year/Semester',
+  ]);
 
   useEffect(() => {
     // Fetch input fields from API
@@ -188,19 +192,17 @@ const AnnotationPage = () => {
 
   const submitAnnotation = async () => {
     try {
-      // Prepare data for POST request
       const postData = {
         projectId: 1,
         ImageUrl: imageUrl,
         annotations: annotations.map((annotation) => ({
           FieldName: annotation.FieldName,
-          coordinates: JSON.stringify(annotation.coordinates).replace(/\"/g, "'"), // Convert coordinates to JSON string
+          coordinates: JSON.stringify(annotation.coordinates).replace(/\"/g, "'"),
         })),
       };
 
       console.log('Submitting annotations:', postData);
 
-      // Make POST request using Axios
       const response = await axios.post(`${apiurl}/ImageConfigs?WhichDatabase=Local`, postData, {
         headers: {
           'Content-Type': 'application/json',
@@ -211,15 +213,13 @@ const AnnotationPage = () => {
         duration: 3,
       });
       console.log('Response:', response.data);
-      // Handle response as needed
     } catch (error) {
-      console.log(error.message)
+      console.log(error.message);
       notification.error({
         message: 'Failed to add Annotations',
         description: error.message,
         duration: 3,
       });
-      // Handle error
     }
   };
 
@@ -248,6 +248,7 @@ const AnnotationPage = () => {
             </button>
           </div>
           <Toolkit
+            annotations={annotations}
             onDelete={handleDeleteAnnotation}
             onAdjustSize={handleAdjustSize}
             isAdjustingSize={isAdjustingSize}
@@ -259,7 +260,8 @@ const AnnotationPage = () => {
             selectedInputField={selectedInputField}
             setSelectedInputField={setSelectedInputField}
             mappedFields={mappedFields}
-            selectedAnnotation={selectedAnnotation !== null}
+            selectedAnnotation={selectedAnnotation}
+            setAnnotations={setAnnotations}
           />
         </div>
       )}
@@ -292,24 +294,12 @@ const AnnotationPage = () => {
                 }}
                 onClick={() => setSelectedAnnotation(index)}
               >
-                {/* <input
-                  style={{
-                    width: '100%',
-                    border: '1px solid black',
-                    padding: '5px',
-                    outline: 'none',
-                    boxSizing: 'border-box',
-                  }}
-                  value={annotation.FieldValue}
-                  onChange={(e) => {
-                    const updatedAnnotations = [...annotations];
-                    updatedAnnotations[index].FieldValue = e.target.value;
-                    setAnnotations(updatedAnnotations);
-                    localStorage.setItem('annotations', JSON.stringify(updatedAnnotations));
-                  }}
-                /> */}
-                <div className='bg-light text-center'>
-                  <span className="text-primary">{annotation.FieldName}</span>
+                <div className="bg-light text-center">
+                  <span className="text-primary">
+                    {selectedAnnotation
+                      ? annotations[selectedAnnotation].field
+                      : annotation.FieldName}
+                  </span>
                 </div>
               </div>
             ))}
@@ -334,7 +324,7 @@ const AnnotationPage = () => {
           style={{ width: '100%' }}
           placeholder="Select an input field"
           onChange={(value) => setSelectedInputField(value)}
-          value={selectedInputField} // Ensure this corresponds to the selected value
+          value={selectedInputField}
         >
           {modalFields.map((field, index) => (
             <Select.Option key={index} value={field}>

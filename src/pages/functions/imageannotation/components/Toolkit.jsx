@@ -1,14 +1,8 @@
 import React from 'react';
-import "./Toolkit.css";
+import './Toolkit.css';
 
 const Toolkit = ({
   onDelete,
-  onAdjustSize,
-  isAdjustingSize,
-  onLeftAdjust,
-  onRightAdjust,
-  onTopAdjust,
-  onBottomAdjust,
   selectedAnnotation,
   selectedInputField,
   inputFields,
@@ -16,7 +10,7 @@ const Toolkit = ({
   annotations,
   setAnnotations,
   mappedFields,
-  setMappedFields // Assuming you have this setter function for mappedFields
+  setMappedFields,
 }) => {
   // Function to handle input field change
   const handleInputChange = (event) => {
@@ -26,7 +20,7 @@ const Toolkit = ({
     // Update annotations if a selected annotation exists
     if (selectedAnnotation !== null) {
       const updatedAnnotations = [...annotations];
-      updatedAnnotations[selectedAnnotation].inputName = newInputField;
+      updatedAnnotations[selectedAnnotation].FieldName = newInputField;
       setAnnotations(updatedAnnotations); // Update annotations state
       localStorage.setItem('annotations', JSON.stringify(updatedAnnotations)); // Store in localStorage
     }
@@ -35,51 +29,161 @@ const Toolkit = ({
     const updatedMappedFields = { ...mappedFields };
     updatedMappedFields[newInputField] = true; // Assuming true means mapped
     setMappedFields(updatedMappedFields); // Update state of mappedFields
-    console.log(mappedFields)
+  };
+
+  // Function to handle coordinate and dimension change
+  const handleCoordinateChange = (name, value) => {
+    if (selectedAnnotation !== null) {
+      const updatedAnnotations = [...annotations];
+      updatedAnnotations[selectedAnnotation].coordinates[name] = parseInt(value, 10);
+      setAnnotations(updatedAnnotations);
+      localStorage.setItem('annotations', JSON.stringify(updatedAnnotations));
+    }
+  };
+
+  // Function to handle increment/decrement buttons
+  const handleIncrement = (name, incrementValue) => {
+    if (selectedAnnotation !== null) {
+      const updatedValue = annotations[selectedAnnotation].coordinates[name] + incrementValue;
+      handleCoordinateChange(name, updatedValue);
+    }
   };
 
   return (
     <div>
-      <button className='btn btn-primary m-1' onClick={onAdjustSize} disabled={!selectedAnnotation}>
-        Adjust Size
-      </button>
-      <button className='btn btn-danger m-1' onClick={onDelete} disabled={!selectedAnnotation}>
+      <button
+        className="btn btn-danger m-1"
+        onClick={onDelete}
+        disabled={selectedAnnotation === null}
+      >
         Delete
       </button>
-      <br />
-      {isAdjustingSize && selectedAnnotation !== null && (
-        <div style={{ display: 'inline-block', marginLeft: '10px' }}>
-          <button className='btn btn-primary m-1' disabled> Top </button>
-          <button className='btn btn-primary m-1' onClick={() => onTopAdjust(-10)}>&nbsp;↑&nbsp;</button>
-          <button className='btn btn-primary m-1' onClick={() => onTopAdjust(10)}>&nbsp;↓&nbsp;</button>
-          <br />
-          <button className='btn btn-primary m-1' disabled>Left</button>
-          <button className='btn btn-primary m-1' onClick={() => onLeftAdjust(-10)}>←</button>
-          <button className='btn btn-primary m-1' onClick={() => onLeftAdjust(10)}>→</button>
-          <br />
-          <button className='btn btn-primary m-1' disabled>Right</button>
-          <button className='btn btn-primary m-1' onClick={() => onRightAdjust(-10)}>←</button>
-          <button className='btn btn-primary m-1' onClick={() => onRightAdjust(10)}>→</button>
-          <br />
-          <button className='btn btn-primary m-1' disabled>Bottom</button>
-          <button className='btn btn-primary m-1' onClick={() => onBottomAdjust(-10)}>↑</button>
-          <button className='btn btn-primary m-1' onClick={() => onBottomAdjust(10)}>↓</button>
-        </div>
-      )}
       <br />
       {selectedAnnotation !== null && (
         <>
           {/* Dropdown to select input field */}
-          <select className="form-select m-2" value={selectedInputField} onChange={handleInputChange}>
+          {/* <select
+            className="form-select m-2"
+            value={selectedInputField}
+            onChange={handleInputChange}
+          >
             <option value="">Select Input Field</option>
             {inputFields.map((field, index) => (
               <option key={index} value={field} disabled={mappedFields[field]}>
                 {field}
               </option>
             ))}
-          </select>
+          </select> */}
           {/* Display selected input field */}
           <p>You have selected: {selectedInputField}</p>
+          {/* Inputs for coordinates and dimensions */}
+          <div className="coordinate-inputs">
+            <div className="input-group mb-3">
+              <div className="input-group-prepend">
+                <span className="input-group-text" id="inputGroup-sizing-default">
+                  X
+                </span>
+              </div>
+              <input
+                type="number"
+                className="form-control"
+                name="x"
+                aria-label="X"
+                aria-describedby="inputGroup-sizing-default"
+                value={annotations[selectedAnnotation].coordinates.x}
+                onChange={(e) => handleCoordinateChange('x', e.target.value)}
+              />
+              <br />
+              <div className="input-group-prepend">
+                <button className="btn btn-light" onClick={() => handleIncrement('x', -10)}>
+                  -10
+                </button>
+              </div>
+              <div className="input-group-prepend">
+                <button className="btn btn-light" onClick={() => handleIncrement('x', 10)}>
+                  +10
+                </button>
+              </div>
+            </div>
+            <div className="input-group mb-3">
+              <div className="input-group-prepend">
+                <span className="input-group-text" id="inputGroup-sizing-default">
+                  Y
+                </span>
+              </div>
+              <input
+                type="number"
+                className="form-control"
+                name="y"
+                aria-label="Y"
+                aria-describedby="inputGroup-sizing-sm"
+                value={annotations[selectedAnnotation].coordinates.y}
+                onChange={(e) => handleCoordinateChange('y', e.target.value)}
+              />
+              <div className="input-group-prepend">
+                <button className="btn btn-light" onClick={() => handleIncrement('y', -10)}>
+                  -10
+                </button>
+              </div>
+              <div className="input-group-prepend">
+                <button className="btn btn-light" onClick={() => handleIncrement('y', 10)}>
+                  +10
+                </button>
+              </div>
+            </div>
+            <div className="input-group mb-3">
+              <div className="input-group-prepend">
+                <span className="input-group-text" id="inputGroup-sizing-default">
+                  Width
+                </span>
+              </div>
+              <input
+                type="number"
+                className="form-control"
+                name="width"
+                aria-label="Width"
+                aria-describedby="inputGroup-sizing-default"
+                value={annotations[selectedAnnotation].coordinates.width}
+                onChange={(e) => handleCoordinateChange('width', e.target.value)}
+              />
+              <div className="input-group-prepend">
+                <button className="btn btn-light" onClick={() => handleIncrement('width', -10)}>
+                  -10
+                </button>
+              </div>
+              <div className="input-group-prepend">
+                <button className="btn btn-light" onClick={() => handleIncrement('width', 10)}>
+                  +10
+                </button>
+              </div>
+            </div>
+            <div className="input-group mb-3">
+              <div className="input-group-prepend">
+                <span className="input-group-text" id="inputGroup-sizing-default">
+                  Height
+                </span>
+              </div>
+              <input
+                type="number"
+                className="form-control"
+                name="height"
+                aria-label="Height"
+                aria-describedby="inputGroup-sizing-default"
+                value={annotations[selectedAnnotation].coordinates.height}
+                onChange={(e) => handleCoordinateChange('height', e.target.value)}
+              />
+              <div className="input-group-prepend">
+                <button className="btn btn-light" onClick={() => handleIncrement('height', -10)}>
+                  -10
+                </button>
+              </div>
+              <div className="input-group-prepend">
+                <button className="btn btn-light" onClick={() => handleIncrement('height', 10)}>
+                  +10
+                </button>
+              </div>
+            </div>
+          </div>
         </>
       )}
     </div>

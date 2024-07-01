@@ -1,35 +1,67 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import './style.css';
 
-const ZoomedImage = ({ src }) => {
-  // Constants based on your provided logic
-  const x = 402;
-  const y = 130.43;
-  const zoomlevel = 1; // 2x zoom
+const ZoomedImage = ({ src, data, onUpdate, onNext }) => {
+  const [value, setValue] = useState(data.FieldValue);
 
-  const originalWidth = 700; // Assuming the original image width is 700px
-  const markedWidth = 114;
-  const markedHeight = 136;
-  const offset = 0;
+  useEffect(() => {
+    setValue(data.FieldValue);
+  }, [data]);
 
-  const scale = originalWidth / (markedWidth * zoomlevel);
-  const width = markedWidth * zoomlevel ;
-  const height = ((markedHeight + offset )* zoomlevel);
-  const xa = x / scale* zoomlevel;
-  const ya = y / scale - offset;
+  const handleChange = (e) => {
+    setValue(e.target.value);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      onUpdate(e.target.value);
+      onNext();
+    }
+  };
+
+  const { x, y, width, height } = data.coordinates;
+  const scale = 700 / width; // Assuming the original image width is 700px
 
   return (
-    <div className="m-auto" style={{ width, height, border: '2px solid red', overflow: 'hidden' }}>
+    <div
+      className="m-auto zoomimg"
+      style={{
+        position: 'absolute',
+        left: '50%',
+        top: '50%',
+        transform: `translate(-50%, -50%) scale(2)`,
+        width,
+        overflow: 'hidden',
+      }}
+    >
       <img
         src={src}
         alt="Zoomed Image"
         style={{
           transform: `scale(${scale})`,
-          transformOrigin: `${xa}px ${ya}px`,
+          transformOrigin: `${x / scale}px ${y / scale}px`,
           position: 'relative',
-          left: `-${xa}px`,
-          top: `-${ya}px`,
+          left: `-${x / scale}px`,
+          top: `-${y / scale}px`,
         }}
       />
+      <div
+        className="form-group"
+        style={{
+          position: 'absolute',
+          top: '0px',
+          left: '0px',
+          backgroundColor: 'rgba(255, 255, 255, 0.8)',
+        }}
+      >
+        <input
+          type="text"
+          className="form-control border-danger text-center p-0"
+          value={value}
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
+        />
+      </div>
     </div>
   );
 };
