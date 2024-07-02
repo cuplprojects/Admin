@@ -10,7 +10,7 @@ import Import from '@/pages/Imports/AllImports';
 
 const ExternalLink = lazy(() => import('@/pages/sys/others/iframe/external-link'));
 const Iframe = lazy(() => import('@/pages/sys/others/iframe'));
-const Calendar = lazy(() => import('@/pages/sys/others/calendar'));
+// const Calendar = lazy(() => import('@/pages/sys/others/calendar'));
 const Kanban = lazy(() => import('@/pages/sys/others/kanban'));
 const ProjectConfig = lazy(() => import('@/pages/ProjectConfig'));
 
@@ -48,7 +48,7 @@ const others: AppRouteObject[] = [
     ),
     meta: {
       label: 'sys.menu.AllImports',
-      icon: <Iconify icon="solar:calendar-bold-duotone" size={24} />,
+      icon: <Iconify icon="solar:upload-square-bold-duotone" size={24} />,
       key: '/AllImports',
     },
   },
@@ -79,20 +79,7 @@ const others: AppRouteObject[] = [
       key: '/Audit',
     },
   },
-  {
-    path: 'calendar',
-    element: (
-      <Wrapper>
-        <Calendar />
-      </Wrapper>
-    ),
-    meta: {
-      label: 'sys.menu.calendar',
-      icon: <Iconify icon="solar:calendar-bold-duotone" size={24} />,
-      key: '/calendar',
-    },
 
-  },
   {
     path: 'kanban',
     element: (
