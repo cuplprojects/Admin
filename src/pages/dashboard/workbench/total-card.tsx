@@ -10,7 +10,7 @@ type Props = {
   count: string;
   chartData: number[];
 };
-export default function TotalCard({ title, increase, count, percent, chartData }: Props) {
+export default function TotalCard({ title, increase,  chartData }: Props) {
   return (
     <Card>
       <div className="flex-grow">
