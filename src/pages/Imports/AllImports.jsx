@@ -160,7 +160,7 @@ const Import = () => {
         const data = await response.json();
         console.log(data)
         const mappings = data.map((item) => ({
-          field: item.fieldAttributes[0].field
+          field: item.fieldName
 
         }));
 
