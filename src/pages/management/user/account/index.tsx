@@ -3,7 +3,7 @@ import { Iconify } from '@/components/icon';
 
 import GeneralTab from './general-tab';
 // import NotificationsTab from './notifications-tab';
-import SecurityTab from './security-tab';
+// import SecurityTab from './security-tab';
 import PermissionTab from './permission';
 
 function UserAccount() {

@@ -86,7 +86,8 @@
       "user": {
         "index": "User",
         "profile": "Profile",
-        "AddUser": "Add User"
+        "AddUser": "Add User",
+        "allusers": "All Users"
       },
       "system": {
         "index": "System",

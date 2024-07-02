@@ -53,7 +53,7 @@ const ImageUploader = ({ onImageSelect }) => {
   const uploadButton = (
     <button style={{ border: 0, background: 'none' }} type="button">
       {uploading ? <LoadingOutlined /> : <PlusOutlined />}
-      <div style={{ marginTop: 8 }}>Upload</div>
+      <div style={{ marginTop: 8 }}>Upload Sample OMR</div>
     </button>
   );
 
