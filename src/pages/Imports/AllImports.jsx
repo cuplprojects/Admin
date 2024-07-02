@@ -19,15 +19,8 @@ const Import = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [headers, setHeaders] = useState([]);
-
   const [fieldMappings, setFieldMappings] = useState({});
-
-
-  const [mapping, setMapping] = useState({
-    districtCode: '',
-    centerCode: '',
-    rollNo: ''
-  });
+  const [mapping, setMapping] = useState([]);
   const [registrationMapping, setRegistrationMapping] = useState({
     rollNo: ''
   });
@@ -71,8 +64,28 @@ const Import = () => {
   };
 
 
+  useEffect(() => {
+    // Fetch mapping fields from backend
+    const fetchMappingFields = async () => {
+      try {
+        const response = await fetch(`${apiurl}/Absentee/absentee/mapping-fields?WhichDatabase=Local`);
+        const data = await response.json();
+        
+        // Transform array data into object format
+        const initialMapping = data.reduce((acc, field) => {
+          acc[field.toUpperCase()] = '';
+          return acc;
+        }, {});
 
+        setMapping(initialMapping);
+      } catch (error) {
+        console.error('Error fetching mapping fields:', error);
+      }
+    };
+    fetchMappingFields();
+  }, []);
 
+  
   const handleAbsenteeUpload = async () => {
     if (selectedFile) {
       setLoading(true);
@@ -92,7 +105,7 @@ const Import = () => {
             const header = mapping[property];
             const index = jsonData[0].indexOf(header);
             // Ensure the value is converted to string before assigning
-            rowData[property] = String(row[index]);
+            rowData[property] = index !== -1 ? String(row[index]) : ''; 
           }
           return rowData;
         });
@@ -330,11 +343,12 @@ const Import = () => {
 
 
   const handleMappingChange = (e, property) => {
-    setMapping({
-      ...mapping,
-      [property]: e.target.value
-    });
+    setMapping((prevMapping) => ({
+      ...prevMapping,
+      [property]: e.target.value  || ''
+    }));
   };
+  console.log(mapping)
 
 
   return (

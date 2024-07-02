@@ -198,15 +198,15 @@ const FieldConfiguration = () => {
     });
   };
 
-  // const showAlert = (message, type) => {
-  //   setAlertMessage(message);
-  //   setAlertType(type);
+  const showAlert = (message, type) => {
+    setAlertMessage(message);
+    setAlertType(type);
 
-  //   setTimeout(() => {
-  //     setAlertMessage('');
-  //     setAlertType('');
-  //   }, 3000);
-  // };
+    setTimeout(() => {
+      setAlertMessage('');
+      setAlertType('');
+    }, 3000);
+  };
 
   const columns = [
     {

@@ -49,7 +49,7 @@ const Absentee = ({
                       <select value={mapping[property]} onChange={(e) => handleMappingChange(e, property)}>
                         <option value="">Select Header</option>
                         {headers.filter(header => !mappedHeaders.includes(header) || header === mapping[property]).map((header, index) => (
-                          <option key={index} value={header}>
+                          <option key={header} value={header}>
                             {header}
                           </option>
                         ))}
@@ -61,14 +61,14 @@ const Absentee = ({
             </table>
           </div>
         )}
-        {selectedFile &&(
-          <div className="d-flex justify-content-center mt-4">
-            <button className="btn btn-primary" onClick={handleAbsenteeUpload} disabled={loading}>
-              {loading ? 'Uploading' : 'Upload'}
-            </button>
-          </div>
-        )}
       </div>
+      {selectedFile && (
+        <div className="d-flex justify-content-center mt-4">
+          <button className="btn btn-primary" onClick={handleAbsenteeUpload} disabled={loading}>
+            {loading ? 'Uploading' : 'Upload'}
+          </button>
+        </div>
+      )}
       {alertMessage && (
         <div className={`alert alert-${alertType} mt-3`} role="alert">
           {alertMessage}
