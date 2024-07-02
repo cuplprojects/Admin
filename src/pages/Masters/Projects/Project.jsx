@@ -212,7 +212,7 @@ function Project() {
       render: (_, record) => <span>{record.projectName}</span>,
     },
     {
-      title: 'Operation',
+      title: 'Actions',
       dataIndex: 'operation',
       render: (_, record) => {
         const editable = isEditing(record);

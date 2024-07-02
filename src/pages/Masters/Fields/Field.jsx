@@ -239,7 +239,7 @@ const Field = () => {
       ),
     },
     {
-      title: 'Operation',
+      title: 'Actions',
       dataIndex: 'operation',
       render: (_, record) => {
         const editable = isEditing(record);
