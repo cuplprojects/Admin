@@ -478,7 +478,7 @@ const FieldConfiguration = () => {
     axios
       .get(`${APIURL}/FieldConfigurations?WhichDatabase=Local`)
       .then((response) => {
-        setSavedData(response.data);
+        setSavedData(response.data); 
         setPagination({ ...pagination, total: response.data.length });
       })
       .catch((error) => {
