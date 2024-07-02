@@ -51,33 +51,21 @@ const Toolkit = ({
 
   return (
     <div>
-      <button
-        className="btn btn-danger m-1"
-        onClick={onDelete}
-        disabled={selectedAnnotation === null}
-      >
-        Delete
-      </button>
-      <br />
+      <div className="d-flex align-items-center justify-content-between text-danger mb-3">
+        <h2 className="fs-4">{selectedInputField}</h2>
+        <button
+          className="btn btn-danger m-1 text-end"
+          onClick={onDelete}
+          disabled={selectedAnnotation === null}
+        >
+          Delete
+        </button>
+      </div>
+      <hr />
       {selectedAnnotation !== null && (
         <>
-          {/* Dropdown to select input field */}
-          {/* <select
-            className="form-select m-2"
-            value={selectedInputField}
-            onChange={handleInputChange}
-          >
-            <option value="">Select Input Field</option>
-            {inputFields.map((field, index) => (
-              <option key={index} value={field} disabled={mappedFields[field]}>
-                {field}
-              </option>
-            ))}
-          </select> */}
-          {/* Display selected input field */}
-          <p>You have selected: {selectedInputField}</p>
           {/* Inputs for coordinates and dimensions */}
-          <div className="coordinate-inputs">
+          <div className=" coordinate-inputs mt-3">
             <div className="input-group mb-3">
               <div className="input-group-prepend">
                 <span className="input-group-text" id="inputGroup-sizing-default">

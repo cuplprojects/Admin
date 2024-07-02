@@ -1,15 +1,18 @@
-import { Button } from 'antd';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Button, Select } from 'antd';
 import { Table } from 'react-bootstrap';
 import omr1 from '@/assets/images/omrs/100001.jpg';
 import ZoomedImage from './ZoomedImage';
+import FullImageView from './FullImageView';
+
+const { Option } = Select;
 
 const CorrectionPage = () => {
   const [data, setData] = useState([
     {
       coordinates: { x: 402, y: 130.4375, width: 114, height: 136 },
-      FieldName: 'Booklet No',
-      FieldValue: 101,
+      FieldName: 'Gender',
+      FieldValue: 'Male',
     },
     {
       coordinates: { x: 29, y: 136.71875, width: 157, height: 222 },
@@ -20,20 +23,35 @@ const CorrectionPage = () => {
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [allDataCorrected, setAllDataCorrected] = useState(false);
+  const [selectedField, setSelectedField] = useState(localStorage.getItem('selectedField') || ''); // State for selected field to correct
+  const [expandMode, setExpandMode] = useState(false); // State to track expand mode
+
+  useEffect(() => {
+    // Reset the current index and correction status when the selected field changes
+    setCurrentIndex(0);
+    setAllDataCorrected(false);
+    localStorage.setItem('selectedField', selectedField); // Save to local storage
+  }, [selectedField]);
 
   const handleUpdate = (index, newValue) => {
     const updatedData = [...data];
     updatedData[index].FieldValue = newValue;
     setData(updatedData);
+    localStorage.setItem('correctionData', JSON.stringify(updatedData)); // Save to local storage
   };
 
   const handleNext = () => {
-    if (currentIndex < data.length - 1) {
+    let fieldData = data;
+    if (selectedField !== 'all') {
+      fieldData = data.filter((item) => item.FieldName === selectedField);
+    }
+
+    if (currentIndex < fieldData.length - 1) {
       setCurrentIndex(currentIndex + 1);
-      console.log(data);
+      console.log(fieldData);
     } else {
       setAllDataCorrected(true);
-      console.log('All data corrected:', data);
+      console.log('All data corrected:', fieldData);
     }
   };
 
@@ -43,14 +61,51 @@ const CorrectionPage = () => {
     }
   };
 
-  const currentData = data[currentIndex];
+  const handleFieldChange = (value) => {
+    setSelectedField(value);
+  };
+
+  const toggleExpandMode = () => {
+    setExpandMode(!expandMode);
+  };
+
+  const handleFullImageUpdate = (fieldName, newValue) => {
+    const updatedData = [...data];
+    const index = updatedData.findIndex((item) => item.FieldName === fieldName);
+    if (index !== -1) {
+      updatedData[index].FieldValue = newValue;
+      setData(updatedData);
+      localStorage.setItem('correctionData', JSON.stringify(updatedData)); // Save to local storage
+    }
+  };
+
+  let fieldData = data;
+  if (selectedField !== 'all') {
+    fieldData = data.filter((item) => item.FieldName === selectedField);
+  }
+  const currentData = fieldData[currentIndex];
   const imageurl = omr1;
-  const remainingFlags = allDataCorrected ? 0 : data.length - currentIndex;
+  const remainingFlags = allDataCorrected ? 0 : fieldData.length - currentIndex;
 
   return (
     <>
-      <div className="text-end">
-        <Button type="primary">Expand OMR</Button>
+      <div className="d-flex align-items-center justify-content-between">
+        <Select
+          placeholder="Select field to correct"
+          onChange={handleFieldChange}
+          value={selectedField} // Set the value of the Select component
+          style={{ width: 200 }}
+        >
+          <Option value="all">All</Option>
+          {data.map((field, index) => (
+            <Option key={index} value={field.FieldName}>
+              {field.FieldName}
+            </Option>
+          ))}
+        </Select>
+        <Button type="primary" onClick={toggleExpandMode}>
+          {expandMode ? 'Zoomed View' : 'Expand OMR'}
+        </Button>
       </div>
       <p className="text-danger fs-5 m-1 text-center">Remaining Flags: {remainingFlags}</p>
 
@@ -72,25 +127,51 @@ const CorrectionPage = () => {
           </tbody>
         </Table>
       </div>
+
       <div className="w-75 position-relative m-auto border p-4" style={{ minHeight: '75%' }}>
-        {!allDataCorrected ? (
-          <ZoomedImage
+        {!allDataCorrected && selectedField ? (
+          expandMode ? (
+            <FullImageView
             src={imageurl}
             data={currentData}
-            onUpdate={(newValue) => handleUpdate(currentIndex, newValue)}
+            onUpdate={(newValue) =>
+              handleUpdate(
+                data.findIndex((item) => item === currentData),
+                newValue,
+              )
+            }
             onNext={handleNext}
-          />
+            />
+          ) : (
+            <ZoomedImage
+              src={imageurl}
+              data={currentData}
+              onUpdate={(newValue) =>
+                handleUpdate(
+                  data.findIndex((item) => item === currentData),
+                  newValue,
+                )
+              }
+              onNext={handleNext}
+            />
+          )
         ) : (
           <div className="text-center">
-            <p className="fs-3">All data corrected</p>
+            <p className="fs-3">
+              {!selectedField ? 'Please select a field to correct' : 'All data corrected'}
+            </p>
           </div>
         )}
       </div>
       <div className="d-flex justify-content-evenly m-1">
-        <Button type="primary" onClick={handlePrevious}>
+        <Button
+          type="primary"
+          onClick={handlePrevious}
+          disabled={currentIndex === 0 || !selectedField}
+        >
           Previous
         </Button>
-        <Button type="primary" onClick={handleNext} disabled={allDataCorrected}>
+        <Button type="primary" onClick={handleNext} disabled={allDataCorrected || !selectedField}>
           Save and Next
         </Button>
       </div>

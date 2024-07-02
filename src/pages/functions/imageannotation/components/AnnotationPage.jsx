@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Modal, Select, notification } from 'antd';
+import { Button, Drawer, Modal, Select, Space, notification } from 'antd';
 import ImageUploader from './ImageUploader';
 import AnnotationCanvas from './AnnotationCanvas';
 import Toolkit from './Toolkit';
@@ -30,6 +30,7 @@ const AnnotationPage = () => {
     'Booklet Series/Set',
     'Year/Semester',
   ]);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     // Fetch input fields from API
@@ -120,6 +121,7 @@ const AnnotationPage = () => {
     const updatedAnnotations = annotations.filter((_, i) => i !== selectedAnnotation);
     setAnnotations(updatedAnnotations);
     setSelectedAnnotation(null);
+    setOpen(false);
     setIsAdjustingSize(false);
     localStorage.setItem('annotations', JSON.stringify(updatedAnnotations));
   };
@@ -225,46 +227,44 @@ const AnnotationPage = () => {
 
   const handleCloseAnnotation = () => {
     setSelectedAnnotation(null);
+    setOpen(false);
     setIsAdjustingSize(false);
   };
 
   return (
     <div>
-      {selectedAnnotation !== null && (
-        <div
-          style={{
-            zIndex: '99',
-            position: 'fixed',
-            bottom: '10px',
-            right: '10px',
-            backgroundColor: '#dadada',
-            padding: '20px',
-            borderRadius: '8px',
-          }}
-        >
-          <div className="d-flex align-items-center justify-content-end text-danger">
-            <button className="btn btn-sm btn-outline-danger mb-4" onClick={handleCloseAnnotation}>
-              <CloseOutlined />
-            </button>
+      <Drawer
+        extra={
+          <Space>
+            <Button danger onClick={handleCloseAnnotation}>
+              Close
+            </Button>
+          </Space>
+        }
+        onClose={handleCloseAnnotation}
+        open={open}
+      >
+        {selectedAnnotation !== null && (
+          <div>
+            <Toolkit
+              annotations={annotations}
+              onDelete={handleDeleteAnnotation}
+              onAdjustSize={handleAdjustSize}
+              isAdjustingSize={isAdjustingSize}
+              onLeftAdjust={handleAdjustLeftSize}
+              onRightAdjust={handleAdjustRightSize}
+              onTopAdjust={handleAdjustTopSize}
+              onBottomAdjust={handleAdjustBottomSize}
+              inputFields={inputFields}
+              selectedInputField={selectedInputField}
+              setSelectedInputField={setSelectedInputField}
+              mappedFields={mappedFields}
+              selectedAnnotation={selectedAnnotation}
+              setAnnotations={setAnnotations}
+            />
           </div>
-          <Toolkit
-            annotations={annotations}
-            onDelete={handleDeleteAnnotation}
-            onAdjustSize={handleAdjustSize}
-            isAdjustingSize={isAdjustingSize}
-            onLeftAdjust={handleAdjustLeftSize}
-            onRightAdjust={handleAdjustRightSize}
-            onTopAdjust={handleAdjustTopSize}
-            onBottomAdjust={handleAdjustBottomSize}
-            inputFields={inputFields}
-            selectedInputField={selectedInputField}
-            setSelectedInputField={setSelectedInputField}
-            mappedFields={mappedFields}
-            selectedAnnotation={selectedAnnotation}
-            setAnnotations={setAnnotations}
-          />
-        </div>
-      )}
+        )}
+      </Drawer>
 
       <div className="d-flex align-items-center justify-content-around m-1">
         <ImageUploader onImageSelect={handleImageSelect} />
@@ -292,15 +292,26 @@ const AnnotationPage = () => {
                   boxSizing: 'border-box',
                   cursor: 'pointer',
                 }}
-                onClick={() => setSelectedAnnotation(index)}
+                onClick={() => {
+                  setSelectedAnnotation(index);
+                  setOpen(true);
+                }}
               >
-                <div className="bg-light text-center">
-                  <span className="text-primary">
-                    {selectedAnnotation
-                      ? annotations[selectedAnnotation].field
-                      : annotation.FieldName}
-                  </span>
-                </div>
+                {selectedAnnotation !== index && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '0',
+                      width: '100%',
+                      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                      color: 'white',
+                      textAlign: 'center',
+                      fontSize: '12px',
+                    }}
+                  >
+                    {annotation.FieldName}
+                  </div>
+                )}
               </div>
             ))}
           </div>
