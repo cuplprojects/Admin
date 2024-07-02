@@ -338,7 +338,7 @@ const Segmentation = () => {
           </div>
         )}
 
-        {isDivided === 'no' && (
+        {/* {isDivided === 'no' && (
           <div style={{ marginTop: '10px' }}>
             <label style={{ marginBottom: '5px' }}>
               Section Name:
@@ -440,7 +440,7 @@ const Segmentation = () => {
               />
             </label>
           </div>
-        )}
+        )} */}
 
         {showAlert && (
           <Alert
