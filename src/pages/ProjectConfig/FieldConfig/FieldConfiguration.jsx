@@ -34,6 +34,7 @@
 //   });
 //   const [rangeError, setRangeError] = useState(false)
 
+
 //   // useEffect(() => {
 //   //   if (formData.maxRange) {
 //   //     setFormData(prevFormData => ({
@@ -45,7 +46,7 @@
 //   useEffect(() => {
 //     getFields();
 //   }, []);
-
+  
 //   useEffect(() => {
 //     axios
 //       .get(`${APIURL}/FieldConfigurations?WhichDatabase=Local`)
@@ -57,6 +58,7 @@
 //         console.error('Error fetching field configurations:', error);
 //       });
 //   }, []);
+
 
 //   const getFields = () => {
 //     axios
@@ -88,6 +90,7 @@
 //       });
 //     }
 //   };
+
 
 //   // if (id === 'inRange' && value > formData.maxRange) {
 //   //   showAlert('Minimum range cannot be greater than maximum range.', 'danger');
@@ -195,6 +198,7 @@
 //       canBlank: false,
 //     });
 //   };
+
 
 //   useEffect(() => {
 //     if (savedData.length > 0) {
@@ -336,7 +340,7 @@
 //               ))}
 //             </Select>
 //             </div>
-
+            
 //               <div className='d-flex align-items-center'>
 //               <label className='me-2' htmlFor="canBlank">Allow Blank Values?</label>
 //                  <input
@@ -345,9 +349,10 @@
 //               checked={formData.canBlank} // Use checked attribute instead of value
 //               onChange={handleInputChange}
 //             />
+            
 
 //               </div>
-
+           
 //           </div>
 //           <Row>
 //             <Col>
@@ -427,6 +432,7 @@
 // };
 
 // export default FieldConfiguration;
+
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
@@ -543,30 +549,25 @@ const FieldConfiguration = () => {
     }
 
     const newConfig = {
-      fieldConfigurationId:
-        selectedFieldIndex !== -1 ? savedData[selectedFieldIndex].fieldConfigurationId : 0,
+      fieldConfigurationId: selectedFieldIndex !== -1 ? savedData[selectedFieldIndex].fieldConfigurationId : 0,
       projectId: 1,
       fieldName: fieldName, // Add fieldName here
       fieldAttributesJson: '',
       canBlank: formData.canBlank,
-      fieldAttributes: [
-        {
-          minRange: formData.minRange,
-          maxRange: formData.maxRange,
-          responses: formData.responses,
-          numberOfBlocks: formData.numberOfBlocks.toString(),
-        },
-      ],
+      fieldAttributes: [{
+        minRange: formData.minRange,
+        maxRange: formData.maxRange,
+        responses: formData.responses,
+        numberOfBlocks: formData.numberOfBlocks.toString(),
+      },
+    ],
     };
 
     console.log('Payload to be sent:', JSON.stringify(newConfig, null, 2));
 
     if (selectedFieldIndex !== -1) {
       axios
-        .put(
-          `${APIURL}/FieldConfigurations/${newConfig.fieldConfigurationId}?WhichDatabase=Local`,
-          newConfig,
-        )
+        .put(`${APIURL}/FieldConfigurations/${newConfig.fieldConfigurationId}?WhichDatabase=Local`, newConfig)
         .then((response) => {
           const updatedData = [...savedData];
           updatedData[selectedFieldIndex] = { ...updatedData[selectedFieldIndex], ...newConfig };
@@ -633,10 +634,10 @@ const FieldConfiguration = () => {
     setFormVisible(true);
     setSelectedFieldIndex(rowIndex);
     setFormData({
-      minRange: record.fieldAttributes[0].minRange,
-      maxRange: record.fieldAttributes[0].maxRange,
-      responses: record.fieldAttributes[0].responses,
-      numberOfBlocks: record.fieldAttributes[0].numberOfBlocks,
+      minRange: record.fieldAttributes.minRange,
+      maxRange: record.fieldAttributes.maxRange,
+      responses: record.fieldAttributes.responses,
+      numberOfBlocks: record.fieldAttributes.numberOfBlocks,
     });
     setFieldName(record.fieldName); // Set the fieldName state
   };
@@ -660,32 +661,28 @@ const FieldConfiguration = () => {
     },
     {
       title: 'Min Range',
-      dataIndex: ['fieldAttributes', 0, 'minRange'],
+      dataIndex: ['fieldAttributes', 'minRange'],
       key: 'minRange',
-      sorter: (a, b) =>
-        parseInt(a.fieldAttributes[0].minRange) - parseInt(b.fieldAttributes[0].minRange),
+      sorter: (a, b) => parseInt(a.fieldAttributes.minRange) - parseInt(b.fieldAttributes.minRange),
     },
     {
       title: 'Max Range',
-      dataIndex: ['fieldAttributes', 0, 'maxRange'],
+      dataIndex: ['fieldAttributes', 'maxRange'],
       key: 'maxRange',
-      sorter: (a, b) =>
-        parseInt(a.fieldAttributes[0].maxRange) - parseInt(b.fieldAttributes[0].maxRange),
+      sorter: (a, b) => parseInt(a.fieldAttributes.maxRange) - parseInt(b.fieldAttributes.maxRange),
     },
     {
       title: 'Preferred Responses',
-      dataIndex: ['fieldAttributes', 0, 'responses'],
+      dataIndex: ['fieldAttributes', 'responses'],
       key: 'responses',
-      sorter: (a, b) =>
-        a.fieldAttributes[0].responses.localeCompare(b.fieldAttributes[0].responses),
+      sorter: (a, b) => a.fieldAttributes.responses.localeCompare(b.fieldAttributes.responses),
     },
     {
       title: 'Number of Blocks',
-      dataIndex: ['fieldAttributes', 0, 'numberOfBlocks'],
+      dataIndex: ['fieldAttributes', 'numberOfBlocks'],
       key: 'numberOfBlocks',
       sorter: (a, b) =>
-        parseInt(a.fieldAttributes[0].numberOfBlocks) -
-        parseInt(b.fieldAttributes[0].numberOfBlocks),
+        parseInt(a.fieldAttributes.numberOfBlocks) - parseInt(b.fieldAttributes.numberOfBlocks),
     },
     {
       title: 'Actions',
