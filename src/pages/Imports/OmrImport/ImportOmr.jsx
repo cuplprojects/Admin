@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Button } from 'antd';
+import { Button,Progress } from 'antd';
 import localforage from 'localforage';
 
 
@@ -16,6 +16,7 @@ const ImportOmr = () => {
   const [currentFileName, setCurrentFileName] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
   const [alertType, setAlertType] = useState('');
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -65,6 +66,7 @@ const ImportOmr = () => {
     const fileCount = files.length;
 
     for (let i = currentFileIndex; i < fileCount; i++) {
+      setProgress(0);
       const formData = new FormData();
       formData.append('file', files[i]);
 
@@ -76,6 +78,15 @@ const ImportOmr = () => {
             headers: {
               'Content-Type': 'multipart/form-data',
             },
+            onUploadProgress: (progressEvent) => {
+              const totalLength = progressEvent.lengthComputable
+                ? progressEvent.total
+                : progressEvent.target.getResponseHeader('content-length') ||
+                  progressEvent.target.getResponseHeader('x-decompressed-content-length');
+              if (totalLength !== null) {
+                setProgress(Math.round((progressEvent.loaded * 100) / totalLength));
+              }
+            }
           },
         );
 
@@ -91,6 +102,9 @@ const ImportOmr = () => {
           await removeCurrentFileIndex();
           setAlertMessage('All files uploaded successfully!');
           setAlertType('success');
+          setProgress(100);
+        } else {
+          setProgress(((nextFileIndex / fileCount) * 100).toFixed(2));
         }
       } catch (error) {
         if (error.response && error.response.status === 409) {
@@ -150,6 +164,13 @@ const ImportOmr = () => {
           </Button>
         )}
       </form>
+      {loading && (
+        <Progress
+          percent={progress}
+          size="small"
+          status={loading ? 'active' : 'normal'}
+        />
+      )}
  
       {loading && <p>Loading...</p>}
       {showSkipBtn && (
@@ -160,7 +181,9 @@ const ImportOmr = () => {
         <Button type="primary" onClick={replaceFile}>
         Replace {currentFileName}
       </Button>
-      </>
+      
+    
+    </>
       )}
       {alertMessage && (
         <div className={`alert alert-${alertType} mt-3`} role="alert">
