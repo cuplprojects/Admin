@@ -95,7 +95,7 @@ const CorrectionPage = () => {
 
   return (
     <>
-      <div>
+      {/* <div>
         <button className='btn btn-primary m-1' onClick={() => handleShowNotification('success', 1)}>
           Show Success Notification
         </button>
@@ -104,7 +104,7 @@ const CorrectionPage = () => {
           Show Warning Notification
         </button>
         <button className='btn btn-primary m-1' onClick={() => handleShowNotification('info', 4)}>Show Info Notification</button>
-      </div>
+      </div> */}
 
       <div className="d-flex align-items-center justify-content-between">
         <Select

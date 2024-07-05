@@ -471,6 +471,17 @@ const OTHERS_PERMISSION = [
     component: '/AuditPage/index.tsx',
 
   },
+  {
+    id: '3981225257359242',
+    parentId: '',
+    label: 'Project Dashboard',
+    name: 'ProjectDashboard',
+    icon: 'hugeicons:audit-01',
+    type: PermissionType.MENU,
+    route: 'ProjectDashboard',
+    component: '/ProjectDashboard/index.tsx',
+
+  },
 //   {
 //     id: '3981225257359246',
 //     parentId: '',

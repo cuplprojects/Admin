@@ -1,3 +1,171 @@
+// import React, { useEffect, useState } from 'react';
+// import { Menu, MenuProps } from 'antd';
+// import Color from 'color';
+// import { m } from 'framer-motion';
+// import { CSSProperties } from 'react';
+// import { useLocation, useNavigate } from 'react-router-dom';
+// import { MenuUnfoldOutlined, MenuFoldOutlined } from '@ant-design/icons';
+// import Scrollbar from '@/components/scrollbar';
+// import { useRouteToMenuFn, usePermissionRoutes, useFlattenedRoutes } from '@/router/hooks';
+// import { menuFilter } from '@/router/utils';
+// import { useSettingActions, useSettings } from '@/store/settingStore';
+// import { useThemeToken } from '@/theme/hooks';
+// import { NAV_COLLAPSED_WIDTH, NAV_WIDTH } from './config';
+// import { ThemeLayout } from '#/enum';
+// import { ItemType } from 'antd/es/menu/interface';
+// import { useProjectId, useProjectActions } from './ProjectStore'; // Adjust the import path as per your project structure
+
+// const slideInLeft = varSlide({ distance: 10 }).inLeft;
+
+// type Props = {
+//   closeSideBarDrawer?: () => void;
+// };
+
+// const Nav = (props: Props) => {
+//   const navigate = useNavigate();
+//   const { pathname } = useLocation();
+
+//   const { colorPrimary, colorTextBase, colorBgElevated, colorBorder } = useThemeToken();
+
+//   const settings = useSettings();
+//   const { themeLayout } = settings;
+//   const { setSettings } = useSettingActions();
+
+//   const routeToMenuFn = useRouteToMenuFn();
+//   const permissionRoutes = usePermissionRoutes();
+//   const flattenedRoutes = useFlattenedRoutes();
+
+//   const [collapsed, setCollapsed] = useState(false);
+//   const [openKeys, setOpenKeys] = useState<string[]>([]);
+//   const [selectedKeys, setSelectedKeys] = useState<string[]>(['']);
+//   const [menuList, setMenuList] = useState<ItemType[]>([]);
+//   const [menuMode, setMenuMode] = useState<MenuProps['mode']>('inline');
+//   const [currentSelectedProject, setCurrentSelectedProject] = useState<string | null>(null);
+
+//   const projectId = useProjectId();
+//   const { setProjectId } = useProjectActions();
+
+//   useEffect(() => {
+//     if (currentSelectedProject) {
+//       const menuRoutes = menuFilter(permissionRoutes);
+//       const menus = routeToMenuFn(menuRoutes);
+//       setMenuList(menus);
+//     } else {
+//       const menuRoutes = menuFilter([permissionRoutes[0], permissionRoutes[1]]);
+//       const menus = routeToMenuFn(menuRoutes);
+//       setMenuList(menus);
+//     }
+//   }, [permissionRoutes, routeToMenuFn, currentSelectedProject]);
+
+//   useEffect(() => {
+//     if (themeLayout === ThemeLayout.Vertical) {
+//       setCollapsed(false);
+//       setMenuMode('inline');
+//     }
+//     if (themeLayout === ThemeLayout.Mini) {
+//       setCollapsed(true);
+//       setMenuMode('inline');
+//     }
+//   }, [themeLayout]);
+
+//   useEffect(() => {
+//     if (menuList?.length > 0) {
+//       if (themeLayout === ThemeLayout.Vertical) {
+//         const openKeys = flattenedRoutes
+//           .filter((route) => matches(route.pathname))
+//           .map((route) => route.pathname);
+//         setOpenKeys(openKeys);
+//       }
+//       setSelectedKeys([pathname]);
+//     }
+//   }, [menuList, pathname, flattenedRoutes, matches, collapsed, themeLayout]);
+
+//   const onOpenChange: MenuProps['onOpenChange'] = (keys) => {
+//     setOpenKeys(keys);
+//   };
+
+//   const onClick: MenuProps['onClick'] = ({ key }) => {
+//     const nextLink = flattenedRoutes?.find((route) => route.key === key);
+
+//     if (nextLink?.hideTab && nextLink?.frameSrc) {
+//       window.open(nextLink.frameSrc, '_blank');
+//       return;
+//     }
+
+//     navigate(key);
+//     props?.closeSideBarDrawer?.();
+//   };
+
+//   const setThemeLayout = (themeLayout: ThemeLayout) => {
+//     setSettings({
+//       ...settings,
+//       themeLayout,
+//     });
+//   };
+
+//   const toggleCollapsed = () => {
+//     if (!collapsed) {
+//       setThemeLayout(ThemeLayout.Mini);
+//     } else {
+//       setThemeLayout(ThemeLayout.Vertical);
+//     }
+//     setCollapsed(!collapsed);
+//   };
+
+//   return (
+//     <div
+//       className="flex h-full flex-col"
+//       style={{
+//         width: collapsed ? NAV_COLLAPSED_WIDTH : NAV_WIDTH,
+//         borderRight: `1px dashed ${Color(colorBorder).alpha(0.6).toString()}`,
+//       }}
+//     >
+//       <div className="relative flex h-20 items-center justify-center py-4">
+//         <div className="flex items-center">
+//           {themeLayout !== ThemeLayout.Mini && (
+//             <m.div variants={slideInLeft}>
+//               <span className="ml-2 text-xl font-bold" style={{ color: colorPrimary }}>
+//                 CUPL SPA
+//               </span>
+//             </m.div>
+//           )}
+//         </div>
+//         <button
+//           onClick={toggleCollapsed}
+//           className="absolute right-0 top-7 z-50 hidden h-6 w-6 translate-x-1/2 cursor-pointer select-none rounded-full text-center !text-gray md:block"
+//           style={{ color: colorTextBase, borderColor: colorTextBase, fontSize: 16 }}
+//         >
+//           {collapsed ? <MenuUnfoldOutlined size={20} /> : <MenuFoldOutlined size={20} />}
+//         </button>
+//       </div>
+
+//       <Scrollbar
+//         style={{
+//           height: 'calc(100vh -70px)',
+//         }}
+//       >
+//         <Menu
+//           mode={menuMode}
+//           items={menuList}
+//           className="h-full !border-none"
+//           defaultOpenKeys={openKeys}
+//           defaultSelectedKeys={selectedKeys}
+//           selectedKeys={selectedKeys}
+//           openKeys={openKeys}
+//           onOpenChange={onOpenChange}
+//           onClick={onClick}
+//           style={{ background: colorBgElevated }}
+//           inlineCollapsed={collapsed}
+//           inlineIndent={50}
+//         />
+//       </Scrollbar>
+//     </div>
+//   );
+// };
+
+// export default Nav;
+
+
 import { MenuUnfoldOutlined, MenuFoldOutlined } from '@ant-design/icons';
 import { Menu, MenuProps } from 'antd';
 
@@ -19,6 +187,7 @@ import { NAV_COLLAPSED_WIDTH, NAV_WIDTH } from './config';
 
 import { ThemeLayout } from '#/enum';
 import { ItemType } from 'antd/es/menu/interface';
+
 const slideInLeft = varSlide({ distance: 10 }).inLeft;
 
 type Props = {
@@ -51,10 +220,7 @@ export default function Nav(props: Props) {
   const [selectedKeys, setSelectedKeys] = useState<string[]>(['']);
   const [menuList, setMenuList] = useState<ItemType[]>([]);
   const [menuMode, setMenuMode] = useState<MenuProps['mode']>('inline');
-  const [currentSelectedProject, setCurrentSelectedProject] = useState(() => {
-    const storedProjectId = localStorage.getItem('projectid');
-    return storedProjectId ? 'defaultProjectId' : null; // Set a default value if 'projectid' is not found
-  });
+  const [currentSelectedProject, setCurrentSelectedProject] = useState(1);
 
   useEffect(() => {
     if (menuList?.length > 0) {
