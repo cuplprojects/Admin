@@ -51,6 +51,10 @@ export default function Nav(props: Props) {
   const [selectedKeys, setSelectedKeys] = useState<string[]>(['']);
   const [menuList, setMenuList] = useState<ItemType[]>([]);
   const [menuMode, setMenuMode] = useState<MenuProps['mode']>('inline');
+  const [currentSelectedProject, setCurrentSelectedProject] = useState(() => {
+    const storedProjectId = localStorage.getItem('projectid');
+    return storedProjectId ? 'defaultProjectId' : null; // Set a default value if 'projectid' is not found
+  });
 
   useEffect(() => {
     if (menuList?.length > 0) {
@@ -65,9 +69,20 @@ export default function Nav(props: Props) {
   }, [menuList, pathname, matches, collapsed, themeLayout]);
 
   useEffect(() => {
-    const menuRoutes = menuFilter(permissionRoutes);
-    const menus = routeToMenuFn(menuRoutes);
-    setMenuList(menus);
+    if (currentSelectedProject) {
+      const menuRoutes = menuFilter(permissionRoutes);
+      const menus = routeToMenuFn(menuRoutes);
+      setMenuList(menus);
+
+    }
+    else {
+      const menuRoutes = menuFilter([permissionRoutes[0], permissionRoutes[1]]);
+
+      const menus = routeToMenuFn(menuRoutes);
+      setMenuList(menus);
+    }
+
+
   }, [permissionRoutes, routeToMenuFn]);
 
   useEffect(() => {
@@ -89,7 +104,7 @@ export default function Nav(props: Props) {
   };
   const onClick: MenuProps['onClick'] = ({ key }) => {
 
-   //Match the currently clicked one from the flattened routing information
+    //Match the currently clicked one from the flattened routing information
     const nextLink = flattenedRoutes?.find((el) => el.key === key);
 
     //Handle the special case of external links in menu items
@@ -147,12 +162,14 @@ export default function Nav(props: Props) {
         </button>
       </div>
 
+
       <Scrollbar
         style={{
           height: 'calc(100vh -70px)',
         }}
       >
         {/*<!--Sidebar Menu --> */}
+
         <Menu
           mode={menuMode}
           items={menuList}
