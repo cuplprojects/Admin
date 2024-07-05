@@ -301,7 +301,7 @@ const Field = () => {
           Add Field
         </Button>
         <Input
-          placeholder="Search Project"
+          placeholder="Search Field"
           value={searchTerm}
           onChange={handleSearchChange}
           style={{ width: 100, marginRight: 8 }}

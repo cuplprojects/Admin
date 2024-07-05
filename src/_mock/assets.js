@@ -333,6 +333,7 @@ const MENU_LEVEL_PERMISSION = {
       route: 'Fields',
       component: '/Masters/Fields/index.tsx',
     },
+   
     // {
     //   id: '7572529636800586',
     //   parentId: '0194818428516575',
@@ -523,6 +524,27 @@ const OTHERS_PERMISSION = [
     type: PermissionType.MENU,
     route: 'correction',
     component: '/correction/index.tsx',
+  },
+  {
+    id: '3981225257359246',
+    parentId: '',
+    label: 'Ambiguity',
+    name: 'Ambiguity',
+    icon: 'solar:document-add-bold-duotone',
+    type: PermissionType.MENU,
+    route: 'Ambiguity',
+    component: '/Ambiguity/index.tsx',
+  },
+
+  {
+    id: '3981225257359246',
+    parentId: '',
+    label: 'Report',
+    name: 'Report',
+    icon: 'solar:document-add-bold-duotone',
+    type: PermissionType.MENU,
+    route:'Report',
+    component: '/Report/index.tsx',
   },
 
 

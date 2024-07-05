@@ -4,9 +4,8 @@ import { Button, Col, Input, Row, Select, notification, Modal, Popconfirm, Switc
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useRouter } from '@/router/hooks';
 import { Icon } from '@iconify/react';
-// import editOutlined from '@iconify/icons-ant-design/edit-outlined';
-// import deleteOutlined from '@iconify/icons-ant-design/delete-outlined';
-import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import editOutlined from '@iconify/icons-ant-design/edit-outlined';
+import deleteOutlined from '@iconify/icons-ant-design/delete-outlined';
 
 export default function GeneralTab() {
   const { push } = useRouter();
@@ -28,7 +27,6 @@ export default function GeneralTab() {
   useEffect(() => {
     const fetchUsersAndRoles = async () => {
       try {
-
         const [usersRes, rolesRes] = await Promise.all([
           axios.get('https://localhost:7290/api/Users?WhichDatabase=Local'),
           axios.get('https://localhost:7290/api/Roles?WhichDatabase=Local'),
@@ -47,7 +45,6 @@ export default function GeneralTab() {
 
         setUserList(usersWithRoleNames);
         setRoles(rolesRes.data);
-
       } catch (error) {
         console.error('Error fetching users and roles:', error.message);
       }
@@ -223,16 +220,23 @@ export default function GeneralTab() {
                         user.email
                       )}
                     </td>
-
                     <td>
                       {editingUserId === user.userId ? (
-                        <Input name="roleName" value={userData.roleName} onChange={handleChange} />
+                        <Select
+                          value={userData.roleId}
+                          onChange={handleRoleChange}
+                          style={{ width: 120 }}
+                        >
+                          {roles.map((role) => (
+                            <Select.Option key={role.roleId} value={role.roleId}>
+                              {role.roleName}
+                            </Select.Option>
+                          ))}
+                        </Select>
                       ) : (
                         user.roleName
                       )}
                     </td>
-                    
-                    
                     <td>
                       <Switch
                         checked={user.isActive}
@@ -247,14 +251,14 @@ export default function GeneralTab() {
                         </>
                       ) : (
                         <>
-                          <Button type="primary" icon={<Icon icon={EditOutlined} />} onClick={() => handleEdit(user)} />
+                          <Button type="primary" icon={<Icon icon={editOutlined} />} onClick={() => handleEdit(user)} />
                           <Popconfirm
                             title="Are you sure you want to delete this user?"
                             onConfirm={() => showDeleteConfirm(user.userId)}
                             okText="Yes"
                             cancelText="No"
                           >
-                            <Button danger icon={<Icon icon={DeleteOutlined} />} style={{ marginLeft: 8 }} />
+                            <Button danger icon={<Icon icon={deleteOutlined} />} style={{ marginLeft: 8 }} />
                           </Popconfirm>
                         </>
                       )}

@@ -19,18 +19,9 @@ const Import = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [headers, setHeaders] = useState([]);
-
   const [fieldMappings, setFieldMappings] = useState({});
-
-
-  const [mapping, setMapping] = useState({
-    districtCode: '',
-    centerCode: '',
-    rollNo: ''
-  });
-  const [registrationMapping, setRegistrationMapping] = useState({
-    rollNo: ''
-  });
+  const [mapping, setMapping] = useState([]);
+  const [registrationMapping, setRegistrationMapping] = useState([]);
   const [alertMessage, setAlertMessage] = useState('');
   const [alertType, setAlertType] = useState('');
   const [fieldNamesArray, setFieldNamesArray] = useState([]);
@@ -44,11 +35,11 @@ const Import = () => {
 
     } else if (file && ['scanned', 'registration', 'absentee'].includes(activetab)) {
       if (activetab === 'scanned' && (file.type === 'text/csv' || file.type === 'application/dat')) {
-        console.log('File uploaded:', file);
+
         setSelectedFile(file);
 
       } else if ((activetab === 'registration' || activetab === 'absentee') && file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
-        console.log('File uploaded:', file);
+
         setSelectedFile(file);
 
         const reader = new FileReader();
@@ -71,6 +62,26 @@ const Import = () => {
   };
 
 
+  useEffect(() => {
+    // Fetch mapping fields from backend
+    const fetchMappingFields = async () => {
+      try {
+        const response = await fetch(`${apiurl}/Absentee/absentee/mapping-fields?WhichDatabase=Local`);
+        const data = await response.json();
+
+        // Transform array data into object format
+        const initialMapping = data.reduce((acc, field) => {
+          acc[field.toUpperCase()] = '';
+          return acc;
+        }, {});
+
+        setMapping(initialMapping);
+      } catch (error) {
+        console.error('Error fetching mapping fields:', error);
+      }
+    };
+    fetchMappingFields();
+  }, []);
 
 
   const handleAbsenteeUpload = async () => {
@@ -92,12 +103,12 @@ const Import = () => {
             const header = mapping[property];
             const index = jsonData[0].indexOf(header);
             // Ensure the value is converted to string before assigning
-            rowData[property] = String(row[index]);
+            rowData[property] = index !== -1 ? String(row[index]) : '';
           }
           return rowData;
         });
 
-        console.log('Mapped Data:', mappedData);
+
 
         try {
 
@@ -111,7 +122,7 @@ const Import = () => {
             body: JSON.stringify(mappedData), // Send the mappedData array directly
           });
           const data = await response.json();
-          console.log('Response from server:', data);
+
           setAlertMessage('Upload successful!');
           setAlertType('success');
         } catch (error) {
@@ -158,9 +169,9 @@ const Import = () => {
           throw new Error('Failed to fetch field mappings');
         }
         const data = await response.json();
-        console.log(data)
+
         const mappings = data.map((item) => ({
-          field: item.fieldName
+          field: item.fieldAttributes[0].field
 
         }));
 
@@ -168,7 +179,7 @@ const Import = () => {
         mappings.push({ field: "Barcode" });
         mappings.push({ field: "NCS" });
 
-        console.log(mappings)
+
         setFieldMappings(mappings.reduce((acc, current) => ({ ...acc, [current.field]: current }), {}));
       } catch (error) {
         console.error('Error fetching field mappings:', error);
@@ -176,6 +187,34 @@ const Import = () => {
     };
     fetchFieldMappings();
   }, []);
+
+
+  useEffect(() => {
+    const fetchRegistrationMappings = async () => {
+      try {
+        const response = await fetch(`${apiurl}/FieldConfigurations?WhichDatabase=Local`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch field mappings');
+        }
+        const data = await response.json();
+
+
+        // Transform array data into object format
+        const initialMapping = data.reduce((acc, item) => {
+          acc[item.fieldAttributes[0].field] = '';
+          return acc;
+        }, {});
+
+
+        setRegistrationMapping(initialMapping);
+      } catch (error) {
+        console.error('Error fetching field mappings:', error);
+      }
+    };
+    fetchRegistrationMappings();
+  }, []);
+
+
 
   const handleFieldMappingChange = (e, field) => {
     setFieldMappings((prevMappings) => ({ ...prevMappings, [field]: e.target.value }));
@@ -226,7 +265,7 @@ const Import = () => {
 
           return rowData;
         });
-        console.log(parsedData)
+
         try {
           const response = await fetch(`${apiurl}/OMRData/uploadcsv?WhichDatabase=Local`, {
             method: 'POST',
@@ -239,12 +278,12 @@ const Import = () => {
 
           if (contentType && contentType.indexOf('application/json') !== -1) {
             const data = await response.json();
-            console.log('Response from server:', data);
+
             setAlertMessage('Upload successful!');
             setAlertType('success');
           } else {
             const text = await response.text();
-            console.log('Response from server:', text);
+
             setAlertMessage('Upload successful!');
             setAlertType('success');
           }
@@ -269,72 +308,110 @@ const Import = () => {
 
   };
 
-  const handleRegistrationMappingChange = (e, property) => {
-    setRegistrationMapping({
-      ...registrationMapping,
-      [property]: e.target.value
-    });
+
+
+  const handleRegistrationMappingChange = (e, field) => {
+    setRegistrationMapping(prevMappings => ({
+      ...prevMappings,
+      [field]: e.target.value || ''
+    }));
   };
+
+  useEffect(() => {
+  }, [registrationMapping]);
+
 
 
   const handleRegistrationUpload = async (event) => {
     event.preventDefault();
   
-    if (selectedFile) {
-      setLoading(true);
-      const reader = new FileReader();
-  
-      reader.onload = async (e) => {
-        const data = e.target.result;
-        const workbook = XLSX.read(data, { type: 'binary' });
-        const sheetName = workbook.SheetNames[0];
-        const sheet = workbook.Sheets[sheetName];
-        const jsonData = XLSX.utils.sheet_to_json(sheet);
-  
-        const mappedData = jsonData.map((item) => {
-          // console.log(item)
-          let mappedItem = {
-            "rollNumber": item[registrationMapping.rollNo].toString(),
-            "registrationsData": JSON.stringify(item).replace(/\"/g, "'"), // Assuming item already contains the desired structure
-          };
-  
-          // console.log(mappedItem);
-          return mappedItem;
-        });
-  
-        try {
-          const response = await axios.post(`${apiurl}/Registration?WhichDatabase=Local`, mappedData);
-  
-          console.log('Registration data uploaded successfully:', response.data);
-          setAlertMessage('Upload successful!');
-          setAlertType('success');
-        } catch (error) {
-          console.error('Error uploading registration data:', error);
-          setAlertMessage('Error uploading data.');
-          setAlertType('danger');
-        } finally {
-          setLoading(false);
-        }
-      };
-  
-      reader.readAsBinaryString(selectedFile);
-    } else {
+    if (!selectedFile) {
       console.error('No file selected.');
       setAlertMessage('No file selected.');
       setAlertType('warning');
       setLoading(false);
+      return;
     }
+  
+    setLoading(true);
+    const reader = new FileReader();
+  
+    reader.onload = async (e) => {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+        const headers = jsonData[0]; // Extract headers from first row
+        const rows = jsonData.slice(1); // Exclude headers
+  
+        const mappedData = rows.map(row => {
+          const rowData = {};
+          for (let property in registrationMapping) {
+            const header = registrationMapping[property];
+            const index = headers.indexOf(header);
+            if (index !== -1) {
+              rowData[property] = String(row[index]); // Ensure data is converted to string if necessary
+            } else {
+              console.warn(`Header '${header}' not found in Excel data. Skipping field '${property}'.`);
+            }
+          }
+          return rowData;
+        });
+  
+        const validMappedData = mappedData.filter(row => {
+          // Check if all mapped fields have corresponding headers
+          return Object.keys(row).every(field => row[field] !== undefined && row[field] !== '');
+        });
+  
+        if (validMappedData.length === 0) {
+          console.warn('No valid data to upload. Ensure all required fields are mapped.');
+          setAlertMessage('No valid data to upload.');
+          setAlertType('warning');
+          setLoading(false);
+          setSelectedFile(null);
+          return;
+        }
+  
+        const response = await fetch(`${apiurl}/Registration?WhichDatabase=Local`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(validMappedData),
+        });
+  
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+  
+        const responseData = await response.json();
+  
+        setAlertMessage('Upload successful!');
+        setAlertType('success');
+      } catch (error) {
+        console.error('Error uploading registration data:', error);
+        setAlertMessage('Error uploading data.');
+        setAlertType('danger');
+      } finally {
+        setLoading(false);
+        setSelectedFile(null);
+      }
+    };
+  
+    reader.readAsArrayBuffer(selectedFile); // Read file as ArrayBuffer
   };
   
 
 
-
   const handleMappingChange = (e, property) => {
-    setMapping({
-      ...mapping,
-      [property]: e.target.value
-    });
+    setMapping((prevMapping) => ({
+      ...prevMapping,
+      [property]: e.target.value || ''
+    }));
   };
+
 
 
   return (
@@ -356,7 +433,7 @@ const Import = () => {
                   <span className='tabline'></span>
 
                   <li style={{ border: `2px solid ${colorPrimary}` }} className='tabcircle' onClick={() => { setActivetab('scanned'); setSelectedFile(null); setAlertMessage(null); setAlertType(null); setHeaders([]); }}>
-                    <a data-toggle="tab"  title="Scanned Data" >
+                    <a data-toggle="tab" title="Scanned Data" >
 
                       <span className="round-tabs-pq two-pq">
                         <i className="fa-solid fa-file-csv" style={{ color: colorPrimary }}></i>
@@ -365,16 +442,16 @@ const Import = () => {
                   </li>
                   <span className='tabline'></span>
 
-                  <li style={{ border: `2px solid ${colorPrimary}` }} className='tabcircle' onClick={() => { setActivetab('registration'); setSelectedFile(null); setHeaders([]); setAlertMessage(null);setAlertType(null); }}>
+                  <li style={{ border: `2px solid ${colorPrimary}` }} className='tabcircle' onClick={() => { setActivetab('registration'); setSelectedFile(null); setHeaders([]); setAlertMessage(null); setAlertType(null); }}>
                     <a data-toggle="tab" title="Registration Data">
-         <span className="round-tabs-pq three-pq">
+                      <span className="round-tabs-pq three-pq">
                         <i className="fa-regular fa-id-card" style={{ color: colorPrimary }}></i>
                       </span>
                     </a>
                   </li>
                   <span className='tabline'></span>
 
-                  <li style={{ border: `2px solid ${colorPrimary}` }} className='tabcircle' onClick={() => { setActivetab('absentee'); setSelectedFile(null); setHeaders([]); setAlertMessage(null);setAlertType(null); }}>
+                  <li style={{ border: `2px solid ${colorPrimary}` }} className='tabcircle' onClick={() => { setActivetab('absentee'); setSelectedFile(null); setHeaders([]); setAlertMessage(null); setAlertType(null); }}>
                     <a data-toggle="tab" title="Absentee Data">
 
                       <span className="round-tabs-pq four-pq ">
@@ -386,7 +463,7 @@ const Import = () => {
               </div>
               <div className="tab-content-pq">
                 {fieldNamesArray.map((item) => {
-                  console.log(item.field)
+
                 })}
                 {activetab === 'OMRImages' && <ImportOmr />}
                 {activetab === 'scanned' &&
