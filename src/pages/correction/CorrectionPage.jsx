@@ -93,19 +93,11 @@ const CorrectionPage = () => {
   const imageurl = omr1;
   const remainingFlags = allDataCorrected ? 0 : fieldData.length - currentIndex;
 
+  // Extract unique field names using Set
+  const uniqueFields = Array.from(new Set(data.map((item) => item.FieldName)));
+
   return (
     <>
-      {/* <div>
-        <button className='btn btn-primary m-1' onClick={() => handleShowNotification('success', 1)}>
-          Show Success Notification
-        </button>
-        <button className='btn btn-primary m-1' onClick={() => handleShowNotification('error', 2)}>Show Error Notification</button>
-        <button className='btn btn-primary m-1' onClick={() => handleShowNotification('warning', 3)}>
-          Show Warning Notification
-        </button>
-        <button className='btn btn-primary m-1' onClick={() => handleShowNotification('info', 4)}>Show Info Notification</button>
-      </div> */}
-
       <div className="d-flex align-items-center justify-content-between">
         <Select
           placeholder="Select field to correct"
@@ -114,9 +106,9 @@ const CorrectionPage = () => {
           style={{ width: 200 }}
         >
           <Option value="all">All</Option>
-          {data.map((field, index) => (
-            <Option key={index} value={field.FieldName}>
-              {field.FieldName}
+          {uniqueFields.map((field, index) => (
+            <Option key={index} value={field}>
+              {field}
             </Option>
           ))}
         </Select>

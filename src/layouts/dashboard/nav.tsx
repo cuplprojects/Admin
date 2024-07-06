@@ -220,7 +220,7 @@ export default function Nav(props: Props) {
   const [selectedKeys, setSelectedKeys] = useState<string[]>(['']);
   const [menuList, setMenuList] = useState<ItemType[]>([]);
   const [menuMode, setMenuMode] = useState<MenuProps['mode']>('inline');
-  const [currentSelectedProject, setCurrentSelectedProject] = useState(1);
+  const [currentSelectedProject] = useState(1);
 
   useEffect(() => {
     if (menuList?.length > 0) {
