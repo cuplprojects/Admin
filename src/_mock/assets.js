@@ -5,6 +5,28 @@ import { BasicStatus, PermissionType } from '#/enum';
 /**
  * User permission mock
  */
+const SUPER_ADMIN = {
+  id: '9100714781927705',
+  parentId: '',
+  label: 'SuperAdmin',
+  name: 'superadmin',
+  icon: 'ic-analysis',
+  type: PermissionType.CATALOGUE,
+  route: 'superadmin',
+  order: 7,
+  children: [
+    {
+      id: '84269992294002379',
+      parentId: '9100714781927705',
+      label: 'AlertPage',
+      name: 'AlertPage',
+      type: PermissionType.MENU,
+      route: 'AlertPage',
+      component: '/SuperAdmin/AlertMessage/index.tsx',
+    },
+  ],
+};
+
 const DASHBOARD_PERMISSION = {
   id: '9100714781927703',
   parentId: '',
@@ -449,6 +471,17 @@ const OTHERS_PERMISSION = [
     component: '/AuditPage/index.tsx',
 
   },
+  {
+    id: '3981225257359242',
+    parentId: '',
+    label: 'Project Dashboard',
+    name: 'ProjectDashboard',
+    icon: 'hugeicons:audit-01',
+    type: PermissionType.MENU,
+    route: 'ProjectDashboard',
+    component: '/ProjectDashboard/index.tsx',
+
+  },
 //   {
 //     id: '3981225257359246',
 //     parentId: '',
@@ -653,6 +686,7 @@ export const PERMISSION_LIST = [
   MENU_LEVEL_PERMISSION,
   // ERRORS_PERMISSION,
   ...OTHERS_PERMISSION,
+  SUPER_ADMIN
 ];
 
 /**

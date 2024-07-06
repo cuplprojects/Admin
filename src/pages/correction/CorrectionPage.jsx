@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Select } from 'antd';
 import { Table } from 'react-bootstrap';
+import { useMessage } from './../../utils/alerts/MessageContext';
 import omr1 from '@/assets/images/omrs/100001.jpg';
 import ZoomedImage from './ZoomedImage';
 import FullImageView from './FullImageView';
@@ -8,6 +9,7 @@ import FullImageView from './FullImageView';
 const { Option } = Select;
 
 const CorrectionPage = () => {
+  const showMessage = useMessage();
   const [data, setData] = useState([
     {
       coordinates: { x: 402, y: 130.4375, width: 114, height: 136 },
@@ -25,6 +27,10 @@ const CorrectionPage = () => {
   const [allDataCorrected, setAllDataCorrected] = useState(false);
   const [selectedField, setSelectedField] = useState(localStorage.getItem('selectedField') || ''); // State for selected field to correct
   const [expandMode, setExpandMode] = useState(false); // State to track expand mode
+
+  const handleShowNotification = async (type, messageId) => {
+    await showMessage(type, messageId);
+  };
 
   useEffect(() => {
     // Reset the current index and correction status when the selected field changes
@@ -87,6 +93,9 @@ const CorrectionPage = () => {
   const imageurl = omr1;
   const remainingFlags = allDataCorrected ? 0 : fieldData.length - currentIndex;
 
+  // Extract unique field names using Set
+  const uniqueFields = Array.from(new Set(data.map((item) => item.FieldName)));
+
   return (
     <>
       <div className="d-flex align-items-center justify-content-between">
@@ -97,9 +106,9 @@ const CorrectionPage = () => {
           style={{ width: 200 }}
         >
           <Option value="all">All</Option>
-          {data.map((field, index) => (
-            <Option key={index} value={field.FieldName}>
-              {field.FieldName}
+          {uniqueFields.map((field, index) => (
+            <Option key={index} value={field}>
+              {field}
             </Option>
           ))}
         </Select>
@@ -132,15 +141,15 @@ const CorrectionPage = () => {
         {!allDataCorrected && selectedField ? (
           expandMode ? (
             <FullImageView
-            src={imageurl}
-            data={currentData}
-            onUpdate={(newValue) =>
-              handleUpdate(
-                data.findIndex((item) => item === currentData),
-                newValue,
-              )
-            }
-            onNext={handleNext}
+              src={imageurl}
+              data={currentData}
+              onUpdate={(newValue) =>
+                handleUpdate(
+                  data.findIndex((item) => item === currentData),
+                  newValue,
+                )
+              }
+              onNext={handleNext}
             />
           ) : (
             <ZoomedImage
