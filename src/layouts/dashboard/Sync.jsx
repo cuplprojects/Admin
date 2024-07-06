@@ -9,7 +9,7 @@ const Sync = () => {
   const SyncData = async () => {
     setLoading(true);
     try {
-      const response = await axios.post('https://localhost:3001/api/sync');
+      const response = await axios.post('https://localhost:7290/api/Sync/SyncLogs');
       console.log(response.data);
       message.success('Data synced successfully!');
     } catch (error) {

@@ -9,11 +9,11 @@ import { useUserToken } from '@/store/userStore';
 import { useThemeToken } from '@/theme/hooks';
 
 import LoginForm from './LoginForm';
-import MobileForm from './MobileForm';
+
 import { LoginStateProvider } from './providers/LoginStateProvider';
-import QrCodeFrom from './QrCodeForm';
-import RegisterForm from './RegisterForm';
-import ResetForm from './ResetForm';
+
+
+
 
 const { VITE_APP_HOMEPAGE: HOMEPAGE } = import.meta.env;
 
@@ -46,10 +46,10 @@ function Login() {
       <div className="m-auto flex !h-screen w-full max-w-[480px] flex-col justify-center px-[16px] lg:px-[64px]">
         <LoginStateProvider>
           <LoginForm />
-          <MobileForm />
-          <QrCodeFrom />
-          <RegisterForm />
-          <ResetForm />
+          
+          
+          
+          
         </LoginStateProvider>
       </div>
 
