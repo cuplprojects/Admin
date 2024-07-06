@@ -77,7 +77,7 @@ const GenerateScore = () => {
 
     try {
       setLoading(true);
-      const response = await fetch(`${apiurl}/Keys/upload?WhichDatabase=Local`, {
+      const response = await fetch(`${apiurl}/Key/upload?WhichDatabase=Local`, {
         method: 'POST',
         body: formData,
       });

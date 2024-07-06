@@ -171,7 +171,7 @@ const Import = () => {
         const data = await response.json();
 
         const mappings = data.map((item) => ({
-          field: item.fieldAttributes[0].field
+          field: item.fieldName
 
         }));
 
@@ -201,7 +201,7 @@ const Import = () => {
 
         // Transform array data into object format
         const initialMapping = data.reduce((acc, item) => {
-          acc[item.fieldAttributes[0].field] = '';
+          acc[item.fieldName] = '';
           return acc;
         }, {});
 

@@ -7,7 +7,6 @@ import ProTag from '@/theme/antd/components/tag';
 import { AppRouteObject } from '#/router';
 import Import from '@/pages/Imports/AllImports';
 
-
 const ExternalLink = lazy(() => import('@/pages/sys/others/iframe/external-link'));
 const Iframe = lazy(() => import('@/pages/sys/others/iframe'));
 // const Calendar = lazy(() => import('@/pages/sys/others/calendar'));
@@ -17,6 +16,7 @@ const ProjectConfig = lazy(() => import('@/pages/ProjectConfig'));
 const Audit = lazy(() => import('@/pages/AuditPage/Audit'));
 
 const Correction = lazy(() => import('@/pages/correction/CorrectionPage'));
+const ProjectDashboard = lazy(() => import('@/pages/ProjectDashboard'));
 
 
 
@@ -64,6 +64,19 @@ const others: AppRouteObject[] = [
       label: 'sys.menu.correctionwindow',
       icon: <Iconify icon="solar:document-add-bold-duotone" size={24} />,
       key: '/correction',
+    },
+  },
+  {
+    path: 'ProjectDashboard',
+    element: (
+      <Wrapper>
+        <ProjectDashboard />
+      </Wrapper>
+    ),
+    meta: {
+      label: 'Project Dashboard',
+      icon: <Iconify icon="solar:document-add-bold-duotone" size={24} />,
+      key: '/ProjectDashboard',
     },
   },
   {
