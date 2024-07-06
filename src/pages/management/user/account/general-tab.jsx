@@ -1,6 +1,6 @@
 import { App, Button, Col, Form, Input, Row, Space, Switch, Select } from 'antd';
 import Card from '@/components/card';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 
 export default function GeneralTab() {
@@ -8,6 +8,7 @@ export default function GeneralTab() {
   const [form] = Form.useForm(); // Create form instance
 
   const [roles, setRoles] = useState([]);
+  const isSubmitting = useRef(false); // Ref to track submission state
 
   useEffect(() => {
     const fetchRoles = async () => {
@@ -23,6 +24,10 @@ export default function GeneralTab() {
   }, []);
 
   const handleSubmit = async (values) => {
+    if (isSubmitting.current) {
+      return; // Ignore subsequent submissions
+    }
+    isSubmitting.current = true; // Set the flag to true
     try {
       await axios.post("https://localhost:7290/api/Users?WhichDatabase=Local", values);
       form.resetFields(); // Reset form fields
@@ -32,6 +37,8 @@ export default function GeneralTab() {
       });
     } catch (error) {
       console.log(error.message);
+    } finally {
+      isSubmitting.current = false; // Reset the flag
     }
   };
 
