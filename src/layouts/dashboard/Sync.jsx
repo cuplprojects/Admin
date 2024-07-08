@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Button, message } from 'antd';
 import axios from 'axios';
 // import { Iconify } from '@/components/icon';
+const apiurl = import.meta.env.VITE_API_URL
+
 
 const Sync = () => {
   const [loading, setLoading] = useState(false);
@@ -9,7 +11,9 @@ const Sync = () => {
   const SyncData = async () => {
     setLoading(true);
     try {
-      const response = await axios.post('https://localhost:7290/api/Sync/SyncLogs');
+
+      const response = await axios.post(`${apiurl}/Sync/SyncLogs`);
+
       console.log(response.data);
       message.success('Data synced successfully!');
     } catch (error) {

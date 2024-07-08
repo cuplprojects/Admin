@@ -5,6 +5,28 @@ import { BasicStatus, PermissionType } from '#/enum';
 /**
  * User permission mock
  */
+const SUPER_ADMIN = {
+  id: '9100714781927705',
+  parentId: '',
+  label: 'SuperAdmin',
+  name: 'superadmin',
+  icon: 'ic-analysis',
+  type: PermissionType.CATALOGUE,
+  route: 'superadmin',
+  order: 7,
+  children: [
+    {
+      id: '84269992294002379',
+      parentId: '9100714781927705',
+      label: 'AlertPage',
+      name: 'AlertPage',
+      type: PermissionType.MENU,
+      route: 'AlertPage',
+      component: '/SuperAdmin/AlertMessage/index.tsx',
+    },
+  ],
+};
+
 const DASHBOARD_PERMISSION = {
   id: '9100714781927703',
   parentId: '',
@@ -121,32 +143,32 @@ const MANAGEMENT_PERMISSION = {
         {
           id: '0157880245365434',
           parentId: '0249937641030250',
-          label: 'sys.menu.system.user',
-          name: 'User',
-          type: PermissionType.MENU,
-          route: 'user',
-          component: '/management/system/user/index.tsx',
-        },
-        {
-          id: '0157880245365434',
-          parentId: '0249937641030250',
-          label: 'sys.menu.system.user_detail',
-          name: 'User Detail',
-          type: PermissionType.MENU,
-          route: 'user/:id',
-          component: '/management/system/user/detail.tsx',
-          hide: true,
-        },
-        {
-          id: '0157880245365435',
-          parentId: '0249937641030250',
-          label: 'users',
-          name: 'All Users',
+          label: 'sys.menu.user.allusers',
+          name: 'allusers',
           type: PermissionType.MENU,
           route: 'allusers',
-          component: '/management/system/alluser/index.tsx',
-          hide: true,
+          component: '/management/system/user/index.tsx',
         },
+        // {
+        //   id: '0157880245365434',
+        //   parentId: '0249937641030250',
+        //   label: 'sys.menu.system.user_detail',
+        //   name: 'User Detail',
+        //   type: PermissionType.MENU,
+        //   route: 'user/:id',
+        //   component: '/management/system/user/detail.tsx',
+        //   hide: true,
+        // },
+        // {
+        //   id: '0157880245365435',
+        //   parentId: '0249937641030250',
+        //   label: 'users',
+        //   name: 'All Users',
+        //   type: PermissionType.MENU,
+        //   route: 'allusers',
+        //   component: '/management/system/alluser/index.tsx',
+        //   hide: true,
+        // },
       ],
     },
   ],
@@ -408,7 +430,7 @@ const OTHERS_PERMISSION = [
     parentId: '',
     label: 'sys.menu.ProjectConfig',
     name: 'ProjectConfig',
-    icon: 'solar:calendar-bold-duotone',
+    icon: 'carbon:cloud-satellite-config',
     type: PermissionType.MENU,
     route: 'ProjectConfig',
     component: '/ProjectConfig/index.tsx',
@@ -420,7 +442,7 @@ const OTHERS_PERMISSION = [
     parentId: '',
     label: 'sys.menu.AllImports',
     name: 'Imports',
-    icon: 'solar:calendar-bold-duotone',
+    icon: 'solar:upload-square-bold-duotone',
     type: PermissionType.MENU,
     route: 'AllImports',
     component: '/Imports/index.tsx',
@@ -431,7 +453,7 @@ const OTHERS_PERMISSION = [
     parentId: '',
     label: 'sys.menu.GenerateScore',
     name: 'ScoreProcessing',
-    icon: 'solar:calendar-bold-duotone',
+    icon: 'solar:checklist-minimalistic-bold-duotone',
     type: PermissionType.MENU,
     route: 'GenerateScore',
     component: '/ScoreProcessing/index.tsx',
@@ -443,10 +465,21 @@ const OTHERS_PERMISSION = [
     parentId: '',
     label: 'sys.menu.Audit',
     name: 'Audit',
-    icon: 'solar:calendar-bold-duotone',
+    icon: 'hugeicons:audit-01',
     type: PermissionType.MENU,
     route: 'AuditPage/Audit',
     component: '/AuditPage/index.tsx',
+
+  },
+  {
+    id: '3981225257359242',
+    parentId: '',
+    label: 'Project Dashboard',
+    name: 'ProjectDashboard',
+    icon: 'hugeicons:audit-01',
+    type: PermissionType.MENU,
+    route: 'ProjectDashboard',
+    component: '/ProjectDashboard/index.tsx',
 
   },
 //   {
@@ -653,6 +686,7 @@ export const PERMISSION_LIST = [
   MENU_LEVEL_PERMISSION,
   // ERRORS_PERMISSION,
   ...OTHERS_PERMISSION,
+  SUPER_ADMIN
 ];
 
 /**

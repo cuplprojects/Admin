@@ -206,4 +206,3 @@ const MarksAllotmentForm = () => {
 };
 
 export default MarksAllotmentForm;
-go

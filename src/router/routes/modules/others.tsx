@@ -7,16 +7,16 @@ import ProTag from '@/theme/antd/components/tag';
 import { AppRouteObject } from '#/router';
 import Import from '@/pages/Imports/AllImports';
 
-
 const ExternalLink = lazy(() => import('@/pages/sys/others/iframe/external-link'));
 const Iframe = lazy(() => import('@/pages/sys/others/iframe'));
-const Calendar = lazy(() => import('@/pages/sys/others/calendar'));
+// const Calendar = lazy(() => import('@/pages/sys/others/calendar'));
 const Kanban = lazy(() => import('@/pages/sys/others/kanban'));
 const ProjectConfig = lazy(() => import('@/pages/ProjectConfig'));
 
 const Audit = lazy(() => import('@/pages/AuditPage/Audit'));
 
 const Correction = lazy(() => import('@/pages/correction/CorrectionPage'));
+const ProjectDashboard = lazy(() => import('@/pages/ProjectDashboard'));
 
 
 
@@ -48,7 +48,7 @@ const others: AppRouteObject[] = [
     ),
     meta: {
       label: 'sys.menu.AllImports',
-      icon: <Iconify icon="solar:calendar-bold-duotone" size={24} />,
+      icon: <Iconify icon="solar:upload-square-bold-duotone" size={24} />,
       key: '/AllImports',
     },
   },
@@ -67,6 +67,19 @@ const others: AppRouteObject[] = [
     },
   },
   {
+    path: 'ProjectDashboard',
+    element: (
+      <Wrapper>
+        <ProjectDashboard />
+      </Wrapper>
+    ),
+    meta: {
+      label: 'Project Dashboard',
+      icon: <Iconify icon="solar:document-add-bold-duotone" size={24} />,
+      key: '/ProjectDashboard',
+    },
+  },
+  {
     path: 'Audit',
     element: (
       <Wrapper>
@@ -79,20 +92,7 @@ const others: AppRouteObject[] = [
       key: '/Audit',
     },
   },
-  {
-    path: 'calendar',
-    element: (
-      <Wrapper>
-        <Calendar />
-      </Wrapper>
-    ),
-    meta: {
-      label: 'sys.menu.calendar',
-      icon: <Iconify icon="solar:calendar-bold-duotone" size={24} />,
-      key: '/calendar',
-    },
 
-  },
   {
     path: 'kanban',
     element: (

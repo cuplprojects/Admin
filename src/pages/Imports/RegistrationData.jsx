@@ -15,21 +15,18 @@ const Registration = ({
 
   useEffect(() => {
     // Check if all properties in mapping have a corresponding header in headers
-    const isValid = Object.values(registrationMapping).every((value) => headers.includes(value));
+    const isValid = Object.keys(registrationMapping).every(field => headers.includes(registrationMapping[field]));
     setIsValidData(isValid);
   }, [headers, registrationMapping]);
 
+  const mappedHeaders = Object.values(registrationMapping);
+
   return (
     <>
-      <div
-        className="tab-pane active d-flex align-items-center justify-content-around mt-5 py-3 "
-        id="registration"
-      >
+      <div className="tab-pane active d-flex align-items-center justify-content-around mt-5 py-3" id="registration">
         <h3 className="head fs-3 text-center">Upload Registration Data</h3>
         <div className="d-flex justify-content-center align-items-center">
-          <p>
-            <input type="file" onChange={handleFileUpload} accept=".xlsx" />
-          </p>
+          <input type="file" onChange={handleFileUpload} accept=".xlsx" />
         </div>
         {headers.length > 0 && (
           <div className="d-flex justify-content-center mt-4">
@@ -41,20 +38,22 @@ const Registration = ({
                 </tr>
               </thead>
               <tbody>
-                {Object.keys(registrationMapping).map((property) => (
-                  <tr key={property}>
-                    <td>{property}</td>
+                {Object.keys(registrationMapping).map((field) => (
+                  <tr key={field}>
+                    <td>{field}</td>
                     <td>
                       <select
-                        value={registrationMapping[property]}
-                        onChange={(e) => handleRegistrationMappingChange(e, property)}
+                        value={registrationMapping[field]}
+                        onChange={(e) => handleRegistrationMappingChange(e, field)}
                       >
                         <option value="">Select Header</option>
-                        {headers.map((header, index) => (
-                          <option key={index} value={header}>
-                            {header}
-                          </option>
-                        ))}
+                        {headers
+                          .filter(header => !mappedHeaders.includes(header) || header === registrationMapping[field])
+                          .map((header, index) => (
+                            <option key={index} value={header}>
+                              {header}
+                            </option>
+                          ))}
                       </select>
                     </td>
                   </tr>
@@ -69,7 +68,7 @@ const Registration = ({
           <button
             className="btn btn-primary m-auto"
             onClick={handleRegistrationUpload}
-            disabled={!isValidData || loading}
+            disabled={ loading}
           >
             {loading ? 'Uploading...' : 'Upload'}
           </button>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Button } from 'antd';
+import { Button,Progress } from 'antd';
 import localforage from 'localforage';
 
 
@@ -12,9 +12,11 @@ const ImportOmr = () => {
   const [loading, setLoading] = useState(false);
   const [currentFileIndex, setCurrentFileIndex] = useState(0);
   const [showSkipBtn, setShowSkipBtn] = useState(false);
+  const [showReplaceBtn, setShowReplaceBtn] = useState(false);
   const [currentFileName, setCurrentFileName] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
   const [alertType, setAlertType] = useState('');
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -50,24 +52,41 @@ const ImportOmr = () => {
       console.error('Error removing data from localforage:', error);
     }
   };
+  const removeCurrentFileIndex = async () => {
+    try {
+      await localforage.removeItem('currentFileIndex');
+    } catch (error) {
+      console.error('Error removing currentFileIndex from localforage:', error);
+    }
+  };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e,replace = false) => {
     e.preventDefault();
     setLoading(true);
     const fileCount = files.length;
 
     for (let i = currentFileIndex; i < fileCount; i++) {
+      setProgress(0);
       const formData = new FormData();
       formData.append('file', files[i]);
 
       try {
         const response = await axios.post(
-          `${apiurl}/OMRData/upload-request?WhichDatabase=Local`,
+          `${apiurl}/OMRData/upload-request?WhichDatabase=Local&replace=${replace}`,
           formData,
           {
             headers: {
               'Content-Type': 'multipart/form-data',
             },
+            onUploadProgress: (progressEvent) => {
+              const totalLength = progressEvent.lengthComputable
+                ? progressEvent.total
+                : progressEvent.target.getResponseHeader('content-length') ||
+                  progressEvent.target.getResponseHeader('x-decompressed-content-length');
+              if (totalLength !== null) {
+                setProgress(Math.round((progressEvent.loaded * 100) / totalLength));
+              }
+            }
           },
         );
 
@@ -80,12 +99,17 @@ const ImportOmr = () => {
         await localforage.setItem('currentFileIndex', nextFileIndex);
         if (nextFileIndex >= fileCount) {
           await localforage.removeItem('currentFileIndex');
+          await removeCurrentFileIndex();
           setAlertMessage('All files uploaded successfully!');
           setAlertType('success');
+          setProgress(100);
+        } else {
+          setProgress(((nextFileIndex / fileCount) * 100).toFixed(2));
         }
       } catch (error) {
         if (error.response && error.response.status === 409) {
           setShowSkipBtn(true);
+          setShowReplaceBtn(true);
           setCurrentFileName(files[i].name);
           setAlertMessage('File with same name already exists!');
           setAlertType('danger');
@@ -104,13 +128,22 @@ const ImportOmr = () => {
   };
 
   const skipFile = async () => {
-    setShowSkipBtn(false);
+    
     await removeFromLocalForage(files[currentFileIndex]);
 
     const nextFileIndex = currentFileIndex + 1;
     setCurrentFileIndex(nextFileIndex);
     await localforage.setItem('currentFileIndex', nextFileIndex);
+    setShowSkipBtn(false);
+    setShowReplaceBtn(false);
     handleSubmit({ preventDefault: () => {} });
+  };
+
+  const replaceFile = async () => {
+    setShowReplaceBtn(false);
+    await removeFromLocalForage(files[currentFileIndex]);
+    setCurrentFileIndex(currentFileIndex + 1); // Move to the next file
+    handleSubmit({ preventDefault: () => {} }, true); // Pass true only for current file index
   };
 
   const handleResume = () => {
@@ -131,12 +164,26 @@ const ImportOmr = () => {
           </Button>
         )}
       </form>
+      {loading && (
+        <Progress
+          percent={progress}
+          size="small"
+          status={loading ? 'active' : 'normal'}
+        />
+      )}
  
       {loading && <p>Loading...</p>}
       {showSkipBtn && (
+        <>
         <Button type="primary" onClick={skipFile}>
           Skip {currentFileName}
         </Button>
+        <Button type="primary" onClick={replaceFile}>
+        Replace {currentFileName}
+      </Button>
+      
+    
+    </>
       )}
       {alertMessage && (
         <div className={`alert alert-${alertType} mt-3`} role="alert">
