@@ -9,8 +9,13 @@ import { Applications, Conversion } from './conversion_applications';
 // import TopInstalled from './top-installed';
 // import TopRelated from './top-related';
 import TotalCard from './total-card';
+// import NewDashboard from './NewDashboard';
+import { useEffect } from 'react';
 
 function Workbench() {
+  useEffect(()=>{
+    localStorage.removeItem('projectid');
+  })
   return (
     <>
       <Row gutter={[16, 16]} justify="center">
@@ -55,6 +60,11 @@ function Workbench() {
             chartData={[35, 41, 62, 42, 13, 18, 29, 37, 36]}
           />
         </Col>
+      </Row>
+
+
+      <Row>
+      {/* <NewDashboard /> */}
       </Row>
 
       {/* <Row gutter={[16, 16]} className="mt-4" justify="center">

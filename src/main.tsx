@@ -18,6 +18,7 @@ import './locales/i18n';
 // tailwind css
 import './theme/index.css';
 import { FileUploadProvider } from './pages/Imports/Importfile';
+import { MessageProvider } from './utils/alerts/MessageContext';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -36,17 +37,19 @@ const queryClient = new QueryClient({
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 
 root.render(
-  <HelmetProvider>
-    <QueryClientProvider client={queryClient}>
-      {/* <ReactQueryDevtools initialIsOpen={true} /> React dev tool */}
-      <Suspense>
-        <Analytics />
-        <FileUploadProvider>
-        <App />
-        </FileUploadProvider>
-      </Suspense>
-    </QueryClientProvider>
-  </HelmetProvider>,
+  <MessageProvider>
+    <HelmetProvider>
+      <QueryClientProvider client={queryClient}>
+        {/* <ReactQueryDevtools initialIsOpen={true} /> React dev tool */}
+        <Suspense>
+          <Analytics />
+          <FileUploadProvider>
+            <App />
+          </FileUploadProvider>
+        </Suspense>
+      </QueryClientProvider>
+    </HelmetProvider>
+  </MessageProvider>,
 );
 
 //start service worker mock in development mode

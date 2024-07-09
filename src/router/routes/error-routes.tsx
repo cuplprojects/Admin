@@ -32,5 +32,6 @@ export const ErrorRoutes: AppRouteObject = {
     { path: '404', element: <Page404 /> },
     { path: '500', element: <Page500 /> },
     { path: 'test', element: <Test /> },
+   
   ],
 };
