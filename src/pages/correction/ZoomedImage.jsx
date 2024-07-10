@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import './style.css';
 
-const ZoomedImage = ({ src, data, onUpdate, onNext }) => {
-  const [value, setValue] = useState(data.FieldValue);
+const ZoomedImage = ({ data, onUpdate, onNext }) => {
+  const [value, setValue] = useState('');
 
   useEffect(() => {
-    setValue(data.FieldValue);
+    if (data) {
+      setValue(data.FieldValue);
+    }
   }, [data]);
 
   const handleChange = (e) => {
@@ -19,23 +21,29 @@ const ZoomedImage = ({ src, data, onUpdate, onNext }) => {
     }
   };
 
+  if (!data || !data.coordinates) {
+    onNext(); // Handle case where data or coordinates are not yet available
+    return;
+  }
+
   const { x, y, width, height } = data.coordinates;
   const scale = 700 / width; // Assuming the original image width is 700px
 
   return (
     <div
-      className="m-auto zoomimg"
+      className="zoomimg m-auto"
       style={{
         position: 'absolute',
         left: '50%',
         top: '50%',
         transform: `translate(-50%, -50%) scale(2)`,
         width,
+        height,
         overflow: 'hidden',
       }}
     >
       <img
-        src={src}
+        src={data.imageUrl}
         alt="Zoomed Image"
         style={{
           transform: `scale(${scale})`,
@@ -56,7 +64,7 @@ const ZoomedImage = ({ src, data, onUpdate, onNext }) => {
       >
         <input
           type="text"
-          className="form-control border-danger text-center p-0"
+          className="form-control border-danger p-0 text-center"
           value={value}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
