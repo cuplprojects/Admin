@@ -170,7 +170,7 @@ export default function MultiTabs({ offsetTop = false }: Props) {
   );
 
   /**
-   * 当前显示dorpdown的tab
+   *The tab currently showing dropdown
    */
   const onOpenChange = (open: boolean, tab: KeepAliveTab) => {
     if (open) {
@@ -181,7 +181,7 @@ export default function MultiTabs({ offsetTop = false }: Props) {
   };
 
   /**
-   * tab样式
+   *Tab style
    */
   const calcTabStyle: (tab: KeepAliveTab) => CSSProperties = useCallback(
     (tab) => {
@@ -206,7 +206,7 @@ export default function MultiTabs({ offsetTop = false }: Props) {
   );
 
   /**
-   * 渲染单个tab
+   * Render a single tab
    */
   const renderTabLabel = useCallback(
     (tab: KeepAliveTab) => {
