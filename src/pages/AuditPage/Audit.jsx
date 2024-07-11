@@ -9,11 +9,9 @@ const AuditButton = () => {
   const [fieldConfigs, setFieldConfigs] = useState([]);
   const [flags, setFlags] = useState([]);
   const [remarksCounts, setRemarksCounts] = useState([]);
-
   const [corrected, setCorrected] = useState(0);
-const [remaining, setRemaining] = useState(0);
-const [totalCount, setTotalCount] = useState(0);
-
+  const [remaining, setRemaining] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
 
   const handleClick = async () => {
     try {
@@ -43,7 +41,6 @@ const [totalCount, setTotalCount] = useState(0);
       setCorrected(result.corrected);
       setRemaining(result.remaining);
       setTotalCount(result.totalCount);
-
     } catch (error) {
       console.error('Error:', error);
     }
@@ -118,40 +115,32 @@ const [totalCount, setTotalCount] = useState(0);
             </Row>
           </Col>
           <Col>
+            <Card
+              className="d-flex align-items-center fs-3 justify-content-center mb-1 mr-3 mt-3 "
+              style={{ height: '60px', backgroundColor: '#ffd1d1' }}
+            >
+              <div className="">
+                <h2 className="text-center">Error Counts: {totalCount}</h2>
+              </div>
+            </Card>
 
-          <Card
-            className="d-flex align-items-center fs-3 justify-content-center mb-1 mr-3 mt-3 "
-            style={{ height: '60px', backgroundColor: '#ffd1d1' }}
-          >
-            <div className="">
-              <h2 className="text-center">
-                Error Counts: {totalCount}
-              </h2>
-            </div>
-          </Card>
+            <Card
+              className="d-flex align-items-center fs-3 justify-content-center mb-1 mr-3 mt-3 "
+              style={{ height: '60px', backgroundColor: '#95f595' }}
+            >
+              <div className="">
+                <h2 className="text-center">Corrected Counts: {corrected}</h2>
+              </div>
+            </Card>
 
-          <Card
-            className="d-flex align-items-center fs-3 justify-content-center mb-1 mr-3 mt-3 "
-            style={{ height: '60px', backgroundColor: '#95f595' }}
-          >
-            <div className="">
-              <h2 className="text-center">
-                Corrected Counts: {corrected}
-              </h2>
-            </div>
-          </Card>
-
-          <Card
-            className="d-flex align-items-center fs-3 justify-content-center mb-5 mr-3 mt-3 "
-            style={{ height: '60px', backgroundColor: '#b4b4ff' }}
-          >
-            <div className="">
-              <h2 className="text-center">
-                Remaining Counts: {remaining}
-              </h2>
-            </div>
-          </Card>
-
+            <Card
+              className="d-flex align-items-center fs-3 justify-content-center mb-5 mr-3 mt-3 "
+              style={{ height: '60px', backgroundColor: '#b4b4ff' }}
+            >
+              <div className="">
+                <h2 className="text-center">Remaining Counts: {remaining}</h2>
+              </div>
+            </Card>
 
             <h2
               className="fs-3 mb-3 text-center "
