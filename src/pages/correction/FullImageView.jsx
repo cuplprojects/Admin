@@ -6,7 +6,7 @@ const FullImageView = ({ data, onUpdate, onNext }) => {
 
   useEffect(() => {
     if (data) {
-      setValue(data.FieldValue);
+      setValue(data.fieldNameValue);
     }
   }, [data]);
 
@@ -66,6 +66,8 @@ const FullImageView = ({ data, onUpdate, onNext }) => {
             width: '100%', // Make input full width of its container
             boxSizing: 'border-box', // Ensure padding and border are included in width and height
           }}
+          required
+          autoFocus
         />
       </div>
     </div>

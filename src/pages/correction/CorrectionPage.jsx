@@ -1,157 +1,178 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Select } from 'antd';
+import { Button, Select, notification, Checkbox } from 'antd';
 import { Table } from 'react-bootstrap';
-import { useMessage } from './../../utils/alerts/MessageContext';
-import omr1 from '@/assets/images/omrs/100001.jpg';
+import axios from 'axios';
 import ZoomedImage from './ZoomedImage';
 import FullImageView from './FullImageView';
+import { useProjectActions, useProjectId } from '@/store/ProjectState';
 
 const apiurl = import.meta.env.VITE_API_URL;
 const { Option } = Select;
 
 const CorrectionPage = () => {
-  const showMessage = useMessage();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [allDataCorrected, setAllDataCorrected] = useState(false);
-  const [selectedField, setSelectedField] = useState('all');
   const [expandMode, setExpandMode] = useState(false);
+  const projectId = useProjectId();
+  const { setProjectId } = useProjectActions();
+  const [fieldCounts, setFieldCounts] = useState([]);
+  const [remaining, setRemaining] = useState(0);
+  const [selectedField, setSelectedField] = useState('all');
+  const [unchangedata, setUnchangeData] = useState('');
+  const [noChangeRequired, setNoChangeRequired] = useState(false);
 
-  const handleShowNotification = async (type, messageId) => {
-    await showMessage(type, messageId);
-  };
+  useEffect(() => {
+    if (data[currentIndex]) {
+      setUnchangeData(data[currentIndex].fieldNameValue);
+    }
+  }, [currentIndex, data]);
+
+  useEffect(() => {
+    fetchFieldCounts();
+    fetchData();
+  }, [projectId, selectedField]);
 
   useEffect(() => {
     const selectedfield = localStorage.getItem('selectedField');
-    setSelectedField(selectedfield);
+    if (selectedfield) {
+      setSelectedField(selectedfield);
+    }
   }, []);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Fetch flags
-        const flagsResponse = await fetch(`${apiurl}/Flags`, {
-          headers: { accept: 'application/json' },
-        });
-        const flagsResult = await flagsResponse.json();
+  const handleFieldChange = (value) => {
+    setSelectedField(value);
+    localStorage.setItem('selectedField', value); // Save selected field to localStorage
+  };
 
-        // Fetch annotations
-        const imageConfigResponse = await fetch(`${apiurl}/ImageConfigs/3?WhichDatabase=Local`, {
-          headers: { accept: 'text/plain' },
-        });
-        const imageConfigResult = await imageConfigResponse.json();
+  const fetchFieldCounts = async () => {
+    try {
+      const response = await axios.get(`${apiurl}/Flags/counts`);
+      setFieldCounts(response.data.countsByFieldname);
+      setRemaining(response.data.remaining);
+    } catch (error) {
+      console.error('Error fetching field counts:', error);
+    }
+  };
 
-        const parsedAnnotations = JSON.parse(imageConfigResult.annotationsJson).map(
-          (annotation) => ({
-            FieldName: annotation.FieldName,
-            coordinates: JSON.parse(annotation.Coordinates.replace(/'/g, '"')),
-            FieldValue: '',
-            imageUrl: '',
-          }),
-        );
-
-        // Merge flags with annotations based on FieldName and construct image URL
-        const mergedData = flagsResult.map((flag) => {
-          const matchingAnnotation = parsedAnnotations.find(
-            (annotation) => annotation.FieldName === flag.field,
-          );
-          return {
-            ...matchingAnnotation,
-            FieldName: flag.field,
-            FieldValue: flag.fieldNameValue,
-            flagRemarks: flag.remarks,
-            imageUrl: `https://localhost:7290/OMR/${flag.barCode}.jpg`,
-            barCode: flag.barCode,
-          };
-        });
-
-        setData(mergedData);
-        setLoading(false); // Set loading to false after data is fetched
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        setLoading(false); // Ensure loading is set to false on error as well
-      }
-    };
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    // Reset the current index and correction status when the selected field changes
+  const fetchData = async () => {
     setCurrentIndex(0);
-    setAllDataCorrected(false);
-    localStorage.setItem('selectedField', selectedField); // Save to local storage
-  }, [selectedField]);
+    try {
+      const flagsResponse = await axios.get(
+        `${apiurl}/Correction/GetFlagsByCategory?WhichDatabase=Local&ProjectID=${projectId}&FieldName=${selectedField}`,
+        { headers: { accept: 'application/json' } }
+      );
+      const flagsResult = flagsResponse.data;
+
+      const imageConfigResponse = await axios.get(`${apiurl}/ImageConfigs/1`, {
+        params: { WhichDatabase: 'Local' },
+        headers: { accept: 'text/plain' },
+      });
+      const imageConfigResult = imageConfigResponse.data;
+
+      const parsedAnnotations = JSON.parse(imageConfigResult.annotationsJson).map((annotation) => ({
+        FieldName: annotation.FieldName,
+        coordinates: JSON.parse(annotation.Coordinates.replace(/'/g, '"')),
+        fieldNameValue: '',
+        imageUrl: '',
+      }));
+
+      const mergedData = flagsResult.map((flag) => {
+        const matchingAnnotation = parsedAnnotations.find(
+          (annotation) => annotation.FieldName === flag.field
+        );
+        return {
+          ...matchingAnnotation,
+          flagId: flag.flagId,
+          remarks: flag.remarks,
+          fieldNameValue: flag.fieldNameValue || '',
+          FieldName: flag.field,
+          barCode: flag.barCode,
+          projectId: projectId,
+          isCorrected: true,
+          imageUrl: `https://localhost:7290/OMR/${flag.barCode}.jpg`,
+          noChangeRequired: false,
+        };
+      });
+
+      setData(mergedData);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      setLoading(false);
+    }
+  };
 
   const handleUpdate = (index, newValue) => {
     const updatedData = [...data];
-    updatedData[index].FieldValue = newValue;
+    updatedData[index].fieldNameValue = newValue;
     setData(updatedData);
-    localStorage.setItem('correctionData', JSON.stringify(updatedData)); 
   };
 
-  const sendPutRequest = async (currentData) => {
+  const sendPostRequest = async (currentData) => {
     try {
-      const response = await fetch(`${apiurl}/Flags/${currentData.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(currentData),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update data');
+      if (!currentData) {
+        console.error('Current data is undefined or null');
+        return;
       }
-      const result = await response.json();
-      console.log('Data updated successfully:', result);
+
+      const payload = {
+        barCode: currentData.barCode,
+        fieldName: currentData.FieldName,
+        value: currentData.fieldNameValue,
+      };
+
+      const response = await axios.post(
+        `${apiurl}/Correction/SubmitCorrection?WhichDatabase=Local`,
+        payload,
+        { headers: { 'Content-Type': 'application/json' } }
+      );
+
+      console.log('Data posted successfully:', response.data);
     } catch (error) {
-      console.error('Error updating data:', error);
+      console.error('Error posting data:', error);
     }
   };
 
   const handleNext = async () => {
     let fieldData = data;
-    if (selectedField !== 'all') {
-      fieldData = data.filter((item) => item.FieldName === selectedField);
-    }
-
     const currentData = fieldData[currentIndex];
-    await sendPutRequest(currentData);
-
-    if (currentIndex < fieldData.length - 1) {
-      setCurrentIndex(currentIndex + 1);
+    if (!currentData) {
+      console.error('Current data is undefined or null');
+      return;
+    }
+    if (unchangedata === currentData.fieldNameValue && !noChangeRequired) {
+      console.log('Data has not changed:', unchangedata);
+      notification.error({
+        message: 'Alert',
+        description: 'Please correct the data before submit',
+        duration: 3,
+      });
+      return;
     } else {
-      setAllDataCorrected(true);
+      await sendPostRequest(currentData);
+
+      if (currentIndex < fieldData.length - 1) {
+        setCurrentIndex(currentIndex + 1);
+        fetchFieldCounts();
+        setUnchangeData(data[currentIndex + 1]?.fieldNameValue);
+      } else {
+        fetchData();
+      }
     }
   };
 
   const handlePrevious = async () => {
     if (currentIndex > 0) {
-      const currentData = data[currentIndex];
-      await sendPutRequest(currentData);
       setCurrentIndex(currentIndex - 1);
+      setUnchangeData(data[currentIndex - 1]?.fieldNameValue);
     }
-  };
-
-  const handleFieldChange = (value) => {
-    setSelectedField(value);
   };
 
   const toggleExpandMode = () => {
     setExpandMode(!expandMode);
   };
-
-  let fieldData = data;
-  if (selectedField !== 'all') {
-    fieldData = data.filter((item) => item.FieldName === selectedField);
-  }
-  const currentData = fieldData[currentIndex];
-  const imageurl = omr1;
-  const remainingFlags = allDataCorrected ? 0 : fieldData.length - currentIndex;
-
-  // Extract unique field names using Set
-  const uniqueFields = Array.from(new Set(data.map((item) => item.FieldName)));
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -166,25 +187,25 @@ const CorrectionPage = () => {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [currentIndex, data, selectedField, allDataCorrected]);
+  }, [currentIndex, data, allDataCorrected]);
 
   if (loading) {
-    return <p>Loading...</p>; // Render a loading indicator while fetching data
+    return <p>Loading...</p>;
   }
 
   return (
     <>
       <div className="d-flex align-items-center justify-content-between">
         <Select
-          placeholder="Select field to correct"
-          onChange={handleFieldChange}
-          value={selectedField} // Set the value of the Select component
+          placeholder="All Fields"
           style={{ width: 200 }}
+          value={selectedField}
+          onChange={handleFieldChange} // Corrected onChange handler
         >
           <Option value="all">All</Option>
-          {uniqueFields.map((field, index) => (
-            <Option key={index} value={field}>
-              {field}
+          {fieldCounts.map((field, index) => (
+            <Option key={index} value={field.fieldName}>
+              {field.fieldName}
             </Option>
           ))}
         </Select>
@@ -192,7 +213,7 @@ const CorrectionPage = () => {
           {expandMode ? 'Zoomed View' : 'Expand OMR'}
         </Button>
       </div>
-      <p className="text-danger fs-5 m-1 text-center">Remaining Flags: {remainingFlags}</p>
+      <p className="text-danger fs-5 m-1 text-center">Remaining Flags: {remaining}</p>
 
       <div className="table-responsive">
         <Table className="table-bordered table-striped text-center">
@@ -202,39 +223,46 @@ const CorrectionPage = () => {
               <th>OMR Barcode Number</th>
               <th>Remark</th>
               <th>Flag Number</th>
+              <th>No Change Required</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>Project A</td>
-              <td>{currentData?.barCode}</td>
-              <td>{currentData?.flagRemarks}</td>
-              <td>{currentIndex + 1}</td>
+              <td>Project {projectId}</td>
+              <td>{data[currentIndex]?.barCode}</td>
+              <td>{data[currentIndex]?.remarks}</td>
+              <td>{data[currentIndex]?.flagId}</td>
+              <td>
+                <Checkbox
+                  checked={noChangeRequired}
+                  onChange={() => setNoChangeRequired(!noChangeRequired)}
+                />
+              </td>
             </tr>
           </tbody>
         </Table>
       </div>
 
       <div className="w-75 position-relative m-auto border p-4" style={{ minHeight: '75%' }}>
-        {!allDataCorrected && currentData && selectedField ? (
+        {!allDataCorrected && data[currentIndex] ? (
           expandMode ? (
             <FullImageView
-              data={currentData}
+              data={data[currentIndex]}
               onUpdate={(newValue) =>
                 handleUpdate(
-                  data.findIndex((item) => item === currentData),
-                  newValue,
+                  data.findIndex((item) => item === data[currentIndex]),
+                  newValue
                 )
               }
               onNext={handleNext}
             />
           ) : (
             <ZoomedImage
-              data={currentData}
+              data={data[currentIndex]}
               onUpdate={(newValue) =>
                 handleUpdate(
-                  data.findIndex((item) => item === currentData),
-                  newValue,
+                  data.findIndex((item) => item === data[currentIndex]),
+                  newValue
                 )
               }
               onNext={handleNext}
@@ -242,26 +270,20 @@ const CorrectionPage = () => {
           )
         ) : (
           <div className="text-center">
-            <p className="fs-3">
-              {!selectedField ? 'Please select a field to correct' : 'All data corrected'}
-            </p>
+            <p className="fs-3">All data corrected</p>
           </div>
         )}
       </div>
       <div className="d-flex justify-content-evenly m-1">
-        <Button
-          type="primary"
-          onClick={handlePrevious}
-          disabled={currentIndex === 0 || !selectedField}
-        >
+        <Button type="primary" onClick={handlePrevious} disabled={currentIndex === 0}>
           Previous
         </Button>
-        <Button type="primary" onClick={handleNext} disabled={allDataCorrected || !selectedField}>
-          Save and Next
+        <Button type="primary" onClick={handleNext} disabled={allDataCorrected}>
+          Next
         </Button>
       </div>
     </>
   );
 };
 
-export default CorrectionPage
+export default CorrectionPage;
