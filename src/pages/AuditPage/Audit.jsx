@@ -11,9 +11,11 @@ const AuditButton = () => {
   const [flags, setFlags] = useState([]);
   const [remarksCounts, setRemarksCounts] = useState([]);
   const [corrected, setCorrected] = useState(0);
+
   const [remaining, setRemaining] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
   const ProjectId = useProjectId();
+
 
   const handleClick = async () => {
     try {
@@ -43,6 +45,7 @@ const AuditButton = () => {
       setCorrected(result.corrected);
       setRemaining(result.remaining);
       setTotalCount(result.totalCount);
+
     } catch (error) {
       console.error('Error:', error);
     }
@@ -117,6 +120,7 @@ const AuditButton = () => {
             </Row>
           </Col>
           <Col>
+
             <Card
               className="d-flex align-items-center fs-3 justify-content-center mb-1 mr-3 mt-3 "
               style={{ height: '60px', backgroundColor: '#ffd1d1' }}
@@ -143,6 +147,7 @@ const AuditButton = () => {
                 <h2 className="text-center">Remaining Counts: {remaining}</h2>
               </div>
             </Card>
+
 
             <h2
               className="fs-3 mb-3 text-center "
