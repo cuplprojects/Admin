@@ -9,6 +9,7 @@ import './style.css'
 import { useThemeToken } from '@/theme/hooks';
 import { color } from 'framer-motion';
 import ImportOmr from './OmrImport/ImportOmr';
+import { useProjectId } from '@/store/ProjectState';
 
 //const apiurl = import.meta.env.VITE_API_URL_PROD;
 const apiurl = import.meta.env.VITE_API_URL;
@@ -25,6 +26,8 @@ const Import = () => {
   const [alertMessage, setAlertMessage] = useState('');
   const [alertType, setAlertType] = useState('');
   const [fieldNamesArray, setFieldNamesArray] = useState([]);
+  const [lastUploadedFile, setLastUploadedFile] = useState('');
+  const ProjectId = useProjectId();
 
 
   const handleFileUpload = (e) => {
@@ -84,18 +87,18 @@ const Import = () => {
   }, []);
 
 
-  const handleAbsenteeUpload = async () => {
+  const handleAbsenteeUpload = async (projectId) => {
     if (selectedFile) {
       setLoading(true);
       const reader = new FileReader();
-
+  
       reader.onload = async (event) => {
         const data = new Uint8Array(event.target.result);
         const workbook = XLSX.read(data, { type: 'array' });
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
         const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
+  
         const rows = jsonData.slice(1); // Exclude headers
         const mappedData = rows.map(row => {
           const rowData = {};
@@ -105,44 +108,45 @@ const Import = () => {
             // Ensure the value is converted to string before assigning
             rowData[property] = index !== -1 ? String(row[index]) : '';
           }
+          // Add projectId to each row
+          rowData['projectId'] = ProjectId;
           return rowData;
         });
-
-
-
+        
         try {
-
           const response = await fetch(`${apiurl}/Absentee/upload?WhichDatabase=Local`, {
-
-
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify(mappedData), // Send the mappedData array directly
+            body: JSON.stringify(mappedData),
           });
-          const data = await response.json();
-
+          
+  
+          const responseData = await response.json();
+  
           setAlertMessage('Upload successful!');
           setAlertType('success');
         } catch (error) {
           console.error('Error uploading data:', error);
-          setLoading(false);
           setAlertMessage('Error uploading data.');
           setAlertType('danger');
+        } finally {
+          setLoading(false);
         }
       };
-
+  
       reader.readAsArrayBuffer(selectedFile);
     } else {
       console.error('No file selected.');
       setAlertMessage('No file selected.');
       setAlertType('warning');
+      setLoading(false);
     }
-
+  
     setSelectedFile(null); // Reset selected file after upload
-    setLoading(false);
   };
+  
 
   useEffect(() => {
     if (activetab === "scanned") {
@@ -267,7 +271,7 @@ const Import = () => {
         });
 
         try {
-          const response = await fetch(`${apiurl}/OMRData/uploadcsv?WhichDatabase=Local`, {
+          const response = await fetch(`${apiurl}/OMRData/uploadcsv?WhichDatabase=Local&ProjectId=${ProjectId}`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -343,7 +347,7 @@ const Import = () => {
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
         const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-        const headers = jsonData[0]; // Extract headers from first row
+        const headers = jsonData[0]; // Extract headers from the first row
         const rows = jsonData.slice(1); // Exclude headers
   
         const mappedData = rows.map(row => {
@@ -352,7 +356,7 @@ const Import = () => {
             const header = registrationMapping[property];
             const index = headers.indexOf(header);
             if (index !== -1) {
-              rowData[property] = String(row[index]); // Ensure data is converted to string if necessary
+              rowData[property] = String(row[index]); // Ensure data is converted to a string if necessary
             } else {
               console.warn(`Header '${header}' not found in Excel data. Skipping field '${property}'.`);
             }
@@ -374,7 +378,7 @@ const Import = () => {
           return;
         }
   
-        const response = await fetch(`${apiurl}/Registration?WhichDatabase=Local`, {
+        const response = await fetch(`${apiurl}/Registration?WhichDatabase=Local&ProjectId=${ProjectId}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -403,7 +407,6 @@ const Import = () => {
     reader.readAsArrayBuffer(selectedFile); // Read file as ArrayBuffer
   };
   
-
 
   const handleMappingChange = (e, property) => {
     setMapping((prevMapping) => ({

@@ -435,6 +435,7 @@ import { Button, Table, Input, Select, Space, Popconfirm, message } from 'antd';
 import { DeleteOutlined } from '@ant-design/icons';
 import { useThemeToken } from '@/theme/hooks';
 import { Col, Row } from 'react-bootstrap';
+import { useProjectId } from '@/store/ProjectState';
 
 const APIURL = import.meta.env.VITE_API_URL;
 const { Option } = Select;
@@ -463,6 +464,9 @@ const FieldConfiguration = () => {
     pageSizeOptions: ['10', '20', '30', '50'],
   });
   const [rangeError, setRangeError] = useState(false);
+const ProjectId = useProjectId();
+
+console.log(ProjectId)
 
   useEffect(() => {
     getFields();
@@ -470,7 +474,7 @@ const FieldConfiguration = () => {
 
   useEffect(() => {
     axios
-      .get(`${APIURL}/FieldConfigurations?WhichDatabase=Local`)
+      .get(`${APIURL}/FieldConfigurations/GetByProjectId/${ProjectId}?WhichDatabase=Local`)
       .then((response) => {
         setSavedData(response.data); 
         setPagination({ ...pagination, total: response.data.length });
@@ -545,7 +549,7 @@ const FieldConfiguration = () => {
     const newConfig = {
       fieldConfigurationId:
         selectedFieldIndex !== -1 ? savedData[selectedFieldIndex].fieldConfigurationId : 0,
-      projectId: 1,
+      projectId: ProjectId,
       fieldName: fieldName, // Add fieldName here
       fieldAttributesJson: '',
       canBlank: formData.canBlank,
