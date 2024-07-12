@@ -9,6 +9,8 @@ import './style.css'
 import { useThemeToken } from '@/theme/hooks';
 import { color } from 'framer-motion';
 import ImportOmr from './OmrImport/ImportOmr';
+import { useProjectId } from '@/store/ProjectState';
+
 
 //const apiurl = import.meta.env.VITE_API_URL_PROD;
 const apiurl = import.meta.env.VITE_API_URL;
@@ -25,6 +27,7 @@ const Import = () => {
   const [alertMessage, setAlertMessage] = useState('');
   const [alertType, setAlertType] = useState('');
   const [fieldNamesArray, setFieldNamesArray] = useState([]);
+  const ProjectId = useProjectId();
 
 
   const handleFileUpload = (e) => {
@@ -112,7 +115,7 @@ const Import = () => {
 
         try {
 
-          const response = await fetch(`${apiurl}/Absentee/upload?WhichDatabase=Local`, {
+          const response = await fetch(`${apiurl}/Absentee/upload?WhichDatabase=Local&ProjectId=${ProjectId}`, {
 
 
             method: 'POST',
@@ -267,7 +270,7 @@ const Import = () => {
         });
 
         try {
-          const response = await fetch(`${apiurl}/OMRData/uploadcsv?WhichDatabase=Local`, {
+          const response = await fetch(`${apiurl}/OMRData/uploadcsv?WhichDatabase=Local&ProjectId=${ProjectId}`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -374,7 +377,7 @@ const Import = () => {
           return;
         }
   
-        const response = await fetch(`${apiurl}/Registration?WhichDatabase=Local`, {
+        const response = await fetch(`${apiurl}/Registration?WhichDatabase=Local&ProjectId=${ProjectId}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

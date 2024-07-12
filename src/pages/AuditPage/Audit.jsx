@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Col, Row, Card } from 'react-bootstrap';
 import { Button } from 'antd';
 import ChartComponent from './ChartComponent';
+import { useProjectId } from '@/store/ProjectState';
 
 const APIURL = import.meta.env.VITE_API_URL;
 
@@ -12,10 +13,11 @@ const AuditButton = () => {
   const [corrected, setCorrected] = useState(0);
   const [remaining, setRemaining] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
+  const ProjectId = useProjectId();
 
   const handleClick = async () => {
     try {
-      const response = await fetch(`${APIURL}/Audit/audit`);
+      const response = await fetch(`${APIURL}/Audit/audit?WhichDatabase=Local&ProjectID=${ProjectId}`);
 
       const result = await response.json();
 
@@ -53,7 +55,7 @@ const AuditButton = () => {
   useEffect(() => {
     const fetchFieldConfigs = async () => {
       try {
-        const response = await fetch(`${APIURL}/FieldConfigurations?WhichDatabase=Local`);
+        const response = await fetch(`${APIURL}/FieldConfigurations?WhichDatabase=Local&ProjectID=${ProjectId}`);
         const result = await response.json();
         setFieldConfigs(result);
       } catch (error) {
