@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Progress } from 'antd';
 import { useProjectActions, useProjectId } from '@/store/ProjectState';
+import { Button } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 
 const { Meta } = Card;
 
@@ -13,7 +15,7 @@ const ProjectDashboard = () => {
   const [numErrors, setNumErrors] = useState(0);
   const [numWarnings, setNumWarnings] = useState(0);
   const [tasksCompleted, setTasksCompleted] = useState(0);
-
+  const navigate = useNavigate();
   useEffect(() => {
     // Fetch project details based on projectId from localStorage
     const id = localStorage.getItem('projectId');
@@ -24,6 +26,14 @@ const ProjectDashboard = () => {
       fetchProjectDetails(id);
     }
   }, []); // Empty dependency array to run only once on component mount
+
+
+
+  const onClickProjectLogout = (() => {
+    setProjectId(0);
+    navigate('/dashboard/workbench')
+ 
+  })
 
   // Function to fetch project details from an API
   const fetchProjectDetails = (projectId) => {
@@ -51,7 +61,7 @@ const ProjectDashboard = () => {
       <Card
         className="project-card"
         title={<h2>{projectId}. {projectName}</h2>}
-        extra={<Progress type="circle" percent={progress} width={60} />}
+        extra={<Button onClick={onClickProjectLogout}>Logout</Button>}
       >
         <div className="statistics">
           <Card.Grid className="statistic-item">
