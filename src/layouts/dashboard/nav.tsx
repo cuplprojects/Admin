@@ -187,6 +187,7 @@ import { NAV_COLLAPSED_WIDTH, NAV_WIDTH } from './config';
 
 import { ThemeLayout } from '#/enum';
 import { ItemType } from 'antd/es/menu/interface';
+import { useProjectId } from '@/store/ProjectState';
 
 const slideInLeft = varSlide({ distance: 10 }).inLeft;
 
@@ -220,7 +221,7 @@ export default function Nav(props: Props) {
   const [selectedKeys, setSelectedKeys] = useState<string[]>(['']);
   const [menuList, setMenuList] = useState<ItemType[]>([]);
   const [menuMode, setMenuMode] = useState<MenuProps['mode']>('inline');
-  const [currentSelectedProject] = useState(1);
+const projectId = useProjectId();
 
   useEffect(() => {
     if (menuList?.length > 0) {
@@ -235,14 +236,14 @@ export default function Nav(props: Props) {
   }, [menuList, pathname, matches, collapsed, themeLayout]);
 
   useEffect(() => {
-    if (currentSelectedProject) {
-      const menuRoutes = menuFilter(permissionRoutes);
+    if (projectId>0) {
+      const menuRoutes = menuFilter([permissionRoutes[3], permissionRoutes[4], permissionRoutes[5], permissionRoutes[6], permissionRoutes[7],permissionRoutes[8],permissionRoutes[9],permissionRoutes[10]]);
       const menus = routeToMenuFn(menuRoutes);
       setMenuList(menus);
 
     }
     else {
-      const menuRoutes = menuFilter([permissionRoutes[0], permissionRoutes[1]]);
+      const menuRoutes = menuFilter([permissionRoutes[0], permissionRoutes[1], permissionRoutes[2]]);
 
       const menus = routeToMenuFn(menuRoutes);
       setMenuList(menus);
