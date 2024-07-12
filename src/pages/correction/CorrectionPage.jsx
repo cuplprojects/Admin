@@ -1,114 +1,211 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Select } from 'antd';
+import { Button, Select, notification, Checkbox } from 'antd';
 import { Table } from 'react-bootstrap';
-import { useMessage } from './../../utils/alerts/MessageContext';
-import omr1 from '@/assets/images/omrs/100001.jpg';
+import axios from 'axios';
 import ZoomedImage from './ZoomedImage';
 import FullImageView from './FullImageView';
+import { useProjectActions, useProjectId } from '@/store/ProjectState';
 
+const apiurl = import.meta.env.VITE_API_URL;
 const { Option } = Select;
 
 const CorrectionPage = () => {
-  const showMessage = useMessage();
-  const [data, setData] = useState([
-    {
-      coordinates: { x: 402, y: 130.4375, width: 114, height: 136 },
-      FieldName: 'Gender',
-      FieldValue: 'Male',
-    },
-    {
-      coordinates: { x: 29, y: 136.71875, width: 157, height: 222 },
-      FieldName: 'Roll No',
-      FieldValue: 20001,
-    },
-  ]);
-
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [allDataCorrected, setAllDataCorrected] = useState(false);
-  const [selectedField, setSelectedField] = useState(localStorage.getItem('selectedField') || ''); // State for selected field to correct
-  const [expandMode, setExpandMode] = useState(false); // State to track expand mode
-
-  const handleShowNotification = async (type, messageId) => {
-    await showMessage(type, messageId);
-  };
+  const [expandMode, setExpandMode] = useState(false);
+  const projectId = useProjectId();
+  const { setProjectId } = useProjectActions();
+  const [fieldCounts, setFieldCounts] = useState([]);
+  const [remaining, setRemaining] = useState(0);
+  const [selectedField, setSelectedField] = useState('all');
+  const [unchangedata, setUnchangeData] = useState('');
+  const [noChangeRequired, setNoChangeRequired] = useState(false);
 
   useEffect(() => {
-    // Reset the current index and correction status when the selected field changes
-    setCurrentIndex(0);
-    setAllDataCorrected(false);
-    localStorage.setItem('selectedField', selectedField); // Save to local storage
-  }, [selectedField]);
-
-  const handleUpdate = (index, newValue) => {
-    const updatedData = [...data];
-    updatedData[index].FieldValue = newValue;
-    setData(updatedData);
-    localStorage.setItem('correctionData', JSON.stringify(updatedData)); // Save to local storage
-  };
-
-  const handleNext = () => {
-    let fieldData = data;
-    if (selectedField !== 'all') {
-      fieldData = data.filter((item) => item.FieldName === selectedField);
+    if (data[currentIndex]) {
+      setUnchangeData(data[currentIndex].fieldNameValue);
     }
+  }, [currentIndex, data]);
 
-    if (currentIndex < fieldData.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-      console.log(fieldData);
-    } else {
-      setAllDataCorrected(true);
-      console.log('All data corrected:', fieldData);
-    }
-  };
+  useEffect(() => {
+    fetchFieldCounts();
+    fetchData();
+  }, [projectId, selectedField]);
 
-  const handlePrevious = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
+  useEffect(() => {
+    const selectedfield = localStorage.getItem('selectedField');
+    if (selectedfield) {
+      setSelectedField(selectedfield);
     }
-  };
+  }, []);
 
   const handleFieldChange = (value) => {
     setSelectedField(value);
+    localStorage.setItem('selectedField', value); // Save selected field to localStorage
+  };
+
+  const fetchFieldCounts = async () => {
+    try {
+      const response = await axios.get(`${apiurl}/Flags/counts`);
+      setFieldCounts(response.data.countsByFieldname);
+      setRemaining(response.data.remaining);
+    } catch (error) {
+      console.error('Error fetching field counts:', error);
+    }
+  };
+
+  const fetchData = async () => {
+    setCurrentIndex(0);
+    try {
+      const flagsResponse = await axios.get(
+        `${apiurl}/Correction/GetFlagsByCategory?WhichDatabase=Local&ProjectID=${projectId}&FieldName=${selectedField}`,
+        { headers: { accept: 'application/json' } }
+      );
+      const flagsResult = flagsResponse.data;
+
+      const imageConfigResponse = await axios.get(`${apiurl}/ImageConfigs/1`, {
+        params: { WhichDatabase: 'Local' },
+        headers: { accept: 'text/plain' },
+      });
+      const imageConfigResult = imageConfigResponse.data;
+
+      const parsedAnnotations = JSON.parse(imageConfigResult.annotationsJson).map((annotation) => ({
+        FieldName: annotation.FieldName,
+        coordinates: JSON.parse(annotation.Coordinates.replace(/'/g, '"')),
+        fieldNameValue: '',
+        imageUrl: '',
+      }));
+
+      const mergedData = flagsResult.map((flag) => {
+        const matchingAnnotation = parsedAnnotations.find(
+          (annotation) => annotation.FieldName === flag.field
+        );
+        return {
+          ...matchingAnnotation,
+          flagId: flag.flagId,
+          remarks: flag.remarks,
+          fieldNameValue: flag.fieldNameValue || '',
+          FieldName: flag.field,
+          barCode: flag.barCode,
+          projectId: projectId,
+          isCorrected: true,
+          imageUrl: `https://localhost:7290/OMR/${flag.barCode}.jpg`,
+          noChangeRequired: false,
+        };
+      });
+
+      setData(mergedData);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      setLoading(false);
+    }
+  };
+
+  const handleUpdate = (index, newValue) => {
+    const updatedData = [...data];
+    updatedData[index].fieldNameValue = newValue;
+    setData(updatedData);
+  };
+
+  const sendPostRequest = async (currentData) => {
+    try {
+      if (!currentData) {
+        console.error('Current data is undefined or null');
+        return;
+      }
+
+      const payload = {
+        barCode: currentData.barCode,
+        fieldName: currentData.FieldName,
+        value: currentData.fieldNameValue,
+      };
+
+      const response = await axios.post(
+        `${apiurl}/Correction/SubmitCorrection?WhichDatabase=Local`,
+        payload,
+        { headers: { 'Content-Type': 'application/json' } }
+      );
+
+      console.log('Data posted successfully:', response.data);
+    } catch (error) {
+      console.error('Error posting data:', error);
+    }
+  };
+
+  const handleNext = async () => {
+    let fieldData = data;
+    const currentData = fieldData[currentIndex];
+    if (!currentData) {
+      console.error('Current data is undefined or null');
+      return;
+    }
+    if (unchangedata === currentData.fieldNameValue && !noChangeRequired) {
+      console.log('Data has not changed:', unchangedata);
+      notification.error({
+        message: 'Alert',
+        description: 'Please correct the data before submit',
+        duration: 3,
+      });
+      return;
+    } else {
+      await sendPostRequest(currentData);
+
+      if (currentIndex < fieldData.length - 1) {
+        setCurrentIndex(currentIndex + 1);
+        fetchFieldCounts();
+        setUnchangeData(data[currentIndex + 1]?.fieldNameValue);
+      } else {
+        fetchData();
+      }
+    }
+  };
+
+  const handlePrevious = async () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+      setUnchangeData(data[currentIndex - 1]?.fieldNameValue);
+    }
   };
 
   const toggleExpandMode = () => {
     setExpandMode(!expandMode);
   };
 
-  const handleFullImageUpdate = (fieldName, newValue) => {
-    const updatedData = [...data];
-    const index = updatedData.findIndex((item) => item.FieldName === fieldName);
-    if (index !== -1) {
-      updatedData[index].FieldValue = newValue;
-      setData(updatedData);
-      localStorage.setItem('correctionData', JSON.stringify(updatedData)); // Save to local storage
-    }
-  };
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.ctrlKey && event.key === 'ArrowLeft') {
+        handlePrevious();
+      } else if (event.ctrlKey && event.key === 'ArrowRight') {
+        handleNext();
+      }
+    };
 
-  let fieldData = data;
-  if (selectedField !== 'all') {
-    fieldData = data.filter((item) => item.FieldName === selectedField);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [currentIndex, data, allDataCorrected]);
+
+  if (loading) {
+    return <p>Loading...</p>;
   }
-  const currentData = fieldData[currentIndex];
-  const imageurl = omr1;
-  const remainingFlags = allDataCorrected ? 0 : fieldData.length - currentIndex;
-
-  // Extract unique field names using Set
-  const uniqueFields = Array.from(new Set(data.map((item) => item.FieldName)));
 
   return (
     <>
       <div className="d-flex align-items-center justify-content-between">
         <Select
-          placeholder="Select field to correct"
-          onChange={handleFieldChange}
-          value={selectedField} // Set the value of the Select component
+          placeholder="All Fields"
           style={{ width: 200 }}
+          value={selectedField}
+          onChange={handleFieldChange} // Corrected onChange handler
         >
           <Option value="all">All</Option>
-          {uniqueFields.map((field, index) => (
-            <Option key={index} value={field}>
-              {field}
+          {fieldCounts.map((field, index) => (
+            <Option key={index} value={field.fieldName}>
+              {field.fieldName}
             </Option>
           ))}
         </Select>
@@ -116,7 +213,7 @@ const CorrectionPage = () => {
           {expandMode ? 'Zoomed View' : 'Expand OMR'}
         </Button>
       </div>
-      <p className="text-danger fs-5 m-1 text-center">Remaining Flags: {remainingFlags}</p>
+      <p className="text-danger fs-5 m-1 text-center">Remaining Flags: {remaining}</p>
 
       <div className="table-responsive">
         <Table className="table-bordered table-striped text-center">
@@ -124,41 +221,48 @@ const CorrectionPage = () => {
             <tr>
               <th>Project Name</th>
               <th>OMR Barcode Number</th>
+              <th>Remark</th>
               <th>Flag Number</th>
+              <th>No Change Required</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>Project A</td>
-              <td>123456</td>
-              <td>{currentIndex + 1}</td>
+              <td>Project {projectId}</td>
+              <td>{data[currentIndex]?.barCode}</td>
+              <td>{data[currentIndex]?.remarks}</td>
+              <td>{data[currentIndex]?.flagId}</td>
+              <td>
+                <Checkbox
+                  checked={noChangeRequired}
+                  onChange={() => setNoChangeRequired(!noChangeRequired)}
+                />
+              </td>
             </tr>
           </tbody>
         </Table>
       </div>
 
       <div className="w-75 position-relative m-auto border p-4" style={{ minHeight: '75%' }}>
-        {!allDataCorrected && selectedField ? (
+        {!allDataCorrected && data[currentIndex] ? (
           expandMode ? (
             <FullImageView
-              src={imageurl}
-              data={currentData}
+              data={data[currentIndex]}
               onUpdate={(newValue) =>
                 handleUpdate(
-                  data.findIndex((item) => item === currentData),
-                  newValue,
+                  data.findIndex((item) => item === data[currentIndex]),
+                  newValue
                 )
               }
               onNext={handleNext}
             />
           ) : (
             <ZoomedImage
-              src={imageurl}
-              data={currentData}
+              data={data[currentIndex]}
               onUpdate={(newValue) =>
                 handleUpdate(
-                  data.findIndex((item) => item === currentData),
-                  newValue,
+                  data.findIndex((item) => item === data[currentIndex]),
+                  newValue
                 )
               }
               onNext={handleNext}
@@ -166,22 +270,16 @@ const CorrectionPage = () => {
           )
         ) : (
           <div className="text-center">
-            <p className="fs-3">
-              {!selectedField ? 'Please select a field to correct' : 'All data corrected'}
-            </p>
+            <p className="fs-3">All data corrected</p>
           </div>
         )}
       </div>
       <div className="d-flex justify-content-evenly m-1">
-        <Button
-          type="primary"
-          onClick={handlePrevious}
-          disabled={currentIndex === 0 || !selectedField}
-        >
+        <Button type="primary" onClick={handlePrevious} disabled={currentIndex === 0}>
           Previous
         </Button>
-        <Button type="primary" onClick={handleNext} disabled={allDataCorrected || !selectedField}>
-          Save and Next
+        <Button type="primary" onClick={handleNext} disabled={allDataCorrected}>
+          Next
         </Button>
       </div>
     </>
