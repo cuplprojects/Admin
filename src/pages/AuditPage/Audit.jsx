@@ -92,7 +92,7 @@ const AuditButton = () => {
                         labels={['Average Results']}
                       />
                       <div>
-                        <p className="fs-2 text-center">Project status</p>
+                        <p className="fs-2 text-center">Completion Status</p>
                       </div>
                     </div>
                   </Card>
