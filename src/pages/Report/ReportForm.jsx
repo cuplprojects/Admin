@@ -3,12 +3,10 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import Select from 'react-select';
 import { PDFViewer, Page, Text, View, Document, StyleSheet } from '@react-pdf/renderer';
-import { Select as AntSelect, DatePicker as AntDatePicker, Input, Button, Row, Col, Table, Typography } from 'antd';
-
+import { Select as AntSelect, Input, Button, Row, Col, Table, Typography } from 'antd';
 
 const { Title } = Typography;
 const { Option } = AntSelect;
-const { RangePicker } = AntDatePicker;
 
 const ReportForm = () => {
   const [startDate, setStartDate] = useState(null);
@@ -20,63 +18,33 @@ const ReportForm = () => {
     { value: 'CENTRE_CODE', label: 'Center Code' },
     { value: 'BC', label: 'Booklet Number' },
     { value: 'NAME', label: 'Name' },
-    { value: 'STATUS', label: 'Status' }
+    { value: 'STATUS', label: 'Status' },
+    { value: 'SCORE', label: 'Score' }
   ]);
-  const [selectedFields, setSelectedFields] = useState(fields);
+  const [selectedFields, setSelectedFields] = useState([]);
   const [previewPDF, setPreviewPDF] = useState(false);
 
   const handleFieldChange = (selectedOptions) => {
     setSelectedFields(selectedOptions);
   };
 
-  const data = [
-    { 'DISTRICT': '101', 'CENTRE_CODE': '001', 'BC': 'B', 'ROLLNO': '200001', 'NAME': 'AAISHA', 'STATUS': 'P' },
-    { 'DISTRICT': '101', 'CENTRE_CODE': '001', 'BC': 'B', 'ROLLNO': '200002', 'NAME': 'AARTI', 'STATUS': 'A' },
-    { 'DISTRICT': '101', 'CENTRE_CODE': '001', 'BC': 'B', 'ROLLNO': '200003', 'NAME': 'AARTI', 'STATUS': 'P' },
-    { 'DISTRICT': '101', 'CENTRE_CODE': '001', 'BC': 'B', 'ROLLNO': '200004', 'NAME': 'AARTI', 'STATUS': 'P' },
-    { 'DISTRICT': '101', 'CENTRE_CODE': '001', 'BC': 'B', 'ROLLNO': '200005', 'NAME': 'AASHU', 'STATUS': 'P' },
-    { 'DISTRICT': '101', 'CENTRE_CODE': '001', 'BC': 'B', 'ROLLNO': '200006', 'NAME': 'AASMEEN', 'STATUS': 'P' },
-    { 'DISTRICT': '101', 'CENTRE_CODE': '001', 'BC': 'B', 'ROLLNO': '200007', 'NAME': 'ANAM', 'STATUS': 'P' },
-    { 'DISTRICT': '101', 'CENTRE_CODE': '001', 'BC': 'B', 'ROLLNO': '200008', 'NAME': 'ANISHA KUMARI', 'STATUS': 'P' },
-    { 'DISTRICT': '101', 'CENTRE_CODE': '001', 'BC': 'B', 'ROLLNO': '200009', 'NAME': 'AVANTIKA', 'STATUS': 'P' },
-    { 'DISTRICT': '101', 'CENTRE_CODE': '001', 'BC': 'B', 'ROLLNO': '200010', 'NAME': 'AZRA', 'STATUS': 'P' },
-    { 'DISTRICT': '101', 'CENTRE_CODE': '001', 'BC': 'B', 'ROLLNO': '200011', 'NAME': 'DHATRI', 'STATUS': 'P' },
-    { 'DISTRICT': '101', 'CENTRE_CODE': '001', 'BC': 'B', 'ROLLNO': '200012', 'NAME': 'HARSHITA', 'STATUS': 'P' },
-    { 'DISTRICT': '101', 'CENTRE_CODE': '001', 'BC': 'B', 'ROLLNO': '200013', 'NAME': 'IKRA', 'STATUS': 'P' },
-    { 'DISTRICT': '101', 'CENTRE_CODE': '001', 'BC': 'B', 'ROLLNO': '200014', 'NAME': 'ISHA', 'STATUS': 'A' },
-    { 'DISTRICT': '101', 'CENTRE_CODE': '001', 'BC': 'B', 'ROLLNO': '200015', 'NAME': 'ITI', 'STATUS': 'P' },
-    { 'DISTRICT': '101', 'CENTRE_CODE': '001', 'BC': 'B', 'ROLLNO': '200016', 'NAME': 'ITI', 'STATUS': 'P' },
-    { 'DISTRICT': '101', 'CENTRE_CODE': '001', 'BC': 'B', 'ROLLNO': '200017', 'NAME': 'JYOTI DHIMAN', 'STATUS': 'A' },
-    { 'DISTRICT': '101', 'CENTRE_CODE': '001', 'BC': 'B', 'ROLLNO': '200018', 'NAME': 'KAJAL SAINI', 'STATUS': 'A' },
-    { 'DISTRICT': '101', 'CENTRE_CODE': '001', 'BC': 'B', 'ROLLNO': '200019', 'NAME': 'KANIKA', 'STATUS': 'P' },
-    { 'DISTRICT': '101', 'CENTRE_CODE': '001', 'BC': 'B', 'ROLLNO': '200020', 'NAME': 'KHUSHI SAINI', 'STATUS': 'P' },
-    { 'DISTRICT': '101', 'CENTRE_CODE': '001', 'BC': 'B', 'ROLLNO': '200021', 'NAME': 'KHUSHI', 'STATUS': 'P' },
-    { 'DISTRICT': '101', 'CENTRE_CODE': '001', 'BC': 'B', 'ROLLNO': '200022', 'NAME': 'KOMAL', 'STATUS': 'P' },
-    { 'DISTRICT': '101', 'CENTRE_CODE': '001', 'BC': 'B', 'ROLLNO': '200023', 'NAME': 'MAHAK', 'STATUS': 'P' },
-    { 'DISTRICT': '101', 'CENTRE_CODE': '001', 'BC': 'B', 'ROLLNO': '200024', 'NAME': 'MISBAH', 'STATUS': 'A' },
-    { 'DISTRICT': '101', 'CENTRE_CODE': '001', 'BC': 'B', 'ROLLNO': '200025', 'NAME': 'MUSKAN', 'STATUS': 'P' },
-    { 'DISTRICT': '101', 'CENTRE_CODE': '001', 'BC': 'B', 'ROLLNO': '200026', 'NAME': 'MUSKAN', 'STATUS': 'P' },
-    { 'DISTRICT': '101', 'CENTRE_CODE': '001', 'BC': 'B', 'ROLLNO': '200027', 'NAME': 'NEETU SAINI', 'STATUS': 'A' },
-    { 'DISTRICT': '101', 'CENTRE_CODE': '001', 'BC': 'B', 'ROLLNO': '200028', 'NAME': 'NITASHA', 'STATUS': 'P' },
-    { 'DISTRICT': '101', 'CENTRE_CODE': '001', 'BC': 'B', 'ROLLNO': '200029', 'NAME': 'PAYAL', 'STATUS': 'P' }
-  ];
+  const data = [];
 
   const styles = StyleSheet.create({
     page: {
       padding: 30,
     },
+    header: {
+      marginBottom: 20,
+      textAlign: 'center',
+    },
     title: {
       fontSize: 24,
-      textAlign: 'center',
-      marginBottom: 20,
+      marginBottom: 10,
     },
     subtitle: {
       fontSize: 18,
-      margin: 12,
-    },
-    text: {
-      fontSize: 12,
-      margin: 12,
+      marginBottom: 8,
     },
     table: {
       display: "table",
@@ -88,80 +56,68 @@ const ReportForm = () => {
       borderBottomWidth: 0,
     },
     tableRow: {
-      flexDirection: "row",
+      flexDirection: 'row',
     },
     tableColHeader: {
-      width: "20%",
+      width: `${100 / selectedFields.length}%`,
       borderStyle: "solid",
       borderWidth: 1,
       borderColor: '#bfbfbf',
-      borderLeftWidth: 0,
-      borderTopWidth: 0,
-      backgroundColor: '#f3f3f3',
-      //padding: 2,
+      borderRightWidth: 0,
+      borderBottomWidth: 0,
+      backgroundColor: '#f0f0f0',
+      textAlign: 'center',
+      fontWeight: 'bold',
+      padding: 8,
     },
     tableCol: {
-      width: "20%",
+      width: `${100 / selectedFields.length}%`,
       borderStyle: "solid",
       borderWidth: 1,
       borderColor: '#bfbfbf',
       borderLeftWidth: 0,
       borderTopWidth: 0,
-      //padding: 2,
-    },
-    tableCellHeader: {
-      margin: "auto",
-      fontSize: 10,
-      fontWeight: 'bold',
-      color: '#333333',
-    },
-    tableCell: {
-      margin: "auto",
-      marginTop: 5,
-      fontSize: 10,
+      padding: 8,
+      textAlign: 'center',
     },
   });
-
-  const PDFReport = () => (
-    <Document>
-      <Page style={styles.page} size="A3">
-        <Text style={styles.title}>Report</Text>
-        <Text style={styles.subtitle}>Select Project: {project}</Text>
-        <Text style={styles.subtitle}>Start Date: {startDate ? startDate.toLocaleDateString() : ''}</Text>
-        <Text style={styles.subtitle}>End Date: {endDate ? endDate.toLocaleDateString() : ''}</Text>
-        <Text style={styles.subtitle}>Worked By: {workedBy}</Text>
-        
-        <View style={styles.table}>
-          <View style={styles.tableRow}>
-            <View style={styles.tableColHeader}>
-              <Text style={styles.tableCellHeader}>S.No.</Text>
-            </View>
-            {selectedFields.map(field => (
-              <View key={field.value} style={styles.tableColHeader}>
-                <Text style={styles.tableCellHeader}>{field.label}</Text>
-              </View>
-            ))}
-          </View>
-          {data.map((item, index) => (
-            <View key={index} style={styles.tableRow}>
-              <View style={styles.tableCol}>
-                <Text style={styles.tableCell}>{index + 1}</Text>
-              </View>
-              {selectedFields.map(field => (
-                <View key={field.value} style={styles.tableCol}>
-                  <Text style={styles.tableCell}>{item[field.value]}</Text>
-                </View>
-              ))}
-            </View>
-          ))}
-        </View>
-      </Page>
-    </Document>
-  );
 
   const generatePDF = () => {
     setPreviewPDF(true);
   };
+
+  const PDFReport = () => (
+    <Document>
+      <Page size="A4" style={styles.page}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Report</Text>
+          <Text style={styles.subtitle}>Project: {project}</Text>
+          <Text style={styles.subtitle}>Date: {startDate && endDate ? `${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}` : 'All'}</Text>
+          <Text style={styles.subtitle}>Worked By: {workedBy}</Text>
+        </View>
+
+        {selectedFields.length > 0 && (
+          <View style={styles.table}>
+            <View style={styles.tableRow}>
+              {selectedFields.map(field => (
+                <Text key={field.value} style={styles.tableColHeader}>{field.label}</Text>
+              ))}
+            </View>
+
+            {data.map((item, index) => (
+              <View key={index} style={styles.tableRow}>
+                {selectedFields.map(field => (
+                  <Text key={`${field.value}-${index}`} style={styles.tableCol}>
+                    {(field.value === 'SCORE' && item.STATUS === 'P') ? item.SCORE : ((field.value === 'SCORE' && item.STATUS === 'A') ? '*' : item[field.value])}
+                  </Text>
+                ))}
+              </View>
+            ))}
+          </View>
+        )}
+      </Page>
+    </Document>
+  );
 
   const columns = [
     {
@@ -174,6 +130,15 @@ const ReportForm = () => {
       title: field.label,
       dataIndex: field.value,
       key: field.value,
+      render: (text, record) => {
+        if (field.value === 'SCORE' && record.STATUS === 'P') {
+          return text;
+        } else if (field.value === 'SCORE' && record.STATUS === 'A') {
+          return '*';
+        } else {
+          return text;
+        }
+      },
     }))
   ];
 
@@ -181,21 +146,19 @@ const ReportForm = () => {
 
   return (
     <div className="container mt-5">
-    <div className="mb-3 d-flex align-items-center justify-content-between">
-  <div className="d-flex align-items-center" style={{ flexGrow: 1 }}>
-    <label className="form-label me-2">Project</label>
-    <AntSelect value={project} onChange={setProject} className="form-select" style={{ width: '100%' }}>
-      <Option value="BHU GROUP">BHU Group</Option>
-      <Option value="RGVP GROUP">RGVP GROUP</Option>
-    </AntSelect>
-  </div>
-  <Button type="primary" onClick={generatePDF} className="ms-5">
-    Download PDF
-  </Button>
-</div>
+      <div className="mb-3 d-flex align-items-center justify-content-between">
+        <div className="d-flex align-items-center" style={{ flexGrow: 1 }}>
+          <label className="form-label me-2">Project</label>
+          <AntSelect value={project} onChange={setProject} className="form-select" style={{ width: '100%' }}>
+            <Option value="BHU GROUP">BHU Group</Option>
+            <Option value="RGVP GROUP">RGVP GROUP</Option>
+          </AntSelect>
+        </div>
+        <Button type="primary" onClick={generatePDF} className="ms-5">
+          Download PDF
+        </Button>
+      </div>
 
-
-      
       <Row gutter={16}>
         <Col span={12}>
           <div className="mb-3">
@@ -220,7 +183,7 @@ const ReportForm = () => {
           </div>
         </Col>
       </Row>
-      
+
       <div className="mb-3">
         <label className="form-label">Worked By</label>
         <Input
@@ -229,7 +192,7 @@ const ReportForm = () => {
           placeholder="Enter names separated by commas"
         />
       </div>
-      
+
       <div className="mb-3">
         <label className="form-label">Select the fields you want in your report</label>
         <Select
@@ -241,20 +204,17 @@ const ReportForm = () => {
           classNamePrefix="select"
         />
       </div>
-      
-      <Table
-        columns={columns}
-        dataSource={tableData}
-        bordered
-        pagination={false}
-        className="mt-4"
-      />
-      
-      {/* <Button type="primary" onClick={generatePDF} className="mt-3">
-        Download PDF
-      </Button> */}
-      
-      {/* Preview PDF Section */}
+
+      {selectedFields.length > 0 && (
+        <Table
+          columns={columns}
+          dataSource={tableData}
+          bordered
+          pagination={false}
+          className="mt-4"
+        />
+      )}
+
       {previewPDF && (
         <div className="mt-3">
           <Title level={3}>Preview</Title>

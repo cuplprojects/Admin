@@ -1,4 +1,4 @@
-import { App, Button, Col, Form, Row, Switch, Table } from 'antd';
+import { App, Col, Row, Switch, Table } from 'antd';
 import Card from '@/components/card';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
@@ -6,7 +6,6 @@ import axios from 'axios';
 
 export default function PermissionTab() {
   const { notification } = App.useApp();
-  const [form] = Form.useForm();
   const { userId } = useParams();
 
   const [modules, setModules] = useState([]);
@@ -27,6 +26,7 @@ export default function PermissionTab() {
           canAdd: false,
           canUpdate: false,
           canDelete: false,
+          permissionId: null, // Add permissionId to initial state
         }));
         setModules(modulesData);
       } catch (error) {
@@ -40,12 +40,12 @@ export default function PermissionTab() {
 
     const fetchPermissions = async () => {
       try {
-        const response = await axios.get(`https://localhost:7290/api/Permissions?userId=${userId}`);
+        const response = await axios.get(`https://localhost:7290/api/Permissions?WhichDatabase=Local&userId=${userId}`);
         const permissions = response.data;
         setModules(prevModules =>
           prevModules.map(module => ({
             ...module,
-            ...permissions.find(p => p.moduleId === module.moduleId),
+            ...permissions.find(p => p.moduleId === module.moduleId) || {},
           }))
         );
       } catch (error) {
@@ -67,8 +67,20 @@ export default function PermissionTab() {
     );
     setModules(updatedModules);
 
+    const updatedModule = updatedModules.find(module => module.moduleId === moduleId);
+
+    const permissionUpdate = {
+      permissionId: updatedModule.permissionId,
+      userId,
+      moduleId: updatedModule.moduleId,
+      canView: updatedModule.canView,
+      canAdd: updatedModule.canAdd,
+      canUpdate: updatedModule.canUpdate,
+      canDelete: updatedModule.canDelete
+    };
+
     try {
-      await axios.put('https://localhost:7290/api/Permissions', { userId, modules: updatedModules });
+      await axios.put(`https://localhost:7290/api/Permissions/${updatedModule.permissionId}?WhichDatabase=Local`, permissionUpdate);
       notification.success({
         message: 'Permissions updated successfully!',
         duration: 3,
@@ -91,7 +103,20 @@ export default function PermissionTab() {
     setSelectAll(prevState => ({ ...prevState, [permissionType]: checked }));
 
     try {
-      await axios.put('https://localhost:7290/api/Permissions', { userId, modules: updatedModules });
+      const updatePromises = updatedModules.map(module => {
+        const permissionUpdate = {
+          permissionId: module.permissionId,
+          userId,
+          moduleId: module.moduleId,
+          canView: module.canView,
+          canAdd: module.canAdd,
+          canUpdate: module.canUpdate,
+          canDelete: module.canDelete
+        };
+        return axios.put(`https://localhost:7290/api/Permissions/${module.permissionId}?WhichDatabase=Local`, permissionUpdate);
+      });
+      await Promise.all(updatePromises);
+
       notification.success({
         message: 'Permissions updated successfully!',
         duration: 3,
