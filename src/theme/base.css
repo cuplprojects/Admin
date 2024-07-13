@@ -363,3 +363,8 @@ video {
 [hidden] {
   display: none;
 }
+
+
+.c-pointer:hover{
+  cursor: pointer !important;
+}
