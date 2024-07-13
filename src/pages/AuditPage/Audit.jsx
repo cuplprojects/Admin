@@ -15,6 +15,7 @@ const AuditButton = () => {
   const [remaining, setRemaining] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
   const ProjectId = useProjectId();
+  const WIP = ((corrected/totalCount)*100).toFixed(3);
 
 
   const handleClick = async () => {
@@ -87,7 +88,7 @@ const AuditButton = () => {
                     <div className="justify-content-center align-items-center">
                       <ChartComponent
                         chartId={`chart-global`}
-                        series={76} // Example series data
+                        series={WIP} // Example series data
                         labels={['Average Results']}
                       />
                       <div>
