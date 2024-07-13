@@ -61,7 +61,7 @@ const CorrectionPage = () => {
     try {
       const flagsResponse = await axios.get(
         `${apiurl}/Correction/GetFlagsByCategory?WhichDatabase=Local&ProjectID=${projectId}&FieldName=${selectedField}`,
-        { headers: { accept: 'application/json' } }
+        { headers: { accept: 'application/json' } },
       );
       const flagsResult = flagsResponse.data;
 
@@ -80,7 +80,7 @@ const CorrectionPage = () => {
 
       const mergedData = flagsResult.map((flag) => {
         const matchingAnnotation = parsedAnnotations.find(
-          (annotation) => annotation.FieldName === flag.field
+          (annotation) => annotation.FieldName === flag.field,
         );
         return {
           ...matchingAnnotation,
@@ -124,11 +124,13 @@ const CorrectionPage = () => {
       };
 
       const response = await axios.post(
-        `${apiurl}/Correction/SubmitCorrection?WhichDatabase=Local`,
+        `${apiurl}/Correction/SubmitCorrection?WhichDatabase=Local&status=${
+          noChangeRequired ? 2 : 3
+        }`,
         payload,
-        { headers: { 'Content-Type': 'application/json' } }
+        { headers: { 'Content-Type': 'application/json' } },
       );
-
+      setNoChangeRequired(false);
       console.log('Data posted successfully:', response.data);
     } catch (error) {
       console.error('Error posting data:', error);
@@ -251,7 +253,7 @@ const CorrectionPage = () => {
               onUpdate={(newValue) =>
                 handleUpdate(
                   data.findIndex((item) => item === data[currentIndex]),
-                  newValue
+                  newValue,
                 )
               }
               onNext={handleNext}
@@ -262,7 +264,7 @@ const CorrectionPage = () => {
               onUpdate={(newValue) =>
                 handleUpdate(
                   data.findIndex((item) => item === data[currentIndex]),
-                  newValue
+                  newValue,
                 )
               }
               onNext={handleNext}

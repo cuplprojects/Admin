@@ -122,15 +122,15 @@ const MANAGEMENT_PERMISSION = {
         //   route: 'organization',
         //   component: '/management/system/organization/index.tsx',
         // },
-        // {
-        //   id: '4359580910369984',
-        //   parentId: '0249937641030250',
-        //   label: 'sys.menu.system.permission',
-        //   name: 'Permission',
-        //   type: PermissionType.MENU,
-        //   route: 'permission',
-        //   component: '/management/system/permission/index.tsx',
-        // },
+        {
+          id: '4359580910369984',
+          parentId: '0249937641030250',
+          label: 'sys.menu.system.permission',
+          name: 'Permission',
+          type: PermissionType.MENU,
+          route: 'permission',
+          component: '/management/system/permission/index.tsx',
+        },
         {
           id: '1689241785490759',
           parentId: '0249937641030250',
@@ -724,6 +724,7 @@ export const ROLE_LIST = [ADMIN_ROLE, TEST_ROLE, DEVELOPER_ROLE];
 /**
  * User data mock
  */
+
 export const DEFAULT_USER = {
   id: 'b34719e1-ce46-457e-9575-99505ecee828',
   username: 'admin',

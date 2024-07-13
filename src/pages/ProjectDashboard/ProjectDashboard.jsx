@@ -17,8 +17,6 @@ const ProjectDashboard = () => {
     setProjectId(id);
   });
 
- 
-
 
   return (
     <div className="project-dashboard">
