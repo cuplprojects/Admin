@@ -1,74 +1,86 @@
-// import { Form, Modal, Input, InputNumber, Radio, Tree } from 'antd';
-// import { useEffect } from 'react';
+// RoleModal.tsx
 
-// import { PERMISSION_LIST } from '@/_mock/assets';
-// import { flattenTrees } from '@/utils/tree';
+import { Form, Modal, Input, InputNumber, Radio, Tree } from 'antd';
+import { useEffect } from 'react';
 
-// import { Permission, Role } from '#/entity';
-// import { BasicStatus } from '#/enum';
+import { PERMISSION_LIST } from '@/_mock/assets';
+import { flattenTrees } from '@/utils/tree';
 
-// export type RoleModalProps = {
-//   formValue: Role;
-//   title: string;
-//   show: boolean;
-//   onOk: VoidFunction;
-//   onCancel: VoidFunction;
-// };
-// const PERMISSIONS: Permission[] = PERMISSION_LIST;
-// export function RoleModal({ title, show, formValue, onOk, onCancel }: RoleModalProps) {
-//   const [form] = Form.useForm();
+import { Permission, Role } from '#/entity';
+import { BasicStatus } from '#/enum';
 
-//   const flattenedPermissions = flattenTrees(formValue.permission);
-//   const checkedKeys = flattenedPermissions.map((item) => item.id);
-//   useEffect(() => {
-//     form.setFieldsValue({ ...formValue });
-//   }, [formValue, form]);
+export type RoleModalProps = {
+  formValue: Role;
+  title: string;
+  show: boolean;
+  onOk: (role: Role) => void; // Receive onOk function with role parameter
+  onCancel: VoidFunction;
+};
 
-//   return (
-//     <Modal title={title} open={show} onOk={onOk} onCancel={onCancel}>
-//       <Form
-//         initialValues={formValue}
-//         form={form}
-//         labelCol={{ span: 4 }}
-//         wrapperCol={{ span: 18 }}
-//         layout="horizontal"
-//       >
-//         <Form.Item<Role> label="Name" name="name" required>
-//           <Input />
-//         </Form.Item>
+const PERMISSIONS: Permission[] = PERMISSION_LIST;
 
-//         <Form.Item<Role> label="Label" name="label" required>
-//           <Input />
-//         </Form.Item>
+const RoleModal: React.FC<RoleModalProps> = ({ title, show, formValue, onOk, onCancel }) => {
+  const [form] = Form.useForm();
 
-//         <Form.Item<Role> label="Order" name="order">
-//           <InputNumber style={{ width: '100%' }} />
-//         </Form.Item>
+  const flattenedPermissions = flattenTrees(formValue.permission);
+  const checkedKeys = flattenedPermissions.map((item) => item.id);
 
-//         <Form.Item<Role> label="Status" name="status" required>
-//           <Radio.Group optionType="button" buttonStyle="solid">
-//             <Radio value={BasicStatus.ENABLE}> Enable </Radio>
-//             <Radio value={BasicStatus.DISABLE}> Disable </Radio>
-//           </Radio.Group>
-//         </Form.Item>
+  useEffect(() => {
+    form.setFieldsValue({ ...formValue });
+  }, [formValue, form]);
 
-//         <Form.Item<Role> label="Desc" name="desc">
-//           <Input.TextArea />
-//         </Form.Item>
+  const handleOk = () => {
+    form
+      .validateFields()
+      .then((values) => {
+        const updatedRole: Role = {
+          ...formValue,
+          ...values,
+        };
+        onOk(updatedRole); // Call onOk with updated role
+      })
+      .catch((errorInfo) => {
+        console.log('Validation failed:', errorInfo);
+      });
+  };
 
-//         <Form.Item<Role> label="Permission" name="permission">
-//           <Tree
-//             checkable
-//             checkedKeys={checkedKeys}
-//             treeData={PERMISSIONS}
-//             fieldNames={{
-//               key: 'id',
-//               children: 'children',
-//               title: 'name',
-//             }}
-//           />
-//         </Form.Item>
-//       </Form>
-//     </Modal>
-//   );
-// }
+  return (
+    <Modal title={title} visible={show} onOk={handleOk} onCancel={onCancel}>
+      <Form form={form} initialValues={formValue} labelCol={{ span: 4 }} wrapperCol={{ span: 18 }}>
+        <Form.Item label="Name" name="name" rules={[{ required: true, message: 'Please enter name' }]}>
+          <Input />
+        </Form.Item>
+
+        <Form.Item label="Label" name="label" rules={[{ required: true, message: 'Please enter label' }]}>
+          <Input />
+        </Form.Item>
+
+        <Form.Item label="Order" name="order">
+          <InputNumber style={{ width: '100%' }} />
+        </Form.Item>
+
+        <Form.Item label="Status" name="status" rules={[{ required: true, message: 'Please select status' }]}>
+          <Radio.Group>
+            <Radio value={BasicStatus.ENABLE}>Enable</Radio>
+            <Radio value={BasicStatus.DISABLE}>Disable</Radio>
+          </Radio.Group>
+        </Form.Item>
+
+        <Form.Item label="Description" name="desc">
+          <Input.TextArea />
+        </Form.Item>
+
+        <Form.Item label="Permission" name="permission">
+          <Tree
+            checkable
+            checkedKeys={checkedKeys}
+            treeData={PERMISSIONS}
+            fieldNames={{ key: 'id', children: 'children', title: 'name' }}
+          />
+        </Form.Item>
+      </Form>
+    </Modal>
+  );
+};
+
+export default RoleModal;

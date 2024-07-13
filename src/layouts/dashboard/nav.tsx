@@ -250,7 +250,7 @@ const projectId = useProjectId();
     }
 
 
-  }, [permissionRoutes, routeToMenuFn]);
+  }, [permissionRoutes, routeToMenuFn,projectId]);
 
   useEffect(() => {
     if (themeLayout === ThemeLayout.Vertical) {
