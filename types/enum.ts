@@ -1,3 +1,4 @@
+// enums.ts
 export enum BasicStatus {
   DISABLE,
   ENABLE,
@@ -14,7 +15,8 @@ export enum StorageEnum {
   Token = 'token',
   Settings = 'settings',
   I18N = 'i18nextLng',
-  ProjectId = "projectId"
+  ProjectId = 'projectId',
+  Permissions = 'permissions' // Ensure this key exists for permissions storage
 }
 
 export enum ThemeMode {
@@ -39,7 +41,7 @@ export enum ThemeColorPresets {
 
 export enum LocalEnum {
   en_US = 'en_US',
-  hi_IN = 'hi_IN'
+  hi_IN = 'hi_IN',
 }
 
 export enum MultiTabOperation {
@@ -52,8 +54,9 @@ export enum MultiTabOperation {
   CLOSERIGHT = 'closeRight',
 }
 
+// enums.ts
 export enum PermissionType {
-  CATALOGUE,
-  MENU,
-  BUTTON,
+  CATALOGUE = 'CATALOGUE',
+  MENU = 'MENU',
+  BUTTON = 'BUTTON',
 }
