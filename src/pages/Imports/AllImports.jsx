@@ -10,10 +10,6 @@ import { useThemeToken } from '@/theme/hooks';
 import { color } from 'framer-motion';
 import ImportOmr from './OmrImport/ImportOmr';
 import { useProjectId } from '@/store/ProjectState';
-<<<<<<< HEAD
-
-=======
->>>>>>> 6615e6ecb82913f51127929eaebee1a6e7a7cb62
 
 //const apiurl = import.meta.env.VITE_API_URL_PROD;
 const apiurl = import.meta.env.VITE_API_URL;
@@ -30,10 +26,7 @@ const Import = () => {
   const [alertMessage, setAlertMessage] = useState('');
   const [alertType, setAlertType] = useState('');
   const [fieldNamesArray, setFieldNamesArray] = useState([]);
-<<<<<<< HEAD
-=======
   const [lastUploadedFile, setLastUploadedFile] = useState('');
->>>>>>> 6615e6ecb82913f51127929eaebee1a6e7a7cb62
   const ProjectId = useProjectId();
 
 
@@ -121,14 +114,7 @@ const Import = () => {
         });
         
         try {
-<<<<<<< HEAD
-
           const response = await fetch(`${apiurl}/Absentee/upload?WhichDatabase=Local&ProjectId=${ProjectId}`, {
-
-
-=======
-          const response = await fetch(`${apiurl}/Absentee/upload?WhichDatabase=Local`, {
->>>>>>> 6615e6ecb82913f51127929eaebee1a6e7a7cb62
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
