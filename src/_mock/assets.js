@@ -5,8 +5,9 @@ import { BasicStatus, PermissionType } from '#/enum';
 /**
  * User permission mock
  */
+// parent 1
 const SUPER_ADMIN = {
-  id: '9100714781927705',
+  id: '1',
   parentId: '',
   label: 'SuperAdmin',
   name: 'superadmin',
@@ -16,8 +17,8 @@ const SUPER_ADMIN = {
   order: 7,
   children: [
     {
-      id: '84269992294002379',
-      parentId: '9100714781927705',
+      id: '1.1',
+      parentId: '1',
       label: 'AlertPage',
       name: 'AlertPage',
       type: PermissionType.MENU,
@@ -27,8 +28,9 @@ const SUPER_ADMIN = {
   ],
 };
 
+// parent 2
 const DASHBOARD_PERMISSION = {
-  id: '9100714781927703',
+  id: '2',
   parentId: '',
   label: 'sys.menu.dashboard',
   name: 'Dashboard',
@@ -38,8 +40,8 @@ const DASHBOARD_PERMISSION = {
   order: 1,
   children: [
     {
-      id: '8426999229400979',
-      parentId: '9100714781927703',
+      id: '2.1',
+      parentId: '2',
       label: 'sys.menu.workbench',
       name: 'Workbench',
       type: PermissionType.MENU,
@@ -47,8 +49,8 @@ const DASHBOARD_PERMISSION = {
       component: '/dashboard/workbench/index.tsx',
     },
     {
-      id: '9710971640510357',
-      parentId: '9100714781927703',
+      id: '2.2',
+      parentId: '2',
       label: 'sys.menu.analysis',
       name: 'Analysis',
       type: PermissionType.MENU,
@@ -57,9 +59,11 @@ const DASHBOARD_PERMISSION = {
     },
   ],
 };
+
+// parent 3 
 const DEVELOPER_PERMISSION = {
-  id: '4359580910369984',
-  parentId: '0249937641030250',
+  id: '3',
+  parentId: '',
   label: 'sys.menu.system.permission',
   name: 'Permission',
   type: PermissionType.MENU,
@@ -67,8 +71,9 @@ const DEVELOPER_PERMISSION = {
   component: '/management/system/permission/index.tsx',
 };
 
+// parent 4
 const MANAGEMENT_PERMISSION = {
-  id: '0901673425580518',
+  id: '4',
   parentId: '',
   label: 'sys.menu.management',
   name: 'Management',
@@ -78,8 +83,8 @@ const MANAGEMENT_PERMISSION = {
   order: 2,
   children: [
     {
-      id: '2781684678535711',
-      parentId: '0901673425580518',
+      id: '4.1',
+      parentId: '4',
       label: 'sys.menu.user.index',
       name: 'User',
       type: PermissionType.CATALOGUE,
@@ -95,8 +100,8 @@ const MANAGEMENT_PERMISSION = {
         //   component: '/management/user/profile/index.tsx',
         // },
         {
-          id: '2516598794787938',
-          parentId: '2781684678535711',
+          id: '4.1.1',
+          parentId: '4.1',
           label: 'sys.menu.user.AddUser',
           name: 'AddUser',
           type: PermissionType.MENU,
@@ -106,8 +111,8 @@ const MANAGEMENT_PERMISSION = {
       ],
     },
     {
-      id: '0249937641030250',
-      parentId: '0901673425580518',
+      id: '4.2',
+      parentId: '4',
       label: 'sys.menu.system.index',
       name: 'System',
       type: PermissionType.CATALOGUE,
@@ -123,8 +128,8 @@ const MANAGEMENT_PERMISSION = {
         //   component: '/management/system/organization/index.tsx',
         // },
         {
-          id: '4359580910369984',
-          parentId: '0249937641030250',
+          id: '4.2.1',
+          parentId: '4.2',
           label: 'sys.menu.system.permission',
           name: 'Permission',
           type: PermissionType.MENU,
@@ -132,8 +137,8 @@ const MANAGEMENT_PERMISSION = {
           component: '/management/system/permission/index.tsx',
         },
         {
-          id: '1689241785490759',
-          parentId: '0249937641030250',
+          id: '4.2.2',
+          parentId: '4.2',
           label: 'sys.menu.system.role',
           name: 'Role',
           type: PermissionType.MENU,
@@ -141,8 +146,8 @@ const MANAGEMENT_PERMISSION = {
           component: '/management/system/role/index.tsx',
         },
         {
-          id: '0157880245365434',
-          parentId: '0249937641030250',
+          id: '4.2.3',
+          parentId: '4.2',
           label: 'sys.menu.user.allusers',
           name: 'allusers',
           type: PermissionType.MENU,
@@ -173,8 +178,10 @@ const MANAGEMENT_PERMISSION = {
     },
   ],
 };
+
+// parent 5 
 const COMPONENTS_PERMISSION = {
-  id: '2271615060673773',
+  id: '5',
   parentId: '',
   label: 'sys.menu.components',
   name: 'Components',
@@ -184,8 +191,8 @@ const COMPONENTS_PERMISSION = {
   order: 3,
   children: [
     {
-      id: '2478488238255411',
-      parentId: '2271615060673773',
+      id: '5.1',
+      parentId: '5',
       label: 'sys.menu.icon',
       name: 'Icon',
       type: PermissionType.MENU,
@@ -193,8 +200,8 @@ const COMPONENTS_PERMISSION = {
       component: '/',
     },
     {
-      id: '2478488238255411',
-      parentId: '2271615060673773',
+      id: '5.2',
+      parentId: '5',
       label: 'sys.menu.profile',
       name: 'Profile',
       type: PermissionType.MENU,
@@ -202,8 +209,8 @@ const COMPONENTS_PERMISSION = {
       component: '/components/profile/Profile.tsx',
     },
     {
-      id: '2478488238255411',
-      parentId: '2271615060673773',
+      id: '5.3',
+      parentId: '5',
       label: 'sys.menu.testcomponent',
       name: 'testcomponent',
       type: PermissionType.MENU,
@@ -211,8 +218,8 @@ const COMPONENTS_PERMISSION = {
       component: '/components/testcomponent/index.tsx',
     },
     {
-      id: '6755238352318767',
-      parentId: '2271615060673773',
+      id: '5.4',
+      parentId: '5',
       label: 'sys.menu.animate',
       name: 'Animate',
       type: PermissionType.MENU,
@@ -220,8 +227,8 @@ const COMPONENTS_PERMISSION = {
       component: '/components/animate/index.tsx',
     },
     {
-      id: '9992476513546805',
-      parentId: '2271615060673773',
+      id: '5.5',
+      parentId: '5',
       label: 'sys.menu.scroll',
       name: 'Scroll',
       type: PermissionType.MENU,
@@ -238,8 +245,8 @@ const COMPONENTS_PERMISSION = {
     //   component: '/components/markdown/index.tsx',
     // },
     {
-      id: '2122547769468069',
-      parentId: '2271615060673773',
+      id: '5.6',
+      parentId: '5',
       label: 'sys.menu.editor',
       name: 'Editor',
       type: PermissionType.MENU,
@@ -247,8 +254,8 @@ const COMPONENTS_PERMISSION = {
       component: '/components/editor/index.tsx',
     },
     {
-      id: '2501920741714350',
-      parentId: '2271615060673773',
+      id: '5.7',
+      parentId: '5',
       label: 'sys.menu.i18n',
       name: 'Multi Language',
       type: PermissionType.MENU,
@@ -256,8 +263,8 @@ const COMPONENTS_PERMISSION = {
       component: '/components/multi-language/index.tsx',
     },
     {
-      id: '2013577074467956',
-      parentId: '2271615060673773',
+      id: '5.8',
+      parentId: '5',
       label: 'sys.menu.upload',
       name: 'upload',
       type: PermissionType.MENU,
@@ -265,8 +272,8 @@ const COMPONENTS_PERMISSION = {
       component: '/components/upload/index.tsx',
     },
     {
-      id: '7749726274771764',
-      parentId: '2271615060673773',
+      id: '5.9',
+      parentId: '5',
       label: 'sys.menu.chart',
       name: 'Chart',
       type: PermissionType.MENU,
@@ -275,8 +282,10 @@ const COMPONENTS_PERMISSION = {
     },
   ],
 };
+
+// parent 6
 const FUNCTIONS_PERMISSION = {
-  id: '8132044808088488',
+  id: '6',
   parentId: '',
   label: 'sys.menu.functions',
   name: 'functions',
@@ -295,8 +304,8 @@ const FUNCTIONS_PERMISSION = {
     //   component: '/components/icon/index.tsx',
     // },
     {
-      id: '3667930780705750',
-      parentId: '8132044808088488',
+      id: '6.1',
+      parentId: '6',
       label: 'sys.menu.imageannotation',
       name: 'Image Annotation',
       type: PermissionType.MENU,
@@ -305,8 +314,10 @@ const FUNCTIONS_PERMISSION = {
     },
   ],
 };
+
+// parent 7
 const MENU_LEVEL_PERMISSION = {
-  id: '0194818428516575',
+  id: '7',
   parentId: '',
   label: 'sys.menu.Masters',
   name: 'Masters',
@@ -316,8 +327,8 @@ const MENU_LEVEL_PERMISSION = {
   order: 5,
   children: [
     {
-      id: '0144431332471389',
-      parentId: '0194818428516575',
+      id: '7.1',
+      parentId: '7',
       label: 'sys.menu.projects',
       name: 'Projects',
       type: PermissionType.MENU,
@@ -325,8 +336,8 @@ const MENU_LEVEL_PERMISSION = {
       component: '/Masters/Projects/index.tsx',
     },
     {
-      id: '0144431332471389',
-      parentId: '0194818428516575',
+      id: '7.2',
+      parentId: '7',
       label: 'sys.menu.fields',
       name: 'Fields',
       type: PermissionType.MENU,
@@ -338,8 +349,9 @@ const MENU_LEVEL_PERMISSION = {
   ],
 };
 
+// parent 8
 const ERRORS_PERMISSION = {
-  id: '9406067785553476',
+  id: '8',
   parentId: '',
   label: 'sys.menu.error.index',
   name: 'Error',
@@ -350,7 +362,7 @@ const ERRORS_PERMISSION = {
   children: [
     // {
     //   id: '8557056851997154',
-    //   parentId: '9406067785553476',
+    //   parentId: '8',
     //   label: 'sys.menu.error.403',
     //   name: '403',
     //   type: PermissionType.MENU,
@@ -358,8 +370,8 @@ const ERRORS_PERMISSION = {
     //   component: '/sys/error/Page403.tsx',
     // },
     {
-      id: '5095669208159005',
-      parentId: '9406067785553476',
+      id: '8.1',
+      parentId: '8',
       label: 'sys.menu.error.404',
       name: '404',
       type: PermissionType.MENU,
@@ -367,8 +379,8 @@ const ERRORS_PERMISSION = {
       component: '/sys/error/Page404.tsx',
     },
     {
-      id: '0225992135973772',
-      parentId: '9406067785553476',
+      id: '8.2',
+      parentId: '8',
       label: 'sys.menu.error.500',
       name: '500',
       type: PermissionType.MENU,
@@ -377,10 +389,12 @@ const ERRORS_PERMISSION = {
     },
   ],
 };
+
+// parent 9 
 const OTHERS_PERMISSION = [
 
   {
-    id: '3981225257359242',
+    id: '9',
     parentId: '',
     label: 'Project Dashboard',
     name: 'ProjectDashboard',
@@ -392,7 +406,7 @@ const OTHERS_PERMISSION = [
   },
   //ProjectConfig Permission --Akshaya
   {
-    id: '3981225257359246',
+    id: '10',
     parentId: '',
     label: 'sys.menu.ProjectConfig',
     name: 'ProjectConfig',
@@ -404,7 +418,7 @@ const OTHERS_PERMISSION = [
 
   // IMPORTS PERMISSION
   {
-    id: '3981225257359246',
+    id: '11',
     parentId: '',
     label: 'sys.menu.AllImports',
     name: 'Imports',
@@ -415,7 +429,7 @@ const OTHERS_PERMISSION = [
   },
 
   {
-    id: '3981225257359246',
+    id: '12',
     parentId: '',
     label: 'sys.menu.GenerateScore',
     name: 'ScoreProcessing',
@@ -427,7 +441,7 @@ const OTHERS_PERMISSION = [
   },
   //Audit
   {
-    id: '3981225257359246',
+    id: '13',
     parentId: '',
     label: 'sys.menu.Audit',
     name: 'Audit',
@@ -483,7 +497,7 @@ const OTHERS_PERMISSION = [
 
   // correctin window
   {
-    id: '3981225257359246',
+    id: '14',
     parentId: '',
     label: 'sys.menu.correctionwindow',
     name: 'correction',
@@ -493,7 +507,7 @@ const OTHERS_PERMISSION = [
     component: '/correction/index.tsx',
   },
   {
-    id: '3981225257359246',
+    id: '15',
     parentId: '',
     label: 'Ambiguity',
     name: 'Ambiguity',
@@ -504,7 +518,7 @@ const OTHERS_PERMISSION = [
   },
 
   {
-    id: '3981225257359246',
+    id: '16',
     parentId: '',
     label: 'Report',
     name: 'Report',

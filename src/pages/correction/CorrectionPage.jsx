@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Select, notification, Checkbox } from 'antd';
-import { Table } from 'react-bootstrap';
+import { Button, Select, notification, Checkbox, Form, Input } from 'antd';
+import { Card, Table } from 'react-bootstrap';
 import axios from 'axios';
 import ZoomedImage from './ZoomedImage';
 import FullImageView from './FullImageView';
@@ -22,6 +22,8 @@ const CorrectionPage = () => {
   const [selectedField, setSelectedField] = useState('all');
   const [unchangedata, setUnchangeData] = useState('');
   const [noChangeRequired, setNoChangeRequired] = useState(false);
+  const [isViewRegData, setIsviewRegData] = useState(false);
+  const [filters, setFilters] = useState([]); // State to store filter values
 
   useEffect(() => {
     if (data[currentIndex]) {
@@ -195,6 +197,26 @@ const CorrectionPage = () => {
     return <p>Loading...</p>;
   }
 
+  const handleFilterChange = (index, fieldName, value) => {
+    const updatedFilters = [...filters];
+    updatedFilters[index] = { ...updatedFilters[index], [fieldName]: value };
+    setFilters(updatedFilters);
+  };
+
+  const addFilter = () => {
+    setFilters([...filters, { fieldName: '', fieldValue: '' }]);
+  };
+
+  const handleSubmitfilter = async () => {
+    // Example: Fetch filtered data based on filters state
+    try {
+      const response = await axios.post(`${apiurl}/FilterEndpoint`, filters);
+      // Handle response data as needed
+      console.log('Filtered data:', response.data);
+    } catch (error) {
+      console.error('Error fetching filtered data:', error);
+    }
+  };
   return (
     <>
       <div className="d-flex align-items-center justify-content-between">
@@ -244,45 +266,114 @@ const CorrectionPage = () => {
           </tbody>
         </Table>
       </div>
-
-      <div className="w-75 position-relative m-auto border p-4" style={{ minHeight: '75%' }}>
-        {!allDataCorrected && data[currentIndex] ? (
-          expandMode ? (
-            <FullImageView
-              data={data[currentIndex]}
-              onUpdate={(newValue) =>
-                handleUpdate(
-                  data.findIndex((item) => item === data[currentIndex]),
-                  newValue,
-                )
-              }
-              onNext={handleNext}
-            />
-          ) : (
-            <ZoomedImage
-              data={data[currentIndex]}
-              onUpdate={(newValue) =>
-                handleUpdate(
-                  data.findIndex((item) => item === data[currentIndex]),
-                  newValue,
-                )
-              }
-              onNext={handleNext}
-            />
-          )
-        ) : (
-          <div className="text-center">
-            <p className="fs-3">All data corrected</p>
+      <div className="h-75 d-flex">
+        {isViewRegData ? (
+          <div className="w-50 me-2 border p-2">
+            <h5 className="text-center">Registration Data</h5>
+            <Card>
+              <Card.Body>
+                <div className="filters-section">
+                  {filters.map((filter, index) => (
+                    <div key={index} className="mb-3">
+                      <div className="d-flex">
+                        <Select
+                          value={filter.fieldName}
+                          onChange={(value) => handleFilterChange(index, 'fieldName', value)}
+                          style={{ width: 120, marginRight: 8 }}
+                        >
+                          <Option value="name">Name</Option>
+                          <Option value="roll">Roll</Option>
+                          <Option value="no">No</Option>
+                          <Option value="collegeCode">College Code</Option>
+                        </Select>
+                        <Input
+                          value={filter.fieldValue}
+                          onChange={(e) => handleFilterChange(index, 'fieldValue', e.target.value)}
+                          style={{ width: 200, marginRight: 8 }}
+                          placeholder="Enter value"
+                        />
+                      </div>
+                      <div className="text-end">
+                        <Button type="danger" onClick={() => handleRemoveFilter(index)}>
+                          Remove
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                  <span className="c-pointer text-primary" onClick={addFilter}>
+                    Add Filter
+                  </span>
+                </div>
+              </Card.Body>
+            </Card>
+            {/* <div className="text-end">
+              <span
+                className="fs-1 text-danger c-pointer me-4 text-end"
+                onClick={() => setIsviewRegData(false)}
+              >
+                😊
+              </span>
+              <h5 className="text-center">Registration Data</h5>
+            </div> */}
+            <table class="mr-0 table">
+              <thead>
+                <tr>
+                  <th scope="col">Field Name</th>
+                  <th scope="col">Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Mark</td>
+                  <td>Otto</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
+        ) : (
+          <Button type="primary" onClick={() => setIsviewRegData(true)}>
+            Get Registration data
+          </Button>
         )}
-      </div>
-      <div className="d-flex justify-content-evenly m-1">
-        <Button type="primary" onClick={handlePrevious} disabled={currentIndex === 0}>
-          Previous
-        </Button>
-        <Button type="primary" onClick={handleNext} disabled={allDataCorrected}>
-          Next
-        </Button>
+        <div className="w-75 position-relative m-auto border p-4" style={{ minHeight: '100%' }}>
+          {!allDataCorrected && data[currentIndex] ? (
+            expandMode ? (
+              <FullImageView
+                data={data[currentIndex]}
+                onUpdate={(newValue) =>
+                  handleUpdate(
+                    data.findIndex((item) => item === data[currentIndex]),
+                    newValue,
+                  )
+                }
+                onNext={handleNext}
+              />
+            ) : (
+              <ZoomedImage
+                data={data[currentIndex]}
+                onUpdate={(newValue) =>
+                  handleUpdate(
+                    data.findIndex((item) => item === data[currentIndex]),
+                    newValue,
+                  )
+                }
+                onNext={handleNext}
+              />
+            )
+          ) : (
+            <div className="text-center">
+              <p className="fs-3">All data corrected</p>
+            </div>
+          )}
+        </div>{' '}
+        <div className="d-flex justify-content-evenly m-1 gap-2">
+          <Button type="primary" onClick={handlePrevious} disabled={currentIndex === 0}>
+            Previous
+          </Button>
+          <Button type="primary" onClick={handleNext} disabled={allDataCorrected}>
+            Next
+          </Button>
+        </div>
       </div>
     </>
   );
