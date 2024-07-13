@@ -334,53 +334,7 @@ const MENU_LEVEL_PERMISSION = {
       component: '/Masters/Fields/index.tsx',
     },
    
-    // {
-    //   id: '7572529636800586',
-    //   parentId: '0194818428516575',
-    //   label: 'sys.menu.menulevel.1b.index',
-    //   name: 'Menu Level 1b',
-    //   type: PermissionType.CATALOGUE,
-    //   route: 'menu-level-1b',
-    //   children: [
-    //     {
-    //       id: '3653745576583237',
-    //       parentId: '7572529636800586',
-    //       label: 'sys.menu.menulevel.1b.2a',
-    //       name: 'Menu Level 2a',
-    //       type: PermissionType.MENU,
-    //       route: 'menu-level-2a',
-    //       component: '/menu-level/menu-level-1b/menu-level-2a/index.tsx',
-    //     },
-    //     {
-    //       id: '4873136353891364',
-    //       parentId: '7572529636800586',
-    //       label: 'sys.menu.menulevel.1b.2b.index',
-    //       name: 'Menu Level 2b',
-    //       type: PermissionType.CATALOGUE,
-    //       route: 'menu-level-2b',
-    //       children: [
-    //         {
-    //           id: '4233029726998055',
-    //           parentId: '4873136353891364',
-    //           label: 'sys.menu.menulevel.1b.2b.3a',
-    //           name: 'Menu Level 3a',
-    //           type: PermissionType.MENU,
-    //           route: 'menu-level-3a',
-    //           component: '/menu-level/menu-level-1b/menu-level-2b/menu-level-3a/index.tsx',
-    //         },
-    //         {
-    //           id: '3298034742548454',
-    //           parentId: '4873136353891364',
-    //           label: 'sys.menu.menulevel.1b.2b.3b',
-    //           name: 'Menu Level 3b',
-    //           type: PermissionType.MENU,
-    //           route: 'menu-level-3b',
-    //           component: '/menu-level/menu-level-1b/menu-level-2b/menu-level-3b/index.tsx',
-    //         },
-    //       ],
-    //     },
-    //   ],
-    // },
+    
   ],
 };
 
@@ -424,6 +378,18 @@ const ERRORS_PERMISSION = {
   ],
 };
 const OTHERS_PERMISSION = [
+
+  {
+    id: '3981225257359242',
+    parentId: '',
+    label: 'Project Dashboard',
+    name: 'ProjectDashboard',
+    icon: 'hugeicons:audit-01',
+    type: PermissionType.MENU,
+    route: 'ProjectDashboard',
+    component: '/ProjectDashboard/index.tsx',
+
+  },
   //ProjectConfig Permission --Akshaya
   {
     id: '3981225257359246',
@@ -471,17 +437,7 @@ const OTHERS_PERMISSION = [
     component: '/AuditPage/index.tsx',
 
   },
-  {
-    id: '3981225257359242',
-    parentId: '',
-    label: 'Project Dashboard',
-    name: 'ProjectDashboard',
-    icon: 'hugeicons:audit-01',
-    type: PermissionType.MENU,
-    route: 'ProjectDashboard',
-    component: '/ProjectDashboard/index.tsx',
-
-  },
+  
 //   {
 //     id: '3981225257359246',
 //     parentId: '',
@@ -680,7 +636,7 @@ const OTHERS_PERMISSION = [
 
 export const PERMISSION_LIST = [
   DASHBOARD_PERMISSION,
-  // MANAGEMENT_PERMISSION,
+  MANAGEMENT_PERMISSION,
   // COMPONENTS_PERMISSION,
   //FUNCTIONS_PERMISSION,
   MENU_LEVEL_PERMISSION,

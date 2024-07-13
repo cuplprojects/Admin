@@ -2,6 +2,7 @@ import React, { useState,useEffect } from 'react';
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import { Upload, Button } from 'antd';
 import ViewScore from './ViewScore';
+import { useProjectId } from '@/store/ProjectState';
 
 const apiurl = import.meta.env.VITE_API_URL;
 
@@ -14,18 +15,22 @@ const GenerateScore = () => {
   const [scores,setScores] = useState(null);
   const [showScores, setShowScores] = useState(false);
   const [entryCount, setEntryCount] = useState(0);
+  const ProjectId = useProjectId();
+  const [keyCount,setKeyCount] = useState(0);
+  
 
-  const projectId = 1; // Replace with your specific project ID
+
 
   useEffect(() => {
     const fetchEntryCount = async () => {
       try {
-        const response = await fetch(`${apiurl}/Score/count?WhichDatabase=Local&projectId=1`);
+        const response = await fetch(`${apiurl}/Score/count?WhichDatabase=Local&projectId=${ProjectId}`);
       
         if (!response.ok) {
           throw new Error('Failed to fetch entry count');
         }
         const result = await response.json();
+        console.log(result)
         setEntryCount(result.count);
       } catch (error) {
         message.error('Failed to fetch entry count');
@@ -33,7 +38,32 @@ const GenerateScore = () => {
     };
 
     fetchEntryCount();
-  }, [projectId]);
+  }, [ProjectId]);
+
+
+
+  useEffect(() => {
+    const fetchEntryCount = async () => {
+      try {
+        const response = await fetch(`${apiurl}/Key/count?WhichDatabase=Local&projectId=${ProjectId}`);
+      
+        if (!response.ok) {
+          throw new Error('Failed to fetch entry count');
+        }
+        const result = await response.json();
+        
+
+        setKeyCount(result);
+        console.log(result)
+      } catch (error) {
+        message.error('Failed to fetch entry count');
+      }
+    };
+
+    fetchEntryCount();
+  }, [ProjectId]);
+
+  
 
   const beforeUpload = (file) => {
     const isXlsx = file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
@@ -53,7 +83,7 @@ const GenerateScore = () => {
  const handleProcessScore = async ()=> {
   try {
     setProcessing(true);
-    const response = await fetch(`${apiurl}/Score/omrdata/1/details`);
+    const response = await fetch(`${apiurl}/Score/omrdata/${ProjectId}/details`);
     if (!response.ok) {
       throw new Error('Failed to fetch scores');
     }
@@ -61,7 +91,7 @@ const GenerateScore = () => {
     setScores(result); // Assuming the result is an array of scores
     setProcessing(false);
   } catch (error) {
-    message.error('Failed to fetch scores');
+    error.message('Failed to fetch scores');
     setProcessing(false);
   }
  };
@@ -77,7 +107,7 @@ const GenerateScore = () => {
 
     try {
       setLoading(true);
-      const response = await fetch(`${apiurl}/Key/upload?WhichDatabase=Local`, {
+      const response = await fetch(`${apiurl}/Key/upload?WhichDatabase=Local&ProjectId=${ProjectId}`, {
         method: 'POST',
         body: formData,
       });
@@ -130,7 +160,7 @@ const GenerateScore = () => {
       >
         {file ? file.name : uploadButton}
       </Upload>
-      {file && (
+      {file && !keyCount && (
         <Button
           type="primary"
           onClick={handleUpload}
@@ -145,7 +175,7 @@ const GenerateScore = () => {
           {alertMessage}
         </div>
       )}
-      {entryCount <= 1 && (
+      {(keyCount && (entryCount <= 1)) ? (
           <Button
             type="primary"
             onClick={handleProcessScore}
@@ -154,6 +184,8 @@ const GenerateScore = () => {
           >
             {processing ? 'Processing...' : 'Process Score'}
           </Button>
+        ):(
+          <></>
         )}
         <div className='text-end'>
         <Button
