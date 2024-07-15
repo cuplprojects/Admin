@@ -40,7 +40,7 @@ export const PreferredResponseProvider = ({ children }) => {
       notification.error({
         message: 'No Preferred Response found',
       });
-      return '1,2,3,4,5'; // Return a dummy response or handle the error as needed
+      return ; // Return a dummy response or handle the error as needed
     }
   };
 
