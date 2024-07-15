@@ -35,7 +35,7 @@ export default function Header({ className = '', offsetTop = false }: Props) {
   const projectId = useProjectId();
   const { setProjectId } = useProjectActions();
   const [project, setProject] = useState<{ projectName: string | null }>({ projectName: null });
-  const [projects, setProjects] = useState<Array<{ projectId: number, projectName: string }>>([]);
+  const [projects, setProjects] = useState<Array<{ projectId: number; projectName: string }>>([]);
   // State variable to control the drawer open/close state
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -66,6 +66,9 @@ export default function Header({ className = '', offsetTop = false }: Props) {
       fetchProjectData();
     }
   }, [projectId, apiUrl]);
+
+  
+  console.log(project);
 
   // Fetch all projects
   useEffect(() => {
@@ -133,21 +136,19 @@ export default function Header({ className = '', offsetTop = false }: Props) {
             </div>
           </div>
           {/* show current project */}
-         
-          <div className="flex align-items-center">
-          <Select
 
-            value={projectId}
-            onChange={handleProjectChange}
-            style={{ width: 200, marginRight: '1rem' }}
-            
-          >
-            {projects.map(proj => (
-              <Option key={proj.projectId} value={proj.projectId}>
-                {proj.projectName}
-              </Option>
-            ))}
-          </Select>
+          <div className="align-items-center flex">
+            <Select
+              value={projectId}
+              onChange={handleProjectChange}
+              style={{ width: 200, marginRight: '1rem' }}
+            >
+              {projects.map((proj) => (
+                <Option key={proj.projectId} value={proj.projectId}>
+                  {proj.projectName}
+                </Option>
+              ))}
+            </Select>
             <Sync />
             <SearchBar /> {/* Search bar component */}
             <LocalePicker /> {/* Locale picker component */}
