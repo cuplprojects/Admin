@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Button,Progress } from 'antd';
+import { Button, Progress } from 'antd';
 import localforage from 'localforage';
+import { useProjectId } from '@/store/ProjectState';
 
-
-//const apiurl = import.meta.env.VITE_API_URL_PROD;
+// const apiurl = import.meta.env.VITE_API_URL_PROD;
 const apiurl = import.meta.env.VITE_API_URL;
 
 const ImportOmr = () => {
@@ -17,14 +17,18 @@ const ImportOmr = () => {
   const [alertMessage, setAlertMessage] = useState('');
   const [alertType, setAlertType] = useState('');
   const [progress, setProgress] = useState(0);
+  const [lastUploadedFile, setLastUploadedFile] = useState('');
+  const ProjectId = useProjectId();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const storedFiles = await localforage.getItem('uploadFiles') || [];
         const storedIndex = await localforage.getItem('currentFileIndex') || 0;
+        const storedLastUploadedFile = await localforage.getItem('lastUploadedFile') || '';
         setFiles(storedFiles);
         setCurrentFileIndex(storedIndex);
+        setLastUploadedFile(storedLastUploadedFile);
       } catch (error) {
         console.error('Error fetching data from localforage:', error);
       }
@@ -52,6 +56,7 @@ const ImportOmr = () => {
       console.error('Error removing data from localforage:', error);
     }
   };
+
   const removeCurrentFileIndex = async () => {
     try {
       await localforage.removeItem('currentFileIndex');
@@ -60,40 +65,61 @@ const ImportOmr = () => {
     }
   };
 
-  const handleSubmit = async (e,replace = false) => {
+  const uploadFile = async (file, replace = false) => {
+    setProgress(0);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await axios.post(
+        `${apiurl}/OMRData/upload-request?WhichDatabase=Local&ProjectId=${ProjectId}&replace=${replace}`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+          onUploadProgress: (progressEvent) => {
+            const totalLength = progressEvent.lengthComputable
+              ? progressEvent.total
+              : progressEvent.target.getResponseHeader('content-length') ||
+                progressEvent.target.getResponseHeader('x-decompressed-content-length');
+            if (totalLength !== null) {
+              setProgress(Math.round((progressEvent.loaded * 100) / totalLength));
+            }
+          }
+        },
+      );
+
+      console.log(`File uploaded successfully:`, response);
+      await removeFromLocalForage(file);
+      setLastUploadedFile(file.name);
+      await localforage.setItem('lastUploadedFile', file.name);
+      return true;
+    } catch (error) {
+      if (error.response && error.response.status === 409) {
+        setShowSkipBtn(true);
+        setShowReplaceBtn(true);
+        setCurrentFileName(file.name);
+        setAlertMessage('File with same name already exists!');
+        setAlertType('danger');
+      } else {
+        console.error('Error uploading file:', error);
+        setAlertMessage('Error uploading file!');
+        setAlertType('danger');
+      }
+      return false;
+    }
+  };
+
+  const handleSubmit = async (e, replace = false) => {
     e.preventDefault();
     setLoading(true);
     const fileCount = files.length;
 
     for (let i = currentFileIndex; i < fileCount; i++) {
-      setProgress(0);
-      const formData = new FormData();
-      formData.append('file', files[i]);
+      const success = await uploadFile(files[i], replace);
 
-      try {
-        const response = await axios.post(
-          `${apiurl}/OMRData/upload-request?WhichDatabase=Local&replace=${replace}`,
-          formData,
-          {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
-            onUploadProgress: (progressEvent) => {
-              const totalLength = progressEvent.lengthComputable
-                ? progressEvent.total
-                : progressEvent.target.getResponseHeader('content-length') ||
-                  progressEvent.target.getResponseHeader('x-decompressed-content-length');
-              if (totalLength !== null) {
-                setProgress(Math.round((progressEvent.loaded * 100) / totalLength));
-              }
-            }
-          },
-        );
-
-        console.log(`File ${i + 1} uploaded successfully:`, response);
-
-        await removeFromLocalForage(files[i]);
-
+      if (success) {
         const nextFileIndex = i + 1;
         setCurrentFileIndex(nextFileIndex);
         await localforage.setItem('currentFileIndex', nextFileIndex);
@@ -106,21 +132,8 @@ const ImportOmr = () => {
         } else {
           setProgress(((nextFileIndex / fileCount) * 100).toFixed(2));
         }
-      } catch (error) {
-        if (error.response && error.response.status === 409) {
-          setShowSkipBtn(true);
-          setShowReplaceBtn(true);
-          setCurrentFileName(files[i].name);
-          setAlertMessage('File with same name already exists!');
-          setAlertType('danger');
-          break;
-        } else {
-          console.error(`Error uploading file ${i + 1}:`, error);
-          setLoading(false);
-          setAlertMessage('Error uploading file!');
-          setAlertType('danger');
-          break;
-        }
+      } else {
+        break;
       }
     }
 
@@ -128,7 +141,6 @@ const ImportOmr = () => {
   };
 
   const skipFile = async () => {
-    
     await removeFromLocalForage(files[currentFileIndex]);
 
     const nextFileIndex = currentFileIndex + 1;
@@ -141,8 +153,6 @@ const ImportOmr = () => {
 
   const replaceFile = async () => {
     setShowReplaceBtn(false);
-    await removeFromLocalForage(files[currentFileIndex]);
-    setCurrentFileIndex(currentFileIndex + 1); // Move to the next file
     handleSubmit({ preventDefault: () => {} }, true); // Pass true only for current file index
   };
 
@@ -153,10 +163,8 @@ const ImportOmr = () => {
 
   return (
     <>
-
-   
-   <h3 className="head text-center">Upload OMR Data</h3>
-      <form className="text-center mb -5 mt-4" onSubmit={handleSubmit}>
+      <h3 className="head text-center">Upload OMR Images</h3>
+      <form className="text-center mb-5 mt-4" onSubmit={handleSubmit}>
         <input type="file" multiple onChange={handleFileChange} />
         {files.length > 0 && currentFileIndex < files.length && (
           <Button type="primary" htmlType="submit" disabled={loading}>
@@ -171,23 +179,25 @@ const ImportOmr = () => {
           status={loading ? 'active' : 'normal'}
         />
       )}
- 
       {loading && <p>Loading...</p>}
       {showSkipBtn && (
         <>
-        <Button type="primary" onClick={skipFile}>
-          Skip {currentFileName}
-        </Button>
-        <Button type="primary" onClick={replaceFile}>
-        Replace {currentFileName}
-      </Button>
-      
-    
-    </>
+          <Button type="primary" onClick={skipFile}>
+            Skip {currentFileName}
+          </Button>
+          <Button type="primary" onClick={replaceFile}>
+            Replace {currentFileName}
+          </Button>
+        </>
       )}
       {alertMessage && (
         <div className={`alert alert-${alertType} mt-3`} role="alert">
           {alertMessage}
+        </div>
+      )}
+      {lastUploadedFile && (
+        <div className="alert alert-info mt-3" role="alert">
+          Last uploaded file: {lastUploadedFile}
         </div>
       )}
     </>

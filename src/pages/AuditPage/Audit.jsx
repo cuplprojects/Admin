@@ -9,10 +9,10 @@ const AuditButton = () => {
   const [fieldConfigs, setFieldConfigs] = useState([]);
   const [flags, setFlags] = useState([]);
   const [remarksCounts, setRemarksCounts] = useState([]);
-
   const [corrected, setCorrected] = useState(0);
-const [remaining, setRemaining] = useState(0);
-const [totalCount, setTotalCount] = useState(0);
+
+  const [remaining, setRemaining] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
 
 
   const handleClick = async () => {
@@ -119,38 +119,32 @@ const [totalCount, setTotalCount] = useState(0);
           </Col>
           <Col>
 
-          <Card
-            className="d-flex align-items-center fs-3 justify-content-center mb-1 mr-3 mt-3 "
-            style={{ height: '60px', backgroundColor: '#ffd1d1' }}
-          >
-            <div className="">
-              <h2 className="text-center">
-                Error Counts: {totalCount}
-              </h2>
-            </div>
-          </Card>
+            <Card
+              className="d-flex align-items-center fs-3 justify-content-center mb-1 mr-3 mt-3 "
+              style={{ height: '60px', backgroundColor: '#ffd1d1' }}
+            >
+              <div className="">
+                <h2 className="text-center">Error Counts: {totalCount}</h2>
+              </div>
+            </Card>
 
-          <Card
-            className="d-flex align-items-center fs-3 justify-content-center mb-1 mr-3 mt-3 "
-            style={{ height: '60px', backgroundColor: '#95f595' }}
-          >
-            <div className="">
-              <h2 className="text-center">
-                Corrected Counts: {corrected}
-              </h2>
-            </div>
-          </Card>
+            <Card
+              className="d-flex align-items-center fs-3 justify-content-center mb-1 mr-3 mt-3 "
+              style={{ height: '60px', backgroundColor: '#95f595' }}
+            >
+              <div className="">
+                <h2 className="text-center">Corrected Counts: {corrected}</h2>
+              </div>
+            </Card>
 
-          <Card
-            className="d-flex align-items-center fs-3 justify-content-center mb-5 mr-3 mt-3 "
-            style={{ height: '60px', backgroundColor: '#b4b4ff' }}
-          >
-            <div className="">
-              <h2 className="text-center">
-                Remaining Counts: {remaining}
-              </h2>
-            </div>
-          </Card>
+            <Card
+              className="d-flex align-items-center fs-3 justify-content-center mb-5 mr-3 mt-3 "
+              style={{ height: '60px', backgroundColor: '#b4b4ff' }}
+            >
+              <div className="">
+                <h2 className="text-center">Remaining Counts: {remaining}</h2>
+              </div>
+            </Card>
 
 
             <h2
