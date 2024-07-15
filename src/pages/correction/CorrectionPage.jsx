@@ -310,7 +310,9 @@ const CorrectionPage = () => {
   };
 
   const currentReg = regData[currentRegIndex];
-  const parsedData = currentReg ? parseRegData(currentReg.registrationsData) : null;
+  const parsedData = currentReg
+  ? { 'Roll Number': currentReg.rollNumber, ...parseRegData(currentReg.registrationsData) }
+  : null;
 
   return (
     <>
