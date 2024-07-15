@@ -22,8 +22,22 @@ const CorrectionPage = () => {
   const [selectedField, setSelectedField] = useState('all');
   const [unchangedata, setUnchangeData] = useState('');
   const [noChangeRequired, setNoChangeRequired] = useState(false);
-  const [isViewRegData, setIsviewRegData] = useState(false);
-  const [filters, setFilters] = useState([]); // State to store filter values
+  const [isViewRegData, setIsViewRegData] = useState(false);
+  const [filters, setFilters] = useState([{ fieldName: '', fieldValue: '' }]);
+  const [availableOptions, setAvailableOptions] = useState([]);
+  const [regData, setRegData] = useState([]);
+  const [currentRegIndex, setCurrentRegIndex] = useState(0);
+
+  // expand mode from Localstororage if refress the page
+  useEffect(() => {
+    // Check if 'expandMode' is stored in localStorage
+    const isExpandMode = localStorage.getItem('expandMode');
+    // If 'expandMode' is found in localStorage and it's true, set expandMode to true
+    if (isExpandMode === 'true') {
+      setExpandMode(true);
+    }
+    // No dependencies needed here, as we only want to read from localStorage once on component mount
+  }, []);
 
   useEffect(() => {
     if (data[currentIndex]) {
@@ -46,6 +60,17 @@ const CorrectionPage = () => {
   const handleFieldChange = (value) => {
     setSelectedField(value);
     localStorage.setItem('selectedField', value); // Save selected field to localStorage
+  };
+
+  // Get Reg Filte Keys
+  const GetRegFilterKeys = async () => {
+    try {
+      const response = await axios.get(`${apiurl}/Registration/GetKeys?whichDatabase=Local`);
+      setAvailableOptions(response.data.keys);
+      console.log(response.data.keys);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
   };
 
   const fetchFieldCounts = async () => {
@@ -176,6 +201,7 @@ const CorrectionPage = () => {
 
   const toggleExpandMode = () => {
     setExpandMode(!expandMode);
+    localStorage.setItem('expandMode', !expandMode);
   };
 
   useEffect(() => {
@@ -197,26 +223,95 @@ const CorrectionPage = () => {
     return <p>Loading...</p>;
   }
 
-  const handleFilterChange = (index, fieldName, value) => {
+  const handleFilterChange = (index, field, value) => {
     const updatedFilters = [...filters];
-    updatedFilters[index] = { ...updatedFilters[index], [fieldName]: value };
+    updatedFilters[index][field] = value;
     setFilters(updatedFilters);
+
+    // Remove selected fieldName from availableOptions
+  };
+
+  // removing filter items
+  const handleRemoveFilter = (index) => {
+    const updatedFilters = filters.filter((_, i) => i !== index);
+    setFilters(updatedFilters);
+
+    // Add back removed fieldName to availableOptions if it exists in the removed filter
+    if (filters[index]?.fieldName) {
+      setAvailableOptions([...availableOptions, filters[index].fieldName]);
+    }
+  };
+
+  // get student filterd data
+  const handleSubmitFilter = async (e) => {
+    try {
+      const transformedFilters = filters.reduce((obj, item) => {
+        obj[item.fieldName] = item.fieldValue;
+        return obj;
+      }, {});
+
+      const dataToSend = { filters: transformedFilters };
+
+      console.log('Data to send:', dataToSend);
+      const response = await axios.post(
+        `${apiurl}/Registration/ByFilters?WhichDatabase=Local`,
+        dataToSend,
+      );
+      setRegData(response.data);
+      console.log('Filtered data:', response.data);
+    } catch (error) {
+      console.error('Error fetching filtered data:', error);
+    }
   };
 
   const addFilter = () => {
     setFilters([...filters, { fieldName: '', fieldValue: '' }]);
   };
 
-  const handleSubmitfilter = async () => {
-    // Example: Fetch filtered data based on filters state
+  // const handleSubmitfilter = async () => {
+  //   // Transform filters array into an object
+  //   const transformedFilters = filters.reduce((obj, item) => {
+  //     obj[item.fieldName] = item.fieldValue;
+  //     return obj;
+  //   }, {});
+
+  //   // Example: Fetch filtered data based on transformedFilters
+  //   try {
+  //     console.log(transformedFilters);
+  //     const response = await axios.post(`${apiurl}/FilterEndpoint`, transformedFilters);
+  //     // Handle response data as needed
+  //     console.log('Filtered data:', response.data);
+  //   } catch (error) {
+  //     console.error('Error fetching filtered data:', error);
+  //   }
+  // };
+
+  // handle click show reg data btn
+  const handleShowRegDataTableClick = () => {
+    setIsViewRegData(true); // Set isViewRegData to true
+    GetRegFilterKeys(); // Call GetRegFilterKeys function
+  };
+
+  const parseRegData = (data) => {
     try {
-      const response = await axios.post(`${apiurl}/FilterEndpoint`, filters);
-      // Handle response data as needed
-      console.log('Filtered data:', response.data);
+      return JSON.parse(data);
     } catch (error) {
-      console.error('Error fetching filtered data:', error);
+      console.error('Error parsing JSON:', error);
+      return null;
     }
   };
+
+  const showNextReg = () => {
+    setCurrentRegIndex((prevIndex) => prevIndex + 1);
+  };
+
+  const showPreviousReg = () => {
+    setCurrentRegIndex((prevIndex) => prevIndex - 1);
+  };
+
+  const currentReg = regData[currentRegIndex];
+  const parsedData = currentReg ? parseRegData(currentReg.registrationsData) : null;
+
   return (
     <>
       <div className="d-flex align-items-center justify-content-between">
@@ -278,13 +373,19 @@ const CorrectionPage = () => {
                       <div className="d-flex">
                         <Select
                           value={filter.fieldName}
+                          placeholder="Select field"
                           onChange={(value) => handleFilterChange(index, 'fieldName', value)}
                           style={{ width: 120, marginRight: 8 }}
                         >
-                          <Option value="name">Name</Option>
-                          <Option value="roll">Roll</Option>
-                          <Option value="no">No</Option>
-                          <Option value="collegeCode">College Code</Option>
+                          {availableOptions
+                            .filter(
+                              (option) => !filters.some((filter) => filter.fieldName === option),
+                            ) // Filter out selected fieldNames
+                            .map((option) => (
+                              <Option key={option} value={option}>
+                                {option}
+                              </Option>
+                            ))}
                         </Select>
                         <Input
                           value={filter.fieldValue}
@@ -292,17 +393,26 @@ const CorrectionPage = () => {
                           style={{ width: 200, marginRight: 8 }}
                           placeholder="Enter value"
                         />
-                      </div>
-                      <div className="text-end">
-                        <Button type="danger" onClick={() => handleRemoveFilter(index)}>
-                          Remove
-                        </Button>
+                        <div className="text-end">
+                          <button
+                            className="btn btn-danger btn-sm"
+                            onClick={() => handleRemoveFilter(index)}
+                          >
+                            X
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}
-                  <span className="c-pointer text-primary" onClick={addFilter}>
-                    Add Filter
-                  </span>
+
+                  <div className="d-flex align-items-center justify-content-between mb-3">
+                    <span className="c-pointer text-primary" onClick={addFilter}>
+                      Add Filter
+                    </span>
+                    <button className="btn btn-sm btn-primary" onClick={handleSubmitFilter}>
+                      Search
+                    </button>
+                  </div>
                 </div>
               </Card.Body>
             </Card>
@@ -315,23 +425,55 @@ const CorrectionPage = () => {
               </span>
               <h5 className="text-center">Registration Data</h5>
             </div> */}
-            <table class="mr-0 table">
-              <thead>
-                <tr>
-                  <th scope="col">Field Name</th>
-                  <th scope="col">Value</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Mark</td>
-                  <td>Otto</td>
-                </tr>
-              </tbody>
-            </table>
+            <div>
+              <div>
+                {parsedData ? (
+                  <>
+                    <p className="text-danger m-2 text-center">{regData.length} Resultes Found</p>
+                    <table className="table-bordered table-striped mr-0 table">
+                      <thead>
+                        <tr>
+                          <th scope="col">Field Name</th>
+                          <th scope="col">Value</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {Object.entries(parsedData).map(([fieldName, fieldValue], index) => (
+                          <tr key={index}>
+                            <td className="text-capitalize">{fieldName}</td>
+                            <td className="text-capitalize">{fieldValue}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    <p className="fs-6 m-3 text-center">
+                      Showing {currentRegIndex + 1} of {regData.length}
+                    </p>
+                    <div className="d-flex align-items-center justify-content-between mb-3">
+                      <button
+                        className="btn btn-primary btn-sm"
+                        disabled={currentRegIndex === 0}
+                        onClick={showPreviousReg}
+                      >
+                        Previous
+                      </button>
+                      <button
+                        className="btn btn-primary btn-sm"
+                        disabled={currentRegIndex === regData.length - 1}
+                        onClick={showNextReg}
+                      >
+                        Next
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <p>No data available</p>
+                )}
+              </div>
+            </div>
           </div>
         ) : (
-          <Button type="primary" onClick={() => setIsviewRegData(true)}>
+          <Button type="primary" onClick={() => handleShowRegDataTableClick()}>
             Get Registration data
           </Button>
         )}
