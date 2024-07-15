@@ -66,7 +66,7 @@ const CorrectionPage = () => {
   const GetRegFilterKeys = async () => {
     try {
       const response = await axios.get(`${apiurl}/Registration/GetKeys?whichDatabase=Local&ProjectId=${projectId}`);
-      setAvailableOptions(response.data.keys);
+      setAvailableOptions(response.data.Keys);
       console.log(response.data.keys);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -310,10 +310,7 @@ const CorrectionPage = () => {
   };
 
   const currentReg = regData[currentRegIndex];
-  const parsedData = currentReg
-  ? { 'Roll Number': currentReg.rollNumber, ...parseRegData(currentReg.registrationsData) }
-  : null;
-
+  const parsedData = currentReg ? parseRegData(currentReg.registrationsData) : null;
 
   return (
     <>
