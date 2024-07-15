@@ -37,7 +37,7 @@ const AuditButton = () => {
       const response = await fetch(`${APIURL}/Flags/counts`);
       const result = await response.json();
       console.log(result);
-      setFlags(result.countsByFieldname); // Update state with countsByFieldname array
+      setFlags(result.countsByFieldname); 
       setRemarksCounts(result.remarksCounts);
 
       setCorrected(result.corrected);
