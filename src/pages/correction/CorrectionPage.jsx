@@ -314,7 +314,6 @@ const CorrectionPage = () => {
   ? { 'Roll Number': currentReg.rollNumber, ...parseRegData(currentReg.registrationsData) }
   : null;
 
-
   return (
     <>
       <div className="d-flex align-items-center justify-content-between">
