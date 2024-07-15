@@ -114,7 +114,7 @@ const Import = () => {
         });
         
         try {
-          const response = await fetch(`${apiurl}/Absentee/upload?WhichDatabase=Local`, {
+          const response = await fetch(`${apiurl}/Absentee/upload?WhichDatabase=Local&ProjectId=${ProjectId}`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
