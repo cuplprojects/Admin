@@ -10,9 +10,11 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 
 import { MotionLazy } from './components/animate/motion-lazy';
 import { FileUploadProvider } from './pages/Imports/Importfile';
+import { PreferredResponseProvider } from './utils/PreferredResponse/PreferredResponseContext';
 
 function App() {
   return (
+    <PreferredResponseProvider>
       <AntdConfig>
         <AntdApp>
           <MotionLazy>
@@ -26,6 +28,7 @@ function App() {
           </MotionLazy>
         </AntdApp>
       </AntdConfig>
+      </PreferredResponseProvider>
   );
 }
 

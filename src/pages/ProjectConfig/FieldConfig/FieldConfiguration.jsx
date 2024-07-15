@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './FieldConfig.css';
-import { Button, Table, Input, Select, Space, Popconfirm, message } from 'antd';
-import { DeleteOutlined } from '@ant-design/icons';
+import { Button, Table, Input, Select, Space, Popconfirm, message, Tooltip } from 'antd';
+import { DeleteOutlined, RedoOutlined } from '@ant-design/icons';
 import { useThemeToken } from '@/theme/hooks';
 import { Col, Row } from 'react-bootstrap';
 import { useProjectId } from '@/store/ProjectState';
+import { usePreferredResponse } from '@/utils/PreferredResponse/PreferredResponseContext';
 
 const APIURL = import.meta.env.VITE_API_URL;
 const { Option } = Select;
@@ -13,6 +14,7 @@ const { Option } = Select;
 const FieldConfiguration = () => {
   const { colorPrimary } = useThemeToken();
   const [isFormVisible, setFormVisible] = useState(false);
+  const { fetchPreferredResponse } = usePreferredResponse();
   const [formData, setFormData] = useState({
     minRange: '',
     maxRange: '',
@@ -34,9 +36,9 @@ const FieldConfiguration = () => {
     pageSizeOptions: ['10', '20', '30', '50'],
   });
   const [rangeError, setRangeError] = useState(false);
-const ProjectId = useProjectId();
+  const ProjectId = useProjectId();
 
-console.log(ProjectId)
+  console.log(ProjectId);
 
   useEffect(() => {
     getFields();
@@ -215,6 +217,23 @@ console.log(ProjectId)
     setFieldName(record.fieldName); // Set the fieldName state
   };
 
+  // get autofill data
+  const getAutofillData = async (fieldName) => {
+    const preferredResponse = await fetchPreferredResponse(fieldName);
+    if (preferredResponse) {
+      setFormData((prevData) => ({
+        ...prevData,
+        responses: preferredResponse || '',
+      }));
+    }
+    else{
+      setFormData((prevData) => ({
+        ...prevData,
+        responses: '',
+      }));
+    }
+  };
+
   const showAlert = (message, type) => {
     setAlertMessage(message);
     setAlertType(type);
@@ -338,7 +357,18 @@ console.log(ProjectId)
             </Col>
             <Col>
               <label htmlFor="responses">Preferred Responses:</label>
-              <Input id="responses" value={formData.responses} onChange={handleInputChange} />
+              <Input
+                id="responses"
+                value={formData.responses}
+                onChange={handleInputChange}
+                suffix={
+                  <Tooltip title="Autofill by registered data">
+                    <span className="c-pointer" onClick={() => getAutofillData(fieldName)}>
+                      <RedoOutlined style={{ fontSize: '16px', color: colorPrimary }} />
+                    </span>
+                  </Tooltip>
+                }
+              />
             </Col>
           </Row>
           <Row>
