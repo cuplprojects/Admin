@@ -13,27 +13,45 @@ const GenerateScore = () => {
   const [processing,setProcessing] = useState(false);
   const [scores,setScores] = useState(null);
   const [showScores, setShowScores] = useState(false);
-  const [entryCount, setEntryCount] = useState(0);
+  // const [entryCount, setEntryCount] = useState(0);
+
 
   const projectId = 1; // Replace with your specific project ID
 
-  useEffect(() => {
-    const fetchEntryCount = async () => {
-      try {
-        const response = await fetch(`${apiurl}/Score/count?WhichDatabase=Local&projectId=1`);
+  // useEffect(() => {
+  //   const fetchEntryCount = async () => {
+  //     try {
+  //       const response = await fetch(`${apiurl}/Score/count?WhichDatabase=Local&projectId=1`);
       
-        if (!response.ok) {
-          throw new Error('Failed to fetch entry count');
-        }
-        const result = await response.json();
-        setEntryCount(result.count);
-      } catch (error) {
-        message.error('Failed to fetch entry count');
-      }
-    };
+  //       if (!response.ok) {
+  //         throw new Error('Failed to fetch entry count');
+  //       }
+  //       const result = await response.json();
+  //       setEntryCount(result.count);
+  //     } catch (error) {
+  //       message.error('Failed to fetch entry count');
+  //     }
+  //   };
+  //   fetchEntryCount();
+  // }, [projectId]);
 
-    fetchEntryCount();
-  }, [projectId]);
+
+  // useEffect(() => {
+  //   const fetchEntryCount = async () => {
+  //     try {
+  //       const response = await fetch(`${apiurl}/Key/count?WhichDatabase=Local&projectId=1`);
+      
+  //       if (!response.ok) {
+  //         throw new Error('Failed to fetch entry count');
+  //       }
+  //       const result = await response.json();
+  //       setKeyUploaded(result.count);
+  //     } catch (error) {
+  //       message.error('Failed to fetch entry count');
+  //     }
+  //   };
+  //   fetchEntryCount();
+  // }, [projectId]);
 
   const beforeUpload = (file) => {
     const isXlsx = file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
@@ -104,6 +122,7 @@ const GenerateScore = () => {
     }
   };
 
+
   const uploadButton = (
     <div>
       {loading ? <LoadingOutlined /> : <PlusOutlined />}
@@ -120,7 +139,9 @@ const GenerateScore = () => {
   return (
     <>
     <div>
-      <Upload
+      <div  className='d-flex align-items-center justify-content-between'>
+        
+          <Upload
         name="file"
         listType="picture-card"
         className="file-uploader"
@@ -130,6 +151,16 @@ const GenerateScore = () => {
       >
         {file ? file.name : uploadButton}
       </Upload>
+         
+        <a href="/template.xlsx"> <Button
+          type="primary"
+         
+          disabled={loading}
+        >
+         Download Key Template
+        </Button></a>
+      </div>
+      
       {file && (
         <Button
           type="primary"
@@ -140,17 +171,18 @@ const GenerateScore = () => {
           {loading ? 'Uploading...' : 'Upload'}
         </Button>
       )}
+       
       {alertMessage && (
         <div className={`alert alert-${alertType} mt-3`} role="alert">
           {alertMessage}
         </div>
       )}
-      {entryCount <= 1 && (
+      { (
           <Button
             type="primary"
             onClick={handleProcessScore}
             disabled={processing}
-            style={{ marginTop: 16 }}
+            style={{ marginTop: 16}}
           >
             {processing ? 'Processing...' : 'Process Score'}
           </Button>

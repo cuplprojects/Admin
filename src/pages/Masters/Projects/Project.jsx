@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Form, Input, InputNumber, Popconfirm, Table, Typography, message } from 'antd';
+import { Button, Form, Input, InputNumber, Popconfirm, Table, Typography, message, Select } from 'antd';
 import './Project.css';
 
 const apiurl = import.meta.env.VITE_API_URL;
@@ -11,10 +11,27 @@ function EditableCell({
   inputType,
   record,
   index,
+  options = [],
   children,
   ...restProps
 }) {
-  const inputNode = inputType === 'number' ? <InputNumber /> : <Input />;
+  let inputNode;
+  if (inputType === 'number') {
+    inputNode = <InputNumber />;
+  } else if (inputType === 'select') {
+    inputNode = (
+      <Select mode="multiple" style={{ width: '100%' }}>
+        {options.map(option => (
+          <Option key={option.value} value={option.value}>
+            {option.label}
+          </Option>
+        ))}
+      </Select>
+    );
+  } else {
+    inputNode = <Input />;
+  }
+
   return (
     <td {...restProps}>
       {editing ? (
@@ -44,9 +61,11 @@ function Project() {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [sortedInfo, setSortedInfo] = useState({});
   const [searchTerm, setSearchTerm] = useState('');
+  const [users, setUsers] = useState([]);
 
   useEffect(() => {
     fetchData();
+    fetchUsers();
   }, []);
 
   const fetchData = async () => {
@@ -56,6 +75,17 @@ function Project() {
       setData(data.map((item, index) => ({ ...item, key: index.toString(), serialNo: index + 1 })));
     } catch (error) {
       console.error('Error fetching data:', error);
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch(`${apiurl}/Users?WhichDatabase=Local`);
+      const users = await response.json();
+      console.log(users);
+      setUsers(users.map(user => ({ value: user.userId, label: user.fullName })));
+    } catch (error) {
+      console.error('Error fetching users:', error);
     }
   };
 
@@ -72,6 +102,7 @@ function Project() {
   const edit = (record) => {
     form.setFieldsValue({
       projectName: record.projectName,
+      userAssigned: record.userAssigned || [],
     });
     setEditingKey(record.key);
   };
@@ -80,7 +111,6 @@ function Project() {
     setEditingKey('');
     const lastRow = data[data.length - 1];
     if (lastRow && lastRow.projectName.trim() === '') {
-      // Remove the last row if Project Name is blank
       const newData = [...data];
       newData.pop();
       setData(newData);
@@ -95,7 +125,6 @@ function Project() {
       const index = newData.findIndex((item) => key === item.key);
 
       if (index > -1) {
-        // Check for duplicate projectName
         const isDuplicate = newData.some((item, idx) => idx !== index && item.projectName === row.projectName);
         if (isDuplicate) {
           message.error('Project name already exists. Please enter a unique name.');
@@ -113,7 +142,6 @@ function Project() {
         setEditingKey('');
         setHasUnsavedChanges(false);
       } else {
-        // Check for duplicate projectName before adding
         const isDuplicate = newData.some((item) => item.projectName === row.projectName);
         if (isDuplicate) {
           message.error('Project name already exists. Please enter a unique name.');
@@ -145,7 +173,6 @@ function Project() {
       if (!response.ok) {
         throw new Error('Failed to update project');
       }
-      // Handle success
     } catch (error) {
       console.error('Error updating project:', error);
     }
@@ -165,7 +192,6 @@ function Project() {
         throw new Error('Failed to add new project');
       }
       fetchData();
-      // Handle success
       setHasUnsavedChanges(false);
     } catch (error) {
       console.error('Error adding new project:', error);
@@ -174,7 +200,6 @@ function Project() {
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
-    // Filter data based on projectName containing searchTerm
     const filteredData = data.filter(item =>
       item.projectName.toLowerCase().includes(e.target.value.toLowerCase())
     );
@@ -186,7 +211,8 @@ function Project() {
     const newData = {
       key: newRowKey.toString(),
       serialNo: newRowKey,
-      projectName: '', // Start with blank projectName
+      projectName: '',
+      userAssigned: [],
       method: 'POST',
     };
     setData([...data, newData]);
@@ -198,18 +224,31 @@ function Project() {
     {
       title: 'Serial No',
       dataIndex: 'serialNo',
-      width: '15%',
+      width: '10%',
       sorter: (a, b) => a.serialNo - b.serialNo,
       sortOrder: sortedInfo.columnKey === 'serialNo' && sortedInfo.order,
     },
     {
       title: 'Project Name',
       dataIndex: 'projectName',
-      width: '70%',
+      width: '35%',
       editable: true,
       sorter: (a, b) => a.projectName.length - b.projectName.length,
       sortOrder: sortedInfo.columnKey === 'projectName' && sortedInfo.order,
       render: (_, record) => <span>{record.projectName}</span>,
+    },
+    {
+      title: 'User Assigned',
+      dataIndex: 'userAssigned',
+      width: '35%',
+      editable: true,
+      sorter: (a, b) => a.userAssigned.length - b.userAssigned.length,
+      sortOrder: sortedInfo.columnKey === 'userAssigned' && sortedInfo.order,
+      render: (_, record) => (
+        <span>
+          {Array.isArray(record.userAssigned) ? record.userAssigned.join(', ') : record.userAssigned}
+        </span>
+      ),
     },
     {
       title: 'Actions',
@@ -228,12 +267,20 @@ function Project() {
                 </Popconfirm>
               </span>
             ) : (
+              <div style={{ display: 'flex', justifyContent: 'space-between', width: 100 }}>
               <Typography.Link
                 disabled={editingKey !== '' && editingKey !== record.key}
                 onClick={() => edit(record)}
               >
                 Edit
               </Typography.Link>
+               <Typography.Link
+               onClick={() => archive(record.key)}
+               disabled={editingKey !== '' && editingKey !== record.key}
+             >
+               Archive
+             </Typography.Link>
+             </div>
             )}
           </div>
         );
@@ -249,10 +296,11 @@ function Project() {
       ...col,
       onCell: (record) => ({
         record,
-        inputType: col.dataIndex === 'projectId' ? 'number' : 'text',
+        inputType: col.dataIndex === 'serialNo' ? 'number' : col.dataIndex === 'userAssigned' ? 'select' : 'text',
         dataIndex: col.dataIndex,
         title: col.title,
         editing: isEditing(record),
+        options: col.dataIndex === 'userAssigned' ? users : [],
       }),
     };
   });
@@ -287,9 +335,7 @@ function Project() {
           dataSource={data}
           columns={mergedColumns}
           rowClassName="editable-row"
-          pagination={{
-            onChange: cancel,
-          }}
+          pagination={{ onChange: cancel }}
           onChange={handleChange}
         />
       </Form>
@@ -298,3 +344,5 @@ function Project() {
 }
 
 export default Project;
+
+

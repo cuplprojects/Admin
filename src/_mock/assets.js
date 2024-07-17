@@ -557,6 +557,16 @@ const OTHERS_PERMISSION = [
     route:'Report',
     component: '/Report/index.tsx',
   },
+  {
+    id: '3981225257359246',
+    parentId: '',
+    label: 'Archive',
+    name: 'Archive',
+    icon: 'solar:document-add-bold-duotone',
+    type: PermissionType.MENU,
+    route:'Archive',
+    component: '/Archive/index.tsx',
+  },
 
 
   //   {
