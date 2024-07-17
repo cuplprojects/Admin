@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Col, Row, Card } from 'react-bootstrap';
-import { Button } from 'antd';
+import { Button, notification } from 'antd';
 import ChartComponent from './ChartComponent';
+import { useProjectId } from '@/store/ProjectState';
 
 const APIURL = import.meta.env.VITE_API_URL;
 
@@ -9,30 +10,103 @@ const AuditButton = () => {
   const [fieldConfigs, setFieldConfigs] = useState([]);
   const [flags, setFlags] = useState([]);
   const [remarksCounts, setRemarksCounts] = useState([]);
+  const [corrected, setCorrected] = useState(0);
+
+  const [remaining, setRemaining] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
+  const ProjectId = useProjectId();
+  const [wip, setWip] = useState(0)
+  
+  useEffect(() => {
+    if(totalCount>0)
+    {
+      setWip(((corrected/totalCount)*100).toFixed(3))
+    }
+  }, [corrected,totalCount])
+
+
+  // const handleClick = async () => {
+  //   try {
+  //     const response = await fetch(`${APIURL}/Audit/audit?WhichDatabase=Local&ProjectID=${ProjectId}`);
+
+  //     const result = await response.json();
+
+  //     if (Array.isArray(result)) {
+  //       alert(`Audit Flags:\n${result.join('\n')}`);
+  //     } else {
+  //       alert(result);
+  //     }
+  //   } catch (error) {
+  //     console.error('Error:', error);
+  //     alert('An error occurred while performing the audit.');
+  //   }
+  // };
+
+  // const handleClick = async () => {
+  //   try {
+  //     const response = await fetch(`${APIURL}/Audit/audit?WhichDatabase=Local&ProjectID=${ProjectId}`);
+  
+  //     // Check if the response status is OK (status code 200-299)
+  //     if (!response.ok) {
+  //       throw new Error(`HTTP error! Status: ${response.status}`);
+  //     }
+  
+  //     const result = await response.json();
+  
+  //     // Log the result for debugging
+  //     console.log('Fetched result:', result);
+  
+  //     // Check if the result is an array
+  //     if (Array.isArray(result)) {
+  //       alert(`Audit Flags:\n${result.join('\n')}`);
+  //     } else {
+  //       alert(result);
+  //     }
+  //   } catch (error) {
+  //     console.error('Error:', error);
+  //     alert('An error occurred while performing the audit.');
+  //   }
+  // };
 
   const handleClick = async () => {
     try {
-      const response = await fetch(`${APIURL}/audit/audit`);
-      const result = await response.json();
-
-      if (Array.isArray(result)) {
-        alert(`Audit Flags:\n${result.join('\n')}`);
-      } else {
-        alert(result);
+      const response = await fetch(`${APIURL}/Audit/audit?WhichDatabase=Local&ProjectID=${ProjectId}`);
+  
+      // Log the response status and headers
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`); 
       }
+      notification.success({
+        message: 'Audit Cycle Complete!',
+        duration: 3,
+      });
+
+      getFlags();
+  
+      // Attempt to parse the JSON
+
     } catch (error) {
       console.error('Error:', error);
       alert('An error occurred while performing the audit.');
     }
   };
+  
 
   const getFlags = async () => {
     try {
       const response = await fetch(`${APIURL}/Flags/counts`);
       const result = await response.json();
       console.log(result);
-      setFlags(result.countsByFieldname); // Update state with countsByFieldname array
+      setFlags(result.countsByFieldname); 
       setRemarksCounts(result.remarksCounts);
+
+      setCorrected(result.corrected);
+      setRemaining(result.remaining);
+      setTotalCount(result.totalCount);
+
     } catch (error) {
       console.error('Error:', error);
     }
@@ -45,7 +119,7 @@ const AuditButton = () => {
   useEffect(() => {
     const fetchFieldConfigs = async () => {
       try {
-        const response = await fetch(`${APIURL}/FieldConfigurations?WhichDatabase=Local`);
+        const response = await fetch(`${APIURL}/FieldConfigurations?WhichDatabase=Local&ProjectID=${ProjectId}`);
         const result = await response.json();
         setFieldConfigs(result);
       } catch (error) {
@@ -74,11 +148,13 @@ const AuditButton = () => {
                     <div className="justify-content-center align-items-center">
                       <ChartComponent
                         chartId={`chart-global`}
-                        series={76} // Example series data
+                        series={wip} // Example series data
                         labels={['Average Results']}
                       />
                       <div>
-                        <p className="fs-2 text-center">Project status</p>
+                        <p className="fs-2 text-center">
+                        {totalCount === 0 ? "Run Audit to Start Audit Process" : "Completion Status"}
+                        </p>
                       </div>
                     </div>
                   </Card>
@@ -107,16 +183,34 @@ const AuditButton = () => {
             </Row>
           </Col>
           <Col>
+
             <Card
-              className="d-flex align-items-center fs-3 justify-content-center mb-5 mr-3 mt-3 "
+              className="d-flex align-items-center fs-3 justify-content-center mb-1 mr-3 mt-3 "
               style={{ height: '60px', backgroundColor: '#ffd1d1' }}
             >
               <div className="">
-                <h2 className="text-center">
-                  Error Counts: {flags.reduce((acc, curr) => acc + curr.count, 0)}
-                </h2>
+                <h2 className="text-center">Error Counts: {totalCount}</h2>
               </div>
             </Card>
+
+            <Card
+              className="d-flex align-items-center fs-3 justify-content-center mb-1 mr-3 mt-3 "
+              style={{ height: '60px', backgroundColor: '#95f595' }}
+            >
+              <div className="">
+                <h2 className="text-center">Corrected Counts: {corrected}</h2>
+              </div>
+            </Card>
+
+            <Card
+              className="d-flex align-items-center fs-3 justify-content-center mb-5 mr-3 mt-3 "
+              style={{ height: '60px', backgroundColor: '#b4b4ff' }}
+            >
+              <div className="">
+                <h2 className="text-center">Remaining Counts: {remaining}</h2>
+              </div>
+            </Card>
+
 
             <h2
               className="fs-3 mb-3 text-center "

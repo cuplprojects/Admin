@@ -5,8 +5,7 @@
     },
     "workbench":{
       "welcome":"Welcome back 👋",
-      "welcomedata": "Welcome! Explore all the dashboard activities of CUPL SPA for detailed insights and updates on our latest features.",
-      "hello": "hello world"
+      "welcomedata": "Welcome! Explore all the dashboard activities of CUPL SPA for detailed insights and updates on our latest features."
     }
   }
 }

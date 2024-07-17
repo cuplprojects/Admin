@@ -1,6 +1,7 @@
-import { Drawer } from 'antd'; // Importing the Drawer component from antd
+import { Drawer, Select } from 'antd'; // Importing the Drawer and Select components from antd
 import Color from 'color'; // Importing the Color library for color manipulations
-import { CSSProperties, useState } from 'react'; // Importing the CSSProperties type and useState hook from React
+import { CSSProperties, useEffect, useState } from 'react'; // Importing the CSSProperties type and useState hook from React
+import axios from 'axios'; // Importing Axios for HTTP requests
 
 import { IconButton, SvgIcon } from '@/components/icon'; // Importing IconButton, Iconify, and SvgIcon components
 import LocalePicker from '@/components/locale-picker'; // Importing the LocalePicker component
@@ -19,6 +20,9 @@ import Nav from './nav'; // Importing Nav component
 
 import { ThemeLayout } from '#/enum'; // Importing ThemeLayout enum
 import Sync from './Sync';
+import { useProjectActions, useProjectId } from '@/store/ProjectState';
+
+const { Option } = Select;
 
 // Define the Props type for the Header component
 type Props = {
@@ -28,6 +32,10 @@ type Props = {
 
 // Define the Header component
 export default function Header({ className = '', offsetTop = false }: Props) {
+  const projectId = useProjectId();
+  const { setProjectId } = useProjectActions();
+  const [project, setProject] = useState<{ projectName: string | null }>({ projectName: null });
+  const [projects, setProjects] = useState<Array<{ projectId: number; projectName: string }>>([]);
   // State variable to control the drawer open/close state
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -39,6 +47,46 @@ export default function Header({ className = '', offsetTop = false }: Props) {
 
   // Extract screen size map using the useResponsive hook
   const { screenMap } = useResponsive();
+
+  // API URL
+  const apiUrl = import.meta.env.VITE_API_URL;
+
+  // Fetch project data whenever the project ID changes
+  useEffect(() => {
+    const fetchProjectData = async () => {
+      try {
+        const response = await axios.get(`${apiUrl}/Projects/${projectId}?WhichDatabase=Local`);
+        setProject({ projectName: response.data.projectName });
+      } catch (error) {
+        console.error('Error fetching project data:', error);
+      }
+    };
+
+    if (projectId) {
+      fetchProjectData();
+    }
+  }, [projectId, apiUrl]);
+
+  
+  console.log(project);
+
+  // Fetch all projects
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await axios.get(`${apiUrl}/Projects?WhichDatabase=Local`);
+        setProjects(response.data);
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+      }
+    };
+
+    fetchProjects();
+  }, [apiUrl]);
+
+  const handleProjectChange = (value: number) => {
+    setProjectId(value);
+  };
 
   // Define header style as a CSSProperties object
   const headerStyle: CSSProperties = {
@@ -87,9 +135,21 @@ export default function Header({ className = '', offsetTop = false }: Props) {
               {breadCrumb ? <BreadCrumb /> : null} {/* Display breadcrumb if enabled */}
             </div>
           </div>
+          {/* show current project */}
 
-          <div className="flex">
-            <Sync/>
+          <div className="align-items-center flex">
+            <Select
+              value={projectId}
+              onChange={handleProjectChange}
+              style={{ width: 200, marginRight: '1rem' }}
+            >
+              {projects.map((proj) => (
+                <Option key={proj.projectId} value={proj.projectId}>
+                  {proj.projectName}
+                </Option>
+              ))}
+            </Select>
+            <Sync />
             <SearchBar /> {/* Search bar component */}
             <LocalePicker /> {/* Locale picker component */}
             {/* <NoticeButton /> Notifications button */}

@@ -46,6 +46,40 @@ const AnnotationPage = () => {
       });
   }, []);
 
+  // get image config by perojecvt id
+  useEffect(() => {
+    // Fetch annotations by project ID
+    const projectId = 1; // Replace with your project ID
+    axios
+      .get(`${apiurl}/ImageConfigs/ByProjectId/${projectId}?WhichDatabase=Local`)
+      .then((response) => {
+        const resdata = response.data[0].annotations;
+        console.log(resdata);
+  
+        const fetchedAnnotations = resdata.map(annotation => {
+          // Fixing the coordinates format to be valid JSON
+          const fixedCoordinates = annotation.coordinates
+            .replace(/'/g, '"') // Replace single quotes with double quotes
+            .replace(/(\w+):/g, '"$1":'); // Wrap property names with double quotes
+  
+          return {
+            FieldName: annotation.fieldName,
+            FieldValue: '', // Assuming you want an empty string for FieldValue
+            coordinates: JSON.parse(fixedCoordinates), // Parse fixed coordinates JSON
+          };
+        });
+        setImageUrl(response.data[0].imageUrl)
+        console.log(fetchedAnnotations);
+        setAnnotations(fetchedAnnotations);
+        localStorage.setItem('annotations', JSON.stringify(fetchedAnnotations));
+      })
+      .catch((error) => {
+        console.error('Error fetching annotations:', error);
+      });
+  }, []);
+  
+  
+  
   useEffect(() => {
     const mappedFieldsObj = {};
     annotations.forEach((annotation) => {

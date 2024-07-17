@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect } from 'react';
 import { notification } from 'antd'; // Import notification from Ant Design
 import axios from 'axios'; // Import Axios for HTTP requests
 import i18n from '@/locales/i18n';
-
+const apiUrl = import.meta.env.VITE_API_URL;
 const MessageContext = createContext();
 
 export const useMessage = () => useContext(MessageContext);
@@ -23,7 +23,9 @@ export const MessageProvider = ({ children }) => {
   const showMessage = async (module, operation, status) => {
     try {
       // Fetch message content from API based on module, operation, status, and language
-      const response = await axios.get(`https://localhost:7290/api/Messages/Filter?module=${module}&operation=${operation}&status=${status}`);
+      const response = await axios.get(
+        `${apiUrl}/Messages/Filter?module=${module}&operation=${operation}&status=${status}`,
+      );
       const { enUsTitle, enUsDescription, hiInTitle, hiInDescription } = response.data[0];
 
       // Determine which title and description to use based on the requested language
@@ -71,9 +73,5 @@ export const MessageProvider = ({ children }) => {
     }
   };
 
-  return (
-    <MessageContext.Provider value={showMessage}>
-      {children}
-    </MessageContext.Provider>
-  );
+  return <MessageContext.Provider value={showMessage}>{children}</MessageContext.Provider>;
 };

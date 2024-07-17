@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import './style.css';
 
-const FullImageView = ({ src, data, onUpdate, onNext }) => {
-  const [value, setValue] = useState(data.FieldValue);
+const FullImageView = ({ data, onUpdate, onNext }) => {
+  const [value, setValue] = useState('');
 
   useEffect(() => {
-    setValue(data.FieldValue);
+    if (data) {
+      setValue(data.fieldNameValue);
+    }
   }, [data]);
 
   const handleChange = (e) => {
@@ -19,8 +21,13 @@ const FullImageView = ({ src, data, onUpdate, onNext }) => {
     }
   };
 
+  if (!data || !data.coordinates) {
+    return null; // Handle case where data or coordinates are not yet available
+  }
+
   const { x, y, width, height } = data.coordinates;
   const originalWidth = 700; // Replace with the original width of your image
+  const imageUrl = data.imageUrl; // Ensure data includes imageUrl
 
   return (
     <div
@@ -32,7 +39,7 @@ const FullImageView = ({ src, data, onUpdate, onNext }) => {
       }}
     >
       <img
-        src={src}
+        src={data.imageUrl}
         alt="Full Image"
         style={{
           width: `${originalWidth}px`, // Set the image width to the original image width
@@ -46,7 +53,7 @@ const FullImageView = ({ src, data, onUpdate, onNext }) => {
           left: `${x}px`, // Adjust left position to match annotation x-coordinate
           width: `${width}px`, // Set width to match annotation width
           height: `${height}px`, // Set height to match annotation height
-          border: '2px solid black'
+          border: '2px solid black',
         }}
       >
         <input
@@ -59,6 +66,8 @@ const FullImageView = ({ src, data, onUpdate, onNext }) => {
             width: '100%', // Make input full width of its container
             boxSizing: 'border-box', // Ensure padding and border are included in width and height
           }}
+          required
+          autoFocus
         />
       </div>
     </div>
