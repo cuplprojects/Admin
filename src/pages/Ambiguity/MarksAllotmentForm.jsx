@@ -4,7 +4,9 @@ import { Form, Input, Radio, Typography, Divider, Row, Col, Space, Table, Select
 
 const { Title } = Typography;
 
+
 const apiurl = import.meta.env.VITE_API_URL;
+
 
 const MarksAllotmentForm = () => {
     const [formState, setFormState] = useState({
@@ -18,12 +20,32 @@ const MarksAllotmentForm = () => {
     const [setCodes, setSetCodes] = useState([]);
     const [markingRules, setMarkingRules] = useState([]);
 
-    const tableRefs = {
-        SetA: useRef(null),
-        SetB: useRef(null),
-        SetC: useRef(null),
-        SetD: useRef(null),
-    };
+
+    useEffect(() => {
+        axios.get('http://localhost:5071/api/Ambiguity/BSetResponsesByProject/1')
+            .then(response => {
+                const setCodesArray = response.data.split(',');
+                setSetCodes(setCodesArray);
+                if (setCodesArray.length > 0) {
+                    setFormState(prevState => ({
+                        ...prevState,
+                        setCode: response.data
+                    }));
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching set codes:', error);
+            });
+
+        axios.get('http://localhost:5071/api/MarkingRule')
+            .then(response => {
+                setMarkingRules(response.data);
+            })
+            .catch(error => {
+                console.error('Error fetching marking rules:', error);
+            });
+    }, []);
+
 
     useEffect(() => {
         axios.get(`${apiurl}/Ambiguity/BSetResponsesByProject/1`)
@@ -64,7 +86,8 @@ const MarksAllotmentForm = () => {
             ...formState,
             [name]: value
         });
-    };
+    };<<<
+
 
     const transformData = () => {
         const transformed = [];
@@ -72,6 +95,7 @@ const MarksAllotmentForm = () => {
         Object.keys(formState.ambiguousQuestions).forEach(setCode => {
             Object.keys(formState.ambiguousQuestions[setCode]).forEach(questionNumber => {
                 const questionData = formState.ambiguousQuestions[setCode][questionNumber];
+
 
                 if (questionData && questionData.options) {
                     const optionsKey = Object.keys(questionData.options)[0];
@@ -87,6 +111,7 @@ const MarksAllotmentForm = () => {
         });
 
         return transformed;
+
     };
 
     const handleSubmit = async () => {
@@ -97,7 +122,7 @@ const MarksAllotmentForm = () => {
         };
 
         try {
-            const response = await axios.post(`${apiurl}/Ambiguity/allot-marks`, requestData, {
+            const response = await axios.post('http://localhost:5071/api/Ambiguity/allot-marks', requestData, {
                 headers: {
                     'Content-Type': 'application/json'
                 }
@@ -152,57 +177,61 @@ const MarksAllotmentForm = () => {
         });
     };
 
-    const renderTableData = (setCode) => {
+    const renderTableData = () => {
         const { numberOfAmbiguousQuestions } = formState;
         const data = [];
-    
+
         if (numberOfAmbiguousQuestions && !isNaN(numberOfAmbiguousQuestions)) {
             for (let i = 1; i <= parseInt(numberOfAmbiguousQuestions); i++) {
-                data.push({
-                    key: `${setCode}-${i}`,
-                    questionNumber: (
-                        <Input
-                            type="number"
-                            placeholder={`Question ${i}`}
-                            value={formState.ambiguousQuestions[setCode] && formState.ambiguousQuestions[setCode][i] && formState.ambiguousQuestions[setCode][i].question}
-                            onChange={(e) => handleQuestionChange(setCode, i, e)}
-                            style={{ borderRadius: '0' }}
-                        />
-                    ),
-                    options: (
-                        <Space direction="vertical">
-                            {Array.from({ length: parseInt(numberOfAmbiguousQuestions) }).map((_, index) => (
-                                <Input
-                                    key={`ambiguousQuestion${i}Option${String.fromCharCode(65 + index)}`}
-                                    type="text"
-                                    placeholder={`Option ${String.fromCharCode(65 + index)}`}
-                                    value={formState.ambiguousQuestions[setCode] && formState.ambiguousQuestions[setCode][i] && formState.ambiguousQuestions[setCode][i].options && formState.ambiguousQuestions[setCode][i].options[`option${String.fromCharCode(65 + index)}`]}
-                                    onChange={(e) => handleOptionChange(setCode, i, `option${String.fromCharCode(65 + index)}`, e)}
-                                    style={{ borderRadius: '0' }}
-                                />
-                            ))}
-                        </Space>
-                    )
+                setCodes.forEach(setCode => {
+                    data.push({
+                        key: `${setCode}-${i}`,
+                        setCode: setCode,
+                        questionNumber: (
+                            <Input
+                                type="number"
+                                placeholder={`Question ${i}`}
+                                value={formState.ambiguousQuestions[setCode] && formState.ambiguousQuestions[setCode][i] && formState.ambiguousQuestions[setCode][i].question}
+                                onChange={(e) => handleQuestionChange(setCode, i, e)}
+                                style={{ borderRadius: '0' }}
+                            />
+                        ),
+                        option: (
+                            <Input
+                                type="text"
+                                placeholder={`Option for Question ${i}`}
+                                value={formState.ambiguousQuestions[setCode] && formState.ambiguousQuestions[setCode][i] && formState.ambiguousQuestions[setCode][i].options && formState.ambiguousQuestions[setCode][i].options['option']}
+                                onChange={(e) => handleOptionChange(setCode, i, 'option', e)}
+                                style={{ borderRadius: '0' }}
+                            />
+                        )
+                    });
                 });
             }
         }
-    
+
         return data;
     };
 
+
     const columns = [
+        {
+            title: 'Set Code',
+            dataIndex: 'setCode',
+            key: 'setCode',
+        },
         {
             title: 'Question Number',
             dataIndex: 'questionNumber',
             key: 'questionNumber',
-            render: (text) => text
+
         },
         {
-            title: 'Options',
-            dataIndex: 'options',
-            key: 'options',
-            render: (text) => text
-        }
+            title: 'Option',
+            dataIndex: 'option',
+            key: 'option',
+        },
+
     ];
 
     return (
@@ -265,23 +294,24 @@ const MarksAllotmentForm = () => {
 
             <Divider />
             <Row gutter={16}>
-                {setCodes.map(setCode => (
-                    <Col md={12} key={setCode}>
-                        <div ref={tableRefs[setCode]}>
-                            <Title level={3}>Set {setCode}</Title>
-                            <Table
-                                columns={columns}
-                                dataSource={renderTableData(setCode)}
-                                pagination={false}
-                            />
-                            <Divider />
-                        </div>
-                    </Col>
-                ))}
+
+                <Col span={24}>
+                    <Table
+                        columns={columns}
+                        dataSource={renderTableData()}
+                        pagination={false}
+                    />
+                </Col>
             </Row>
-            <Button type="primary" onClick={handleSubmit}>
-                Submit
-            </Button>
+            <Form.Item>
+                <Button
+                    type="primary"
+                    onClick={handleSubmit}
+                >
+                    Submit
+                </Button>
+            </Form.Item>
+
         </Form>
     );
 };

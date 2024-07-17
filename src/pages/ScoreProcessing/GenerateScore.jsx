@@ -14,10 +14,12 @@ const GenerateScore = () => {
   const [processing,setProcessing] = useState(false);
   const [scores,setScores] = useState(null);
   const [showScores, setShowScores] = useState(false);
+
   const [entryCount, setEntryCount] = useState(0);
   const ProjectId = useProjectId();
   const [keyCount,setKeyCount] = useState(0);
   
+
 
 
 
@@ -134,6 +136,7 @@ const GenerateScore = () => {
     }
   };
 
+
   const uploadButton = (
     <div>
       {loading ? <LoadingOutlined /> : <PlusOutlined />}
@@ -150,7 +153,9 @@ const GenerateScore = () => {
   return (
     <>
     <div>
-      <Upload
+      <div  className='d-flex align-items-center justify-content-between'>
+        
+          <Upload
         name="file"
         listType="picture-card"
         className="file-uploader"
@@ -160,7 +165,19 @@ const GenerateScore = () => {
       >
         {file ? file.name : uploadButton}
       </Upload>
-      {file && !keyCount && (
+
+         
+        <a href="/template.xlsx"> <Button
+          type="primary"
+         
+          disabled={loading}
+        >
+         Download Key Template
+        </Button></a>
+      </div>
+      
+      {file && (
+
         <Button
           type="primary"
           onClick={handleUpload}
@@ -170,17 +187,20 @@ const GenerateScore = () => {
           {loading ? 'Uploading...' : 'Upload'}
         </Button>
       )}
+       
       {alertMessage && (
         <div className={`alert alert-${alertType} mt-3`} role="alert">
           {alertMessage}
         </div>
       )}
+
       {(keyCount && (entryCount <= 1)) ? (
+
           <Button
             type="primary"
             onClick={handleProcessScore}
             disabled={processing}
-            style={{ marginTop: 16 }}
+            style={{ marginTop: 16}}
           >
             {processing ? 'Processing...' : 'Process Score'}
           </Button>
