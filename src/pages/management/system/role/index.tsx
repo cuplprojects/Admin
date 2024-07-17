@@ -1,12 +1,14 @@
-// import { Button, Card, Popconfirm } from 'antd';
-// import Table, { ColumnsType } from 'antd/es/table';
-// import { useState } from 'react';
+// // RolePage.tsx
+
+// import React, { useState } from 'react';
+// import { Button, Card, Table, Popconfirm } from 'antd';
+// import { ColumnsType } from 'antd/es/table';
 
 // import { ROLE_LIST } from '@/_mock/assets';
 // import { IconButton, Iconify } from '@/components/icon';
 // import ProTag from '@/theme/antd/components/tag';
 
-// import { RoleModal, RoleModalProps } from './role-modal';
+// import RoleModal, { RoleModalProps } from './role-modal';
 
 // import { Role } from '#/entity';
 // import { BasicStatus } from '#/enum';
@@ -20,18 +22,22 @@
 //   status: BasicStatus.ENABLE,
 //   permission: [],
 // };
-// export default function RolePage() {
-//   const [roleModalPros, setRoleModalProps] = useState<RoleModalProps>({
+
+// const RolePage: React.FC = () => {
+//   const [roleModalProps, setRoleModalProps] = useState<RoleModalProps>({
 //     formValue: { ...DEFAULE_ROLE_VALUE },
 //     title: 'New',
 //     show: false,
-//     onOk: () => {
+//     onOk: (role) => {
+//       // Logic to save or update role goes here (e.g., call API)
+//       console.log('Save or update role:', role);
 //       setRoleModalProps((prev) => ({ ...prev, show: false }));
 //     },
 //     onCancel: () => {
 //       setRoleModalProps((prev) => ({ ...prev, show: false }));
 //     },
 //   });
+
 //   const columns: ColumnsType<Role> = [
 //     {
 //       title: 'Name',
@@ -81,8 +87,8 @@
 //       show: true,
 //       title: 'Create New',
 //       formValue: {
-//         ...prev.formValue,
 //         ...DEFAULE_ROLE_VALUE,
+//         status: BasicStatus.ENABLE, // Ensure default status is set
 //       },
 //     }));
 //   };
@@ -114,8 +120,10 @@
 //         dataSource={ROLES}
 //       />
 
-//       <RoleModal {...roleModalPros} />
+//       <RoleModal {...roleModalProps} />
 //     </Card>
 //   );
-// }
-export {default} from "./RoleList"
+// };
+
+// // export default RolePage;
+ export {default} from './RolePage'

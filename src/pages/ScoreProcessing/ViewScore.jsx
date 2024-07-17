@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Table, message } from 'antd';
+import { useProjectId } from '@/store/ProjectState';
 
 const apiurl = import.meta.env.VITE_API_URL;
+
+
 
 const columns = [
   {
@@ -37,11 +40,12 @@ const columns = [
 const ViewScore = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const ProjectId = useProjectId();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(`${apiurl}/Score?WhichDatabase=Local`);
+        const response = await fetch(`${apiurl}/Score?WhichDatabase=Local&ProjectId=${ProjectId}`);
         if (!response.ok) {
           throw new Error('Failed to fetch data');
         }

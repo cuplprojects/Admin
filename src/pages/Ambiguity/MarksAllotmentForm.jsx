@@ -4,6 +4,10 @@ import { Form, Input, Radio, Typography, Divider, Row, Col, Space, Table, Select
 
 const { Title } = Typography;
 
+
+const apiurl = import.meta.env.VITE_API_URL;
+
+
 const MarksAllotmentForm = () => {
     const [formState, setFormState] = useState({
         numberOfAmbiguousQuestions: '',
@@ -15,6 +19,7 @@ const MarksAllotmentForm = () => {
 
     const [setCodes, setSetCodes] = useState([]);
     const [markingRules, setMarkingRules] = useState([]);
+
 
     useEffect(() => {
         axios.get('http://localhost:5071/api/Ambiguity/BSetResponsesByProject/1')
@@ -41,6 +46,33 @@ const MarksAllotmentForm = () => {
             });
     }, []);
 
+
+    useEffect(() => {
+        axios.get(`${apiurl}/Ambiguity/BSetResponsesByProject/1`)
+            .then(response => {
+                const setCodesArray = response.data.split(',');
+                setSetCodes(setCodesArray);
+                if (setCodesArray.length > 0) {
+                    setFormState(prevState => ({
+                        ...prevState,
+                        setCode: response.data
+                    }));
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching set codes:', error);
+            });
+
+        axios.get(`${apiurl}/MarkingRule`)
+            .then(response => {
+                setMarkingRules(response.data);
+            })
+            .catch(error => {
+                console.error('Error fetching marking rules:', error);
+            });
+    }, []);
+
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormState({
@@ -54,7 +86,8 @@ const MarksAllotmentForm = () => {
             ...formState,
             [name]: value
         });
-    };
+    };<<<
+
 
     const transformData = () => {
         const transformed = [];
@@ -62,6 +95,7 @@ const MarksAllotmentForm = () => {
         Object.keys(formState.ambiguousQuestions).forEach(setCode => {
             Object.keys(formState.ambiguousQuestions[setCode]).forEach(questionNumber => {
                 const questionData = formState.ambiguousQuestions[setCode][questionNumber];
+
 
                 if (questionData && questionData.options) {
                     const optionsKey = Object.keys(questionData.options)[0];
@@ -77,6 +111,7 @@ const MarksAllotmentForm = () => {
         });
 
         return transformed;
+
     };
 
     const handleSubmit = async () => {
@@ -178,6 +213,7 @@ const MarksAllotmentForm = () => {
         return data;
     };
 
+
     const columns = [
         {
             title: 'Set Code',
@@ -188,12 +224,14 @@ const MarksAllotmentForm = () => {
             title: 'Question Number',
             dataIndex: 'questionNumber',
             key: 'questionNumber',
+
         },
         {
             title: 'Option',
             dataIndex: 'option',
             key: 'option',
         },
+
     ];
 
     return (
@@ -251,10 +289,12 @@ const MarksAllotmentForm = () => {
                         </Select>
                     </Form.Item>
                 </Col>
+
             </Row>
 
             <Divider />
             <Row gutter={16}>
+
                 <Col span={24}>
                     <Table
                         columns={columns}
@@ -271,6 +311,7 @@ const MarksAllotmentForm = () => {
                     Submit
                 </Button>
             </Form.Item>
+
         </Form>
     );
 };

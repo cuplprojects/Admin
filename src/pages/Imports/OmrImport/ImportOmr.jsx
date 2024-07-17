@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Button, Progress } from 'antd';
 import localforage from 'localforage';
+import { useProjectId } from '@/store/ProjectState';
+
 
 const apiurl = import.meta.env.VITE_API_URL;
 
@@ -18,6 +20,7 @@ const ImportOmr = () => {
   const [lastUploadedFile, setLastUploadedFile] = useState('');
   const ProjectId = useProjectId();
 
+
   // useEffect(() => {
   //   const fetchData = async () => {
   //     try {
@@ -31,6 +34,7 @@ const ImportOmr = () => {
   //   };
   //   fetchData();
   // }, []);
+
 
   const handleFileChange = async (e) => {
     const selectedFiles = [...e.target.files];
@@ -73,6 +77,7 @@ const ImportOmr = () => {
   };
 
 
+
   const readFileAsBase64 = (file) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -95,6 +100,7 @@ const ImportOmr = () => {
       // Use lastOmrImageName as needed
     }
     setProgress(0);
+
     try {
       const base64File = await readFileAsBase64(files[index]);
       const fileNameWithoutExtension = files[index].name.replace(/\.[^/.]+$/, ""); 
@@ -147,13 +153,17 @@ const ImportOmr = () => {
     }
   };
 
+
   const handleSubmit = async (e) => {
+
     e.preventDefault();
     setLoading(true);
     const fileCount = files.length;
     for (let i = currentFileIndex; i < fileCount; i++) {
+
       const uploadSuccess = await uploadFile(i);
       if (!uploadSuccess) {
+
         break;
       }
     }
@@ -161,7 +171,9 @@ const ImportOmr = () => {
   };
 
   const skipFile = async () => {
+
     // await removeFromLocalForage(files[currentFileIndex]);
+
     const nextFileIndex = currentFileIndex + 1;
     setCurrentFileIndex(nextFileIndex);
     // await localforage.setItem('currentFileIndex', nextFileIndex);
@@ -177,6 +189,7 @@ const ImportOmr = () => {
 
   const replaceFile = async () => {
     setShowReplaceBtn(false);
+
     setShowSkipBtn(false);
     await uploadFile(currentFileIndex, true);
     handleSubmit({ preventDefault: () => {} })
@@ -192,6 +205,8 @@ const ImportOmr = () => {
           multiple
           accept=".jpg,.jpeg"
           required
+
+    
         />
         <Button
           type="primary"
@@ -207,6 +222,7 @@ const ImportOmr = () => {
           {alertMessage}
         </div>
       )}
+
       {showSkipBtn && (
         <Button type="danger" onClick={skipFile}>
           Skip {currentFileName}
@@ -216,11 +232,19 @@ const ImportOmr = () => {
         <Button type="primary" onClick={replaceFile}>
           Replace {currentFileName}
         </Button>
+
       )}
       {loading && (
         <Progress percent={progress} status="active" />
       )}
-    </div>
+
+      {lastUploadedFile && (
+        <div className="alert alert-info mt-3" role="alert">
+          Last uploaded file: {lastUploadedFile}
+        </div>
+      )}
+    </>
+
   );
 };
 
