@@ -11,19 +11,18 @@ const AuditButton = () => {
   const [flags, setFlags] = useState([]);
   const [remarksCounts, setRemarksCounts] = useState([]);
   const [corrected, setCorrected] = useState(0);
+  const [isAuditing, setIsAuditing] = useState(false);
 
   const [remaining, setRemaining] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
   const ProjectId = useProjectId();
-  const [wip, setWip] = useState(0)
-  
-  useEffect(() => {
-    if(totalCount>0)
-    {
-      setWip(((corrected/totalCount)*100).toFixed(3))
-    }
-  }, [corrected,totalCount])
+  const [wip, setWip] = useState(0);
 
+  useEffect(() => {
+    if (totalCount > 0) {
+      setWip(((corrected / totalCount) * 100).toFixed(3));
+    }
+  }, [corrected, totalCount]);
 
   // const handleClick = async () => {
   //   try {
@@ -45,17 +44,17 @@ const AuditButton = () => {
   // const handleClick = async () => {
   //   try {
   //     const response = await fetch(`${APIURL}/Audit/audit?WhichDatabase=Local&ProjectID=${ProjectId}`);
-  
+
   //     // Check if the response status is OK (status code 200-299)
   //     if (!response.ok) {
   //       throw new Error(`HTTP error! Status: ${response.status}`);
   //     }
-  
+
   //     const result = await response.json();
-  
+
   //     // Log the result for debugging
   //     console.log('Fetched result:', result);
-  
+
   //     // Check if the result is an array
   //     if (Array.isArray(result)) {
   //       alert(`Audit Flags:\n${result.join('\n')}`);
@@ -70,43 +69,42 @@ const AuditButton = () => {
 
   const handleClick = async () => {
     try {
-      const response = await fetch(`${APIURL}/Audit/audit?WhichDatabase=Local&ProjectID=${ProjectId}`);
-  
+      setIsAuditing(true);
+      const response = await fetch(
+        `${APIURL}/Audit/audit?WhichDatabase=Local&ProjectID=${ProjectId}`,
+      );
+
       // Log the response status and headers
       console.log('Response status:', response.status);
       console.log('Response headers:', response.headers);
-  
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`); 
-      }
+      setIsAuditing(false);
       notification.success({
         message: 'Audit Cycle Complete!',
         duration: 3,
       });
-
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
       getFlags();
-  
-      // Attempt to parse the JSON
 
+      // Attempt to parse the JSON
     } catch (error) {
       console.error('Error:', error);
       alert('An error occurred while performing the audit.');
     }
   };
-  
 
   const getFlags = async () => {
     try {
       const response = await fetch(`${APIURL}/Flags/counts`);
       const result = await response.json();
       console.log(result);
-      setFlags(result.countsByFieldname); 
+      setFlags(result.countsByFieldname);
       setRemarksCounts(result.remarksCounts);
 
       setCorrected(result.corrected);
       setRemaining(result.remaining);
       setTotalCount(result.totalCount);
-
     } catch (error) {
       console.error('Error:', error);
     }
@@ -119,7 +117,9 @@ const AuditButton = () => {
   useEffect(() => {
     const fetchFieldConfigs = async () => {
       try {
-        const response = await fetch(`${APIURL}/FieldConfigurations?WhichDatabase=Local&ProjectID=${ProjectId}`);
+        const response = await fetch(
+          `${APIURL}/FieldConfigurations?WhichDatabase=Local&ProjectID=${ProjectId}`,
+        );
         const result = await response.json();
         setFieldConfigs(result);
       } catch (error) {
@@ -133,8 +133,8 @@ const AuditButton = () => {
   return (
     <div>
       <div className="mb-3 mr-3 mt-3 text-end">
-        <Button type="primary" onClick={handleClick}>
-          Run Audit
+        <Button type="primary" onClick={handleClick} disabled={isAuditing}>
+          {isAuditing ? 'Auditing' : 'Audit'}
         </Button>
       </div>
 
@@ -153,7 +153,9 @@ const AuditButton = () => {
                       />
                       <div>
                         <p className="fs-2 text-center">
-                        {totalCount === 0 ? "Run Audit to Start Audit Process" : "Completion Status"}
+                          {totalCount === 0
+                            ? 'Run Audit to Start Audit Process'
+                            : 'Completion Status'}
                         </p>
                       </div>
                     </div>
@@ -183,7 +185,6 @@ const AuditButton = () => {
             </Row>
           </Col>
           <Col>
-
             <Card
               className="d-flex align-items-center fs-3 justify-content-center mb-1 mr-3 mt-3 "
               style={{ height: '60px', backgroundColor: '#ffd1d1' }}
@@ -210,7 +211,6 @@ const AuditButton = () => {
                 <h2 className="text-center">Remaining Counts: {remaining}</h2>
               </div>
             </Card>
-
 
             <h2
               className="fs-3 mb-3 text-center "

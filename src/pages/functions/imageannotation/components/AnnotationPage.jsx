@@ -5,6 +5,7 @@ import AnnotationCanvas from './AnnotationCanvas';
 import Toolkit from './Toolkit';
 import { CloseOutlined } from '@ant-design/icons';
 import axios from 'axios';
+import { useProjectId } from '@/store/ProjectState';
 
 //const apiurl = import.meta.env.VITE_API_URL_PROD;
 const apiurl = import.meta.env.VITE_API_URL;
@@ -31,6 +32,7 @@ const AnnotationPage = () => {
     'Year/Semester',
   ]);
   const [open, setOpen] = useState(false);
+  const projectId = useProjectId();
 
   useEffect(() => {
     // Fetch input fields from API
@@ -48,8 +50,7 @@ const AnnotationPage = () => {
 
   // get image config by perojecvt id
   useEffect(() => {
-    // Fetch annotations by project ID
-    const projectId = 1; // Replace with your project ID
+    // Fetch annotations by project ID // Replace with your project ID
     axios
       .get(`${apiurl}/ImageConfigs/ByProjectId/${projectId}?WhichDatabase=Local`)
       .then((response) => {
@@ -229,7 +230,7 @@ const AnnotationPage = () => {
   const submitAnnotation = async () => {
     try {
       const postData = {
-        projectId: 1,
+        projectId,
         ImageUrl: imageUrl,
         annotations: annotations.map((annotation) => ({
           FieldName: annotation.FieldName,

@@ -47,7 +47,7 @@ const ZoomedImage = ({ data, onUpdate, onNext }) => {
       }}
     >
       <img
-        src={data.imageUrl}
+        src={"data.imageUrl"}
         alt="Zoomed Image"
         style={{
           transform: `scale(${scale})`,

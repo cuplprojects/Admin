@@ -25,7 +25,10 @@ export const PreferredResponseProvider = ({ children }) => {
 
       // Check if data is an empty array
       if (Array.isArray(data) && data.length === 0) {
-        setPreferredResponse(''); // Set preferredResponse to empty string
+        setPreferredResponse('');
+        notification.error({
+          message: 'No Preferred Response found',
+        }); // Set preferredResponse to empty string
         return ''; // Return empty string for autofill
       }
 
@@ -37,7 +40,7 @@ export const PreferredResponseProvider = ({ children }) => {
       notification.error({
         message: 'No Preferred Response found',
       });
-      return '1,2,3,4,5'; // Return a dummy response or handle the error as needed
+      return ; // Return a dummy response or handle the error as needed
     }
   };
 
