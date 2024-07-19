@@ -1,12 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import { Form, Input, Radio, Typography, Divider, Row, Col, Space, Table, Select, Button } from 'antd';
+import { useProjectId } from '@/store/ProjectState';
 
 const { Title } = Typography;
 
 const apiurl = import.meta.env.VITE_API_URL;
 
 const MarksAllotmentForm = () => {
+    const projectId = useProjectId()
     const [formState, setFormState] = useState({
         numberOfAmbiguousQuestions: '',
         optionsJumbled: '',
@@ -26,7 +28,7 @@ const MarksAllotmentForm = () => {
     };
 
     useEffect(() => {
-        axios.get(`${apiurl}/Ambiguity/BSetResponsesByProject/1`)
+        axios.get(`${apiurl}/Ambiguity/BSetResponsesByProject/${projectId}`)
             .then(response => {
                 const setCodesArray = response.data.split(',');
                 setSetCodes(setCodesArray);
@@ -91,7 +93,7 @@ const MarksAllotmentForm = () => {
 
     const handleSubmit = async () => {
         const requestData = {
-            projectId: 1, // Update this as per your requirement
+            projectId, // Update this as per your requirement
             markingId: formState.markingLogic,
             setQuesAns: JSON.stringify(transformData()) // Convert to JSON string
         };

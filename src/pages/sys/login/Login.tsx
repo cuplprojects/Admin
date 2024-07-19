@@ -5,7 +5,7 @@ import { Navigate } from 'react-router-dom';
 import LoginImg from '@/assets/images/background/login.png';
 import Overlay2 from '@/assets/images/background/overlay_2.jpg';
 import LocalePicker from '@/components/locale-picker';
-import { useUserToken } from '@/store/userStore';
+import { useUserToken } from '@/store/UserDataStore';
 import { useThemeToken } from '@/theme/hooks';
 
 import LoginForm from './LoginForm';

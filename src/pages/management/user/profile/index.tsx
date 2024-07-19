@@ -3,7 +3,7 @@ import { CSSProperties, useState } from 'react';
 import CoverImage from '@/assets/images/cover/cover_4.jpg';
 import Card from '@/components/card';
 import { Iconify } from '@/components/icon';
-import { useUserInfo } from '@/store/userStore';
+import { useUserInfo } from '@/store/UserDataStore';
 import { useThemeToken } from '@/theme/hooks';
 
 import ConnectionsTab from './connections-tab';

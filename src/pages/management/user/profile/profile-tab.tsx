@@ -6,7 +6,7 @@ import { fakeAvatars } from '@/_mock/utils';
 import Card from '@/components/card';
 import { IconButton, Iconify, SvgIcon } from '@/components/icon';
 import Scrollbar from '@/components/scrollbar';
-import { useUserInfo } from '@/store/userStore';
+import { useUserInfo } from '@/store/UserDataStore';
 import ProTag from '@/theme/antd/components/tag';
 import { useThemeToken } from '@/theme/hooks';
 

@@ -33,7 +33,6 @@ const Import = () => {
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (file && activetab === 'OMRImages') {
-      console.log('Files uploaded:', e.target.files);
       setSelectedFile(file);
 
     } else if (file && ['scanned', 'registration', 'absentee'].includes(activetab)) {

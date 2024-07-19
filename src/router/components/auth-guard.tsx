@@ -2,7 +2,7 @@ import { useCallback, useEffect } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
 import PageError from '@/pages/sys/error/PageError';
-import { useUserToken } from '@/store/userStore';
+import { useUserToken } from '@/store/UserDataStore';
 
 import { useRouter } from '../hooks';
 
@@ -12,7 +12,7 @@ type Props = {
 export default function AuthGuard({ children }: Props) {
   const router = useRouter();
   const { accessToken } = useUserToken();
-
+console.log(accessToken)
   const check = useCallback(() => {
     if (!accessToken) {
       router.replace('/login');

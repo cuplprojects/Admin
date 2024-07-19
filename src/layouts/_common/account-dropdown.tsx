@@ -7,7 +7,7 @@ import { NavLink } from 'react-router-dom';
 import { IconButton } from '@/components/icon';
 import { useLoginStateContext } from '@/pages/sys/login/providers/LoginStateProvider';
 import { useRouter } from '@/router/hooks';
-import { useUserInfo, useUserActions } from '@/store/userStore';
+import { useUserInfo, useUserActions } from '@/store/UserDataStore';
 import { useThemeToken } from '@/theme/hooks';
 
 const { VITE_APP_HOMEPAGE: HOMEPAGE } = import.meta.env;

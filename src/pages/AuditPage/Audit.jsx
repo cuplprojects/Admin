@@ -72,10 +72,6 @@ const AuditButton = () => {
     try {
       const response = await fetch(`${APIURL}/Audit/audit?WhichDatabase=Local&ProjectID=${ProjectId}`);
   
-      // Log the response status and headers
-      console.log('Response status:', response.status);
-      console.log('Response headers:', response.headers);
-  
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`); 
       }
@@ -99,7 +95,7 @@ const AuditButton = () => {
     try {
       const response = await fetch(`${APIURL}/Flags/counts`);
       const result = await response.json();
-      console.log(result);
+      
       setFlags(result.countsByFieldname); 
       setRemarksCounts(result.remarksCounts);
 

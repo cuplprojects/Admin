@@ -3,14 +3,15 @@ import { Card, Progress } from 'antd';
 import { useProjectActions, useProjectId } from '@/store/ProjectState';
 import { Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import StackedHorizontalBarChart from './stackchart';
 
 const { Meta } = Card;
 
 const ProjectDashboard = () => {
   // State variables
   const [projectName, setProjectName] = useState('');
- const projectId = useProjectId();
- const {setProjectId} = useProjectActions();
+  const projectId = useProjectId();
+  const { setProjectId } = useProjectActions();
   const [progress, setProgress] = useState(0);
   const [numErrors, setNumErrors] = useState(0);
   const [numWarnings, setNumWarnings] = useState(0);
@@ -25,27 +26,24 @@ const ProjectDashboard = () => {
     if (id) {
       fetchProjectDetails(id);
     }
-  }, []); // Empty dependency array to run only once on component mount
+  }, [projectId]); // Empty dependency array to run only once on component mount
 
-
-
-  const onClickProjectLogout = (() => {
+  const onClickProjectLogout = () => {
     setProjectId(0);
-    navigate('/dashboard/workbench')
- 
-  })
+    navigate('/dashboard/workbench');
+  };
 
   // Function to fetch project details from an API
   const fetchProjectDetails = (projectId) => {
     // Replace with actual API call to fetch project details
     fetch(`https://localhost:7290/api/Projects/${projectId}?WhichDatabase=Local`)
-      .then(response => {
+      .then((response) => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
         return response.json();
       })
-      .then(data => {
+      .then((data) => {
         // Update state with fetched data
         setProjectName(data.projectName);
         setProgress(data.progress);
@@ -53,14 +51,18 @@ const ProjectDashboard = () => {
         setNumWarnings(data.numWarnings);
         setTasksCompleted(data.tasksCompleted);
       })
-      .catch(error => console.error('Error fetching project details:', error));
+      .catch((error) => console.error('Error fetching project details:', error));
   };
 
   return (
     <div className="project-dashboard">
       <Card
         className="project-card"
-        title={<h2>{projectId}. {projectName}</h2>}
+        title={
+          <h2>
+            {projectId}. {projectName}
+          </h2>
+        }
         extra={<Button onClick={onClickProjectLogout}>Logout</Button>}
       >
         <div className="statistics">
@@ -76,6 +78,7 @@ const ProjectDashboard = () => {
           {/* Add more Card.Grid items for additional statistics */}
         </div>
       </Card>
+      <StackedHorizontalBarChart />
     </div>
   );
 };

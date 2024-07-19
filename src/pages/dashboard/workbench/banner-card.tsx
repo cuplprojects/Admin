@@ -4,7 +4,7 @@ import {t} from '@/locales/i18n'
 
 import Character3 from '@/assets/images/characters/character_3.png';
 // import { Iconify } from '@/components/icon';
-import { useUserInfo } from '@/store/userStore';
+import { useUserInfo } from '@/store/UserDataStore';
 import { useThemeToken } from '@/theme/hooks';
 
 export default function BannerCard() {
@@ -35,7 +35,6 @@ export default function BannerCard() {
           className="mx-auto mb-6 mt-4 max-w-sm text-sm opacity-80 md:mx-0"
         >
          {t('pagedata.workbench.welcomedata')}
-         {t('pagedata.workbench.hello')}
           <div>
             {/* <a
               href="https://blog.slashspaces.com"

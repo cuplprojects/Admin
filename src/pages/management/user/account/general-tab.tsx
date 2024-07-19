@@ -3,7 +3,7 @@ import { App, Button, Col, Form, Input, Row, Space, Switch } from 'antd';
 
 import Card from '@/components/card';
 import { UploadAvatar } from '@/components/upload';
-import { useUserInfo } from '@/store/userStore';
+import { useUserInfo } from '@/store/UserDataStore';
 
 type FieldType = {
   name?: string;

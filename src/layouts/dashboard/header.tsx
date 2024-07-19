@@ -34,7 +34,7 @@ type Props = {
 export default function Header({ className = '', offsetTop = false }: Props) {
   const projectId = useProjectId();
   const { setProjectId } = useProjectActions();
-  const [project, setProject] = useState<{ projectName: string | null }>({ projectName: null });
+  // const [project, setProject] = useState<{ projectName: string | null }>({ projectName: null });
   const [projects, setProjects] = useState<Array<{ projectId: number; projectName: string }>>([]);
   // State variable to control the drawer open/close state
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -52,23 +52,20 @@ export default function Header({ className = '', offsetTop = false }: Props) {
   const apiUrl = import.meta.env.VITE_API_URL;
 
   // Fetch project data whenever the project ID changes
-  useEffect(() => {
-    const fetchProjectData = async () => {
-      try {
-        const response = await axios.get(`${apiUrl}/Projects/${projectId}?WhichDatabase=Local`);
-        setProject({ projectName: response.data.projectName });
-      } catch (error) {
-        console.error('Error fetching project data:', error);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchProjectData = async () => {
+  //     try {
+  //       const response = await axios.get(`${apiUrl}/Projects/${projectId}?WhichDatabase=Local`);
+  //       setProject({ projectName: response.data.projectName });
+  //     } catch (error) {
+  //       console.error('Error fetching project data:', error);
+  //     }
+  //   };
 
-    if (projectId) {
-      fetchProjectData();
-    }
-  }, [projectId, apiUrl]);
-
-  
-  console.log(project);
+  //   if (projectId) {
+  //     fetchProjectData();
+  //   }
+  // }, [projectId, apiUrl]);
 
   // Fetch all projects
   useEffect(() => {

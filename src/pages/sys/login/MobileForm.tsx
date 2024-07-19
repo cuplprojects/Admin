@@ -12,8 +12,7 @@ function MobileForm() {
   const onFinish = (values: any) => {
     console.log('Received values of form: ', values);
   };
-
-  const [countdown, setCountdown] = useState(0); // 倒计时的秒数
+  const [countdown, setCountdown] = useState(0); //Countdown seconds
   const [second, setSecond] = useState(0);
   const { loginState, backToLogin } = useLoginStateContext();
 
@@ -25,9 +24,9 @@ function MobileForm() {
   };
 
   const reset = () => {
-    // TODO: 发送验证码请求
+    //TODO: Send verification code request
 
-    // 启动倒计时
+    //Start countdown
     setCountdown(0);
     setSecond(60);
   };

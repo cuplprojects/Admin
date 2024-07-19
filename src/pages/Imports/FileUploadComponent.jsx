@@ -142,21 +142,18 @@ const FileUploadComponent = () => {
       setResumeButtonVisible(true);
     };
     const handleResumeUpload = () => {
-      console.log('handleResumeUpload called');
-      console.log('selectedFiles:', selectedFiles);
+
       const filesArray = Array.from(selectedFiles);
       localforage.getItem('lastSuccessfulFileIndex').then((lastUploadedFileIndex) => {
         if (lastUploadedFileIndex!== null) {
           const filesToResume = filesArray.slice(lastUploadedFileIndex); // get the files to resume from the last uploaded file
           filesToResume.forEach((file, index) => {
             try {
-              console.log(`Resuming upload of file: ${file.name}`);
               resumeFileUpload(file, lastUploadedFileIndex + index); // pass the file and the correct chunk index
               setFiles((prevFiles) => {
                 const fileObj = prevFiles.get(file);
                 if (fileObj) {
                   fileObj.status = FILE_STATUS.UPLOADING;
-                  console.log(`File status updated to UPLOADING: ${file.name}`);
                   return new Map(prevFiles);
                 }
                 return prevFiles;

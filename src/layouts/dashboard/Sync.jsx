@@ -12,7 +12,6 @@ const Sync = () => {
     setLoading(true);
     try {
       const response = await axios.post(`${apiurl}/Sync/SyncLogs`);
-      console.log(response.data);
       message.success('Data synced successfully!');
     } catch (error) {
       console.error('Error syncing data:', error);

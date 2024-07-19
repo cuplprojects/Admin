@@ -5,18 +5,19 @@ import { useTranslation } from 'react-i18next';
 
 import { DEFAULT_USER } from '@/_mock/assets';
 import { SignInReq } from '@/api/services/userService';
-import { useSignIn } from '@/store/userStore';
+import { useSignIn } from '@/store/UserDataStore';
 // import ProTag from '@/theme/antd/components/tag';
 // import { useThemeToken } from '@/theme/hooks';
 
 import { LoginStateEnum, useLoginStateContext } from './providers/LoginStateProvider';
+
 
 function LoginForm() {
   const { t } = useTranslation();
   // const themeToken = useThemeToken();
   const [loading, setLoading] = useState(false);
 
-  const { loginState} = useLoginStateContext();
+  const { loginState, setLoginState } = useLoginStateContext();
   const signIn = useSignIn();
 
   if (loginState !== LoginStateEnum.LOGIN) return null;
@@ -100,7 +101,8 @@ function LoginForm() {
               </Form.Item>
             </Col>
             <Col span={12} className="text-right">
-              <button className="!underline">{t('sys.login.forgetPassword')}</button>
+              <button className="!underline"
+              onClick={() => setLoginState(LoginStateEnum.RESET_PASSWORD)}>{t('sys.login.forgetPassword')}</button>
             </Col>
           </Row>
         </Form.Item>

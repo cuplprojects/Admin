@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { IconButton, Iconify, SvgIcon } from '@/components/icon';
-import { useUserPermission } from '@/store/userStore';
+import { useUserPermission } from '@/store/UserDataStore';
 import ProTag from '@/theme/antd/components/tag';
 
 import PermissionModal, { type PermissionModalProps } from './permission-modal';

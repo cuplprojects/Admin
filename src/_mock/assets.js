@@ -137,7 +137,7 @@ const MANAGEMENT_PERMISSION = {
           component: '/management/system/permission/index.tsx',
         },
         {
-          id: '4.2.2',
+          id: '4.2.1',
           parentId: '4.2',
           label: 'sys.menu.system.role',
           name: 'Role',
@@ -680,6 +680,7 @@ const TEST_ROLE = {
   desc: 'test',
   permission: [DASHBOARD_PERMISSION, COMPONENTS_PERMISSION, FUNCTIONS_PERMISSION],
 };
+
 const DEVELOPER_ROLE = {
   id: '9931665660771472',
   name: 'Developer',
