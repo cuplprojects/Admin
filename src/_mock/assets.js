@@ -57,6 +57,7 @@ const DASHBOARD_PERMISSION = {
       route: 'analysis',
       component: '/dashboard/analysis/index.tsx',
     },
+    
   ],
 };
 
@@ -517,16 +518,7 @@ const OTHERS_PERMISSION = [
     component: '/Ambiguity/index.tsx',
   },
 
-  {
-    id: '16',
-    parentId: '',
-    label: 'Report',
-    name: 'Report',
-    icon: 'solar:document-add-bold-duotone',
-    type: PermissionType.MENU,
-    route:'Report',
-    component: '/Report/index.tsx',
-  },
+  
 
 
   //   {
