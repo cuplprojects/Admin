@@ -1,6 +1,18 @@
+import React, { useState, useEffect } from 'react';
 import { faker } from '@faker-js/faker';
-import { Row, Col, Typography, Timeline, Table, Space, Avatar, Progress } from 'antd';
-
+import {
+  Row,
+  Col,
+  Typography,
+  Timeline,
+  Table,
+  Space,
+  Avatar,
+  Progress,
+  Pagination,
+  Select,
+  App,
+} from 'antd';
 import { fakeAvatars } from '@/_mock/utils';
 import Card from '@/components/card';
 import { IconButton, Iconify, SvgIcon } from '@/components/icon';
@@ -8,28 +20,112 @@ import Scrollbar from '@/components/scrollbar';
 import { useUserInfo } from '@/store/UserDataStore';
 import ProTag from '@/theme/antd/components/tag';
 import { useThemeToken } from '@/theme/hooks';
+import useUserData from '@/CustomHooks/useUserData'; // Import the custom hook
 
 const ProfileTab = () => {
   const { username } = useUserInfo();
   const theme = useThemeToken();
+  const { userData, loading, error } = useUserData(); // Use the custom hook
+
+  // Timeline pagination state
+  const [timelineItems, setTimelineItems] = useState([]);
+  const [timelinePage, setTimelinePage] = useState(1);
+  const [timelineItemsPerPage, setTimelineItemsPerPage] = useState(5);
+
+  // Table pagination state
+  const [projectData, setProjectData] = useState([]);
+  const [projectPage, setProjectPage] = useState(1);
+  const [projectItemsPerPage, setProjectItemsPerPage] = useState(5);
+
+  useEffect(() => {
+    // Fetch or generate timeline items (simulate with faker)
+    const fetchTimelineItems = () => {
+      const items = [];
+      for (let i = 0; i < 20; i++) {
+        // Simulate more items
+        items.push({
+          color: theme.colorError,
+          children: (
+            <div className="flex flex-col">
+              <div className="flex items-center justify-between">
+                <Typography.Text strong>{faker.lorem.sentence()}</Typography.Text>
+                <div className="opacity-50">{faker.date.recent().toLocaleDateString()}</div>
+              </div>
+              <Typography.Text type="secondary" className="text-xs">
+                {faker.lorem.paragraph()}
+              </Typography.Text>
+
+              <div className="mt-2 flex items-center gap-2">
+                <SvgIcon icon="ic_file_pdf" size={30} />
+                <span className="font-medium opacity-60">document.pdf</span>
+              </div>
+            </div>
+          ),
+        });
+      }
+      setTimelineItems(items);
+    };
+
+    fetchTimelineItems();
+  }, [theme.colorError]);
+
+  useEffect(() => {
+    // Generate project data
+    const fetchProjectData = () => {
+      const data = [];
+      for (let i = 0; i <= 15; i++) {
+        // Simulate more project data
+        data.push({
+          key: faker.string.uuid(),
+          avatar: faker.image.urlPicsumPhotos(),
+          name: faker.company.buzzPhrase(),
+          date: faker.date.past().toDateString(),
+          leader: faker.person.fullName(),
+          team: fakeAvatars(faker.number.int({ min: 2, max: 5 })),
+          status: faker.number.int({ min: 50, max: 99 }),
+        });
+      }
+      setProjectData(data);
+    };
+
+    fetchProjectData();
+  }, [theme.colorPrimary]);
+
+  // Pagination handlers
+  const handleTimelinePageChange = (page) => {
+    setTimelinePage(page);
+  };
+
+  const handleProjectPageChange = (page) => {
+    setProjectPage(page);
+  };
+
+  const handleTimelineItemsPerPageChange = (value) => {
+    setTimelineItemsPerPage(value);
+    setTimelinePage(1); // Reset to the first page
+  };
+
+  const handleProjectItemsPerPageChange = (value) => {
+    setProjectItemsPerPage(value);
+    setProjectPage(1); // Reset to the first page
+  };
 
   const AboutItems = [
-    { icon: <Iconify icon="fa-solid:user" size={18} />, label: 'Full Name', val: username },
-    { icon: <Iconify icon="eos-icons:role-binding" size={18} />, label: 'Role', val: 'Developer' },
-    { icon: <Iconify icon="tabler:location-filled" size={18} />, label: 'Country', val: 'USA' },
-    { icon: <Iconify icon="ion:language" size={18} />, label: 'Language', val: 'English' },
-    { icon: <Iconify icon="ph:phone-fill" size={18} />, label: 'Contact', val: '(123)456-7890' },
-    { icon: <Iconify icon="ic:baseline-email" size={18} />, label: 'Email', val: username },
-  ];
-
-  const ConnectionsItems = [
     {
-      avatar: faker.image.avatarLegacy(),
-      name: faker.person.fullName(),
-      connections: `${faker.number.int(100)} Connections`,
-      connected: faker.datatype.boolean(),
+      icon: <Iconify icon="fa-solid:user" size={18} />,
+      label: 'Full Name',
+      val: userData ? `${userData.firstName} ${userData.lastName}` : 'Loading...',
     },
-    // More items here...
+    {
+      icon: <Iconify icon="eos-icons:role-binding" size={18} />,
+      label: 'Role',
+      val: userData ? 'Developer' : 'Loading...',
+    },
+    {
+      icon: <Iconify icon="ic:baseline-email" size={18} />,
+      label: 'Email',
+      val: userData ? userData.email : 'Loading...',
+    },
   ];
 
   const TeamItems = [
@@ -41,22 +137,6 @@ const ProfileTab = () => {
     },
     // More items here...
   ];
-
-  const fakeProjectItems = () => {
-    const arr = [];
-    for (let i = 0; i <= 25; i += 1) {
-      arr.push({
-        key: faker.string.uuid(),
-        avatar: faker.image.urlPicsumPhotos(),
-        name: faker.company.buzzPhrase(),
-        date: faker.date.past().toDateString(),
-        leader: faker.person.fullName(),
-        team: fakeAvatars(faker.number.int({ min: 2, max: 5 })),
-        status: faker.number.int({ min: 50, max: 99 }),
-      });
-    }
-    return arr;
-  };
 
   const ProjectColumns = [
     {
@@ -108,6 +188,15 @@ const ProfileTab = () => {
     },
   ];
 
+  const paginatedTimelineItems = timelineItems.slice(
+    (timelinePage - 1) * timelineItemsPerPage,
+    timelinePage * timelineItemsPerPage,
+  );
+  const paginatedProjectData = projectData.slice(
+    (projectPage - 1) * projectItemsPerPage,
+    projectPage * projectItemsPerPage,
+  );
+
   return (
     <>
       <Row gutter={[16, 16]}>
@@ -115,16 +204,18 @@ const ProfileTab = () => {
           <Card className="flex-col">
             <div className="flex w-full flex-col">
               <Typography.Title level={5}>About</Typography.Title>
-              <Typography.Text>{faker.lorem.paragraph()}</Typography.Text>
-
               <div className="mt-2 flex flex-col gap-4">
-                {AboutItems.map((item, index) => (
-                  <div className="flex" key={index}>
-                    <div className="mr-2">{item.icon}</div>
-                    <div className="mr-2">{item.label}:</div>
-                    <div className="opacity-50">{item.val}</div>
-                  </div>
-                ))}
+                {loading && <div>Loading...</div>}
+                {error && <div>Error: {error}</div>}
+                {!loading &&
+                  !error &&
+                  AboutItems.map((item, index) => (
+                    <div className="flex" key={index}>
+                      <div className="mr-2">{item.icon}</div>
+                      <div className="mr-2">{item.label}:</div>
+                      <div className="opacity-50">{item.val}</div>
+                    </div>
+                  ))}
               </div>
             </div>
           </Card>
@@ -133,118 +224,62 @@ const ProfileTab = () => {
         <Col span={24} md={12} lg={16}>
           <Card className="flex-col !items-start">
             <Typography.Title level={5}>Activity Timeline</Typography.Title>
-            <Timeline
-              className="!mt-4 w-full"
-              items={[
-                {
-                  color: theme.colorError,
-                  children: (
-                    <div className="flex flex-col">
-                      <div className="flex items-center justify-between">
-                        <Typography.Text strong>8 Invoices have been paid</Typography.Text>
-                        <div className="opacity-50">Wednesday</div>
-                      </div>
-                      <Typography.Text type="secondary" className="text-xs">
-                        Invoices have been paid to the company.
-                      </Typography.Text>
-
-                      <div className="mt-2 flex items-center gap-2">
-                        <SvgIcon icon="ic_file_pdf" size={30} />
-                        <span className="font-medium opacity-60">invoice.pdf</span>
-                      </div>
-                    </div>
-                  ),
-                },
-                // More timeline items here...
-              ]}
-            />
-          </Card>
-        </Col>
-      </Row>
-      <Row gutter={[16, 16]} className="mt-4">
-        <Col span={24} md={12}>
-          <Card className="flex-col !items-start">
-            <div className="flex w-full items-center justify-between">
-              <Typography.Title level={5}>Connections</Typography.Title>
-              <IconButton>
-                <Iconify icon="fontisto:more-v-a" />
-              </IconButton>
-            </div>
-            <div className="mt-2 flex w-full flex-col gap-4">
-              {ConnectionsItems.map((item, index) => (
-                <div className="flex" key={index}>
-                  <img alt="" src={item.avatar} className="h-10 w-10 flex-none rounded-full" />
-                  <div className="ml-4 flex flex-1 flex-col">
-                    <span className="font-semibold">{item.name}</span>
-                    <span className="mt-1 text-xs opacity-50">{item.connections}</span>
-                  </div>
-                  <div
-                    className="flex h-9 w-9 flex-none items-center justify-center rounded"
-                    style={{
-                      backgroundColor: item.connected ? theme.colorPrimaryText : 'transparent',
-                      border: item.connected ? '' : `1px solid ${theme.colorPrimaryText}`,
-                    }}
-                  >
-                    <Iconify
-                      icon="tdesign:user"
-                      color={item.connected ? '#fff' : theme.colorPrimaryText}
-                      size={20}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div
-              className="mt-4 w-full text-center text-lg"
-              style={{ color: theme.colorPrimaryText }}
-            >
-              View all connections
-            </div>
-          </Card>
-        </Col>
-        <Col span={24} md={12}>
-          <Card className="flex-col !items-start">
-            <div className="flex w-full items-center justify-between">
-              <Typography.Title level={5}>Teams</Typography.Title>
-              <IconButton>
-                <Iconify icon="fontisto:more-v-a" />
-              </IconButton>
-            </div>
-            <div className="mt-2 flex w-full flex-col gap-4">
-              {TeamItems.map((item, index) => (
-                <div className="flex" key={index}>
-                  {item.avatar}
-                  <div className="ml-4 flex flex-1 flex-col">
-                    <span className="font-semibold">{item.name}</span>
-                    <span className="mt-1 text-xs opacity-50">{item.members}</span>
-                  </div>
-                  {item.tag}
-                </div>
-              ))}
-            </div>
-
-            <div
-              className="mt-4 w-full text-center text-lg"
-              style={{ color: theme.colorPrimaryText }}
-            >
-              View all members
+            <Timeline className="!mt-4 w-full" items={paginatedTimelineItems} />
+            <div className="mt-4 flex items-center justify-between">
+              <Select
+                value={timelineItemsPerPage}
+                onChange={handleTimelineItemsPerPageChange}
+                options={[
+                  { label: '5', value: 5 },
+                  { label: '10', value: 10 },
+                  { label: '15', value: 15 },
+                ]}
+                style={{ width: 120 }}
+              />
+              <Pagination
+                current={timelinePage}
+                pageSize={timelineItemsPerPage}
+                total={timelineItems.length}
+                onChange={handleTimelinePageChange}
+                showSizeChanger={false}
+              />
             </div>
           </Card>
         </Col>
       </Row>
+
       <Row gutter={[16, 16]} className="mt-4">
         <Col span={24}>
           <Card className="flex-col !items-start">
-            <Typography.Title level={5}>Projects</Typography.Title>
+            <div className="mt-4 flex items-center justify-between">
+              <Typography.Title level={5}>Projects</Typography.Title>
+              <Select
+                value={projectItemsPerPage}
+                onChange={handleProjectItemsPerPageChange}
+                options={[
+                  { label: '5', value: 5 },
+                  { label: '10', value: 10 },
+                  { label: '15', value: 15 },
+                ]}
+                style={{ width: 120 }}
+              />
+            </div>
             <div className="!mt-4 w-full">
               <Scrollbar>
                 <Table
                   columns={ProjectColumns}
-                  dataSource={fakeProjectItems()}
+                  dataSource={paginatedProjectData}
                   pagination={false}
                 />
               </Scrollbar>
+
+              <Pagination
+                current={projectPage}
+                pageSize={projectItemsPerPage}
+                total={projectData.length}
+                onChange={handleProjectPageChange}
+                showSizeChanger={false}
+              />
             </div>
           </Card>
         </Col>
@@ -252,4 +287,5 @@ const ProfileTab = () => {
     </>
   );
 };
+
 export default ProfileTab;

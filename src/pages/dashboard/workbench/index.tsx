@@ -8,7 +8,7 @@ import { Applications, Conversion } from './conversion_applications';
 // import TopAuthor from './top-authors';
 // import TopInstalled from './top-installed';
 // import TopRelated from './top-related';
-import TotalCard from './total-card';
+// import TotalCard from './total-card';
 import NewDashboard from './NewDashboard';
 import { useEffect } from 'react';
 

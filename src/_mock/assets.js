@@ -456,7 +456,7 @@ const DEFAULT_PPERMISSIONS = {
       id: '20.1',
       parentId: '20',
       label: 'Profile',
-      name: 'Profile',
+      name: 'profile',
       type: PermissionType.MENU,
       route: 'profile',
       component: '/management/user/profile/index.tsx',

@@ -1,11 +1,12 @@
-import { App, Button, Form, Input } from 'antd';
-import { useState } from 'react';
-
+import React from 'react';
+import { App, Button, Form, Input, Typography } from 'antd';
 import Card from '@/components/card';
+import useChangePassword from '@/CustomHooks/useChangePassword'; // Adjust the import path as needed
 
 const SecurityTab = () => {
   const { notification } = App.useApp();
-  const [loading, setLoading] = useState(false);
+  const { changePassword, loading, error, success } = useChangePassword(); // Use the custom hook
+
   const initFormValues = {
     oldPassword: '',
     newPassword: '',
@@ -21,21 +22,10 @@ const SecurityTab = () => {
       return;
     }
 
-    setLoading(true);
-
     try {
-      const response = await fetch('https://localhost:7290/api/Login/ChangePassword', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          oldPassword: values.oldPassword,
-          newPassword: values.newPassword,
-        }),
-      });
+      await changePassword(values.oldPassword, values.newPassword);
 
-      if (response.ok) {
+      if (success) {
         notification.success({
           message: 'Update success!',
           duration: 3,
@@ -52,13 +42,12 @@ const SecurityTab = () => {
         description: error.message,
         duration: 3,
       });
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
     <Card className="!h-auto flex-col">
+      <Typography.Title level={5}>Change Password</Typography.Title>
       <Form
         layout="vertical"
         initialValues={initFormValues}
@@ -99,4 +88,5 @@ const SecurityTab = () => {
     </Card>
   );
 };
+
 export default SecurityTab;

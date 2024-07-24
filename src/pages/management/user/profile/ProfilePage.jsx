@@ -8,8 +8,10 @@ import { useThemeToken } from '@/theme/hooks';
 
 import ProfileTab from './profile-tab';
 import SecurityTab from './security-tab';
+import useUserData from '@/CustomHooks/useUserData';
 
 const UserProfile = () => {
+  const { userData, loading, error } = useUserData(); // Use the custom hook
   const { avatar, username } = useUserInfo();
   const { colorTextBase } = useThemeToken();
   const [currentTabIndex, setcurrentTabIndex] = useState(0);
@@ -38,13 +40,19 @@ const UserProfile = () => {
       <Card className="relative mb-6 h-[290px] flex-col rounded-2xl !p-0">
         <div style={bgStyle} className="h-full w-full">
           <div className="flex flex-col items-center justify-center pt-12 md:absolute md:bottom-6 md:left-6 md:flex-row md:pt-0">
-            <img src={avatar} className="h-16 w-16 rounded-full md:h-32 md:w-32" alt="" />
+            <img
+              src={'https://placehold.co/400x400'}
+              className="h-16 w-16 rounded-full md:h-32 md:w-32"
+              alt=""
+            />
             <div
               className="ml-6 mt-6 flex flex-col justify-center md:mt-0"
               style={{ color: '#fff' }}
             >
-              <span className="mb-2 text-2xl font-medium">{username}</span>
-              <span className="text-center opacity-50 md:text-left">TS FullStack</span>
+              <span className="mb-2 text-2xl font-medium">
+                {userData ? `${userData.firstName} ${userData.lastName}` : 'Loading...'}
+              </span>
+              <span className="text-center opacity-50 md:text-left">{ userData ? 'Admin' : 'Loading...'}</span>
             </div>
           </div>
         </div>

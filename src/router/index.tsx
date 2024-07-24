@@ -5,7 +5,7 @@ import DashboardLayout from '@/layouts/dashboard';
 import AuthGuard from '@/router/components/auth-guard';
 import { usePermissionRoutes } from '@/router/hooks';
 import { ErrorRoutes } from '@/router/routes/error-routes';
-import userRoutes from '@/router/routes/UserRoutes';
+
 
 import { AppRouteObject } from '#/router';
 
@@ -34,7 +34,6 @@ export default function Router() {
     children: [
       { index: true, element: <Navigate to={HOMEPAGE} replace /> },
       ...permissionRoutes,
-      ...userRoutes,
     ],
   };
 

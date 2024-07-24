@@ -1,5 +1,5 @@
-import { Divider, MenuProps } from 'antd';
-import Dropdown, { DropdownProps } from 'antd/es/dropdown/dropdown';
+import { Divider } from 'antd';
+import Dropdown from 'antd/es/dropdown/dropdown';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router-dom';
@@ -9,19 +9,19 @@ import { useLoginStateContext } from '@/pages/sys/login/providers/LoginStateProv
 import { useRouter } from '@/router/hooks';
 import { useUserInfo, useUserActions } from '@/store/UserDataStore';
 import { useThemeToken } from '@/theme/hooks';
-
+import useUserData from '@/CustomHooks/useUserData';
 
 const { VITE_APP_HOMEPAGE: HOMEPAGE } = import.meta.env;
-const avatarimg = "https://placehold.co/400"
-/**
- * Account Dropdown
- */
+const avatarimg = 'https://placehold.co/40';
+
 export default function AccountDropdown() {
+  const { userId } = useUserInfo();
+  const { userData, loading, error } = useUserData(); // Use the custom hook with userId
   const { replace } = useRouter();
-  const { username, email} = useUserInfo();
   const { clearUserInfoAndToken } = useUserActions();
   const { backToLogin } = useLoginStateContext();
   const { t } = useTranslation();
+
   const logout = () => {
     try {
       // todo const logoutMutation = useMutation(userService.logout);
@@ -34,47 +34,46 @@ export default function AccountDropdown() {
       replace('/login');
     }
   };
+
   const { colorBgElevated, borderRadiusLG, boxShadowSecondary } = useThemeToken();
 
-  const contentStyle: React.CSSProperties = {
+  const contentStyle = {
     backgroundColor: colorBgElevated,
     borderRadius: borderRadiusLG,
     boxShadow: boxShadowSecondary,
   };
 
-  const menuStyle: React.CSSProperties = {
+  const menuStyle = {
     boxShadow: 'none',
   };
 
-  const dropdownRender: DropdownProps['dropdownRender'] = (menu) => (
+  const dropdownRender = (menu) => (
     <div style={contentStyle}>
       <div className="flex flex-col items-start p-4">
-        <div>{username}</div>
-        <div className="text-gray">{email}</div>
+        {loading ? (
+          <div>Loading...</div>
+        ) : error ? (
+          <div>Error: {error}</div>
+        ) : (
+          <>
+            <div>
+              {userData?.firstName} {userData?.lastName}
+            </div>
+            <div className="text-gray">{userData?.email}</div>
+          </>
+        )}
       </div>
       <Divider style={{ margin: 0 }} />
-      {React.cloneElement(menu as React.ReactElement, { style: menuStyle })}
+      {React.cloneElement(menu, { style: menuStyle })}
     </div>
   );
 
-  const items: MenuProps['items'] = [
-    // {
-    //   label: (
-    //     <NavLink to="/" target="_blank">
-    //       {t('sys.docs')}
-    //     </NavLink>
-    //   ),
-    //   key: '0',
-    // },
-    { label: <NavLink to={HOMEPAGE}>{t('sys.menu.dashboard')}</NavLink>, key: '1' },
+  const items = [
     {
-      label: <NavLink to="/profile">{t('sys.menu.user.profile')}</NavLink>,
+      label: <NavLink to="/default/profile">{t('sys.menu.user.profile')}</NavLink>,
       key: '2',
     },
-    // {
-    //   label: <NavLink to="/management/user/AddUser">{t('sys.menu.user.AddUser')}</NavLink>,
-    //   key: '3',
-    // },
+    { label: <NavLink to={HOMEPAGE}>{t('sys.menu.dashboard')}</NavLink>, key: '1' },
     { type: 'divider' },
     {
       label: <button className="font-bold text-warning">{t('sys.login.logout')}</button>,
