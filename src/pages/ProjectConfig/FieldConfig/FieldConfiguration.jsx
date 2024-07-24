@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './FieldConfig.css';
-import { Button, Table, Input, Select, Space, Popconfirm, message, Tooltip } from 'antd';
+import { Button, Table, Input, Select, Space, Popconfirm, notification, Tooltip } from 'antd';
 import { DeleteOutlined, RedoOutlined } from '@ant-design/icons';
 import { useThemeToken } from '@/theme/hooks';
 import { Col, Row } from 'react-bootstrap';
@@ -25,8 +25,6 @@ const FieldConfiguration = () => {
   const [fieldName, setFieldName] = useState(''); // New state for fieldName
   const [savedData, setSavedData] = useState([]);
   const [fields, setFields] = useState([]);
-  const [alertMessage, setAlertMessage] = useState('');
-  const [alertType, setAlertType] = useState('');
   const [selectedFieldIndex, setSelectedFieldIndex] = useState(-1);
   const [pagination, setPagination] = useState({
     current: 1,
@@ -102,18 +100,28 @@ const FieldConfiguration = () => {
     e.preventDefault();
 
     if (!fieldName || !formData.numberOfBlocks) {
-      showAlert('Please fill in all fields.', 'danger');
+      notification.error({
+        message: 'Please fill in all fields!',
+        duration:3
+       })
       return;
     }
 
     if (parseInt(formData.minRange) > parseInt(formData.maxRange)) {
-      showAlert('Maximum range cannot be less than minimum range.', 'danger');
+      notification.error({
+        message: 'Maximum range cannot be less than minimum range!',
+        duration:3
+       })
       return;
     }
 
     if (formData.maxRange) {
       if (formData.numberOfBlocks !== formData.maxRange.toString().length.toString()) {
-        showAlert('Number of blocks must match the length of the max range.', 'danger');
+        notification.error({
+          message: 'Number of blocks must match the length of the max range!',
+          duration:3
+         })
+        
         return;
       }
     }
@@ -148,11 +156,18 @@ const FieldConfiguration = () => {
           updatedData[selectedFieldIndex] = { ...updatedData[selectedFieldIndex], ...newConfig };
           setSavedData(updatedData);
           setSelectedFieldIndex(-1);
-          showAlert('Field configuration updated successfully.', 'success');
+          notification.success({
+            message: 'Field configuration updated successfully!',
+            duration:3
+           })
         })
         .catch((error) => {
           console.error('Error updating field configuration:', error);
-          showAlert('Error updating field configuration. Please try again later.', 'danger');
+          notification.error({
+            message: 'Error updating field configuration. Please try again later!',
+            duration:3
+           })
+          
         });
     } else {
       axios
@@ -160,12 +175,19 @@ const FieldConfiguration = () => {
         .then((response) => {
           const newFieldConfig = response.data;
           setSavedData([...savedData, newFieldConfig]);
-          showAlert('Field configuration saved successfully.', 'success');
+          notification.success({
+            message:'Field configuration saved successfully.',
+            duration:3,
+          })
+         
           setPagination({ ...pagination, total: savedData.length + 1 });
         })
         .catch((error) => {
           console.error('Error saving field configuration:', error);
-          showAlert('Error saving field configuration. Please try again later.', 'danger');
+          notification.error({
+            message:'Error saving field configuration. Please try again later.',
+            duration:3,
+          })
           if (error.response) {
             console.error('Response data:', error.response.data);
           }
@@ -197,11 +219,19 @@ const FieldConfiguration = () => {
         setSavedData(
           savedData.filter((item) => item.fieldConfigurationId !== fieldConfigurationId),
         );
-        message.success('Field configuration deleted successfully.');
+        notification.success({
+          message:'Field configuration deleted successfully.',
+          duration:3,
+        })
+        
       })
       .catch((error) => {
         console.error('Error deleting field configuration:', error);
-        message.error('Error deleting field configuration. Please try again later.');
+        notification.success({
+          message:'Error deleting field configuration. Please try again later.',
+          duration:3,
+        })
+        
       });
   };
 
@@ -234,15 +264,7 @@ const FieldConfiguration = () => {
     }
   };
 
-  const showAlert = (message, type) => {
-    setAlertMessage(message);
-    setAlertType(type);
-
-    setTimeout(() => {
-      setAlertMessage('');
-      setAlertType('');
-    }, 3000);
-  };
+ 
 
   const columns = [
     {
@@ -312,11 +334,6 @@ const FieldConfiguration = () => {
       >
         {isFormVisible ? 'Hide Form' : 'Add New Configuration'}
       </Button>
-      {alertMessage && (
-        <div className={`alert alert-${alertType}`} role="alert">
-          {alertMessage}
-        </div>
-      )}
       {isFormVisible && (
         <form onSubmit={handleSave} className="config-form">
           <Row>

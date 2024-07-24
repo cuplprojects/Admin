@@ -86,7 +86,7 @@ const MarksAllotmentForm = () => {
             ...formState,
             [name]: value
         });
-    };<<<
+    };
 
 
     const transformData = () => {

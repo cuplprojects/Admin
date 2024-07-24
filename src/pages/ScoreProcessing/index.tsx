@@ -1,3 +1,1 @@
-
-
-export {default} from "./GenerateScore"
+export {default} from './GenerateScore'

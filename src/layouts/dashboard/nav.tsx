@@ -237,7 +237,7 @@ const projectId = useProjectId();
 
   useEffect(() => {
     if (projectId>0) {
-      const menuRoutes = menuFilter([permissionRoutes[3], permissionRoutes[4], permissionRoutes[5], permissionRoutes[6], permissionRoutes[7],permissionRoutes[8],permissionRoutes[9],permissionRoutes[10]]);
+      const menuRoutes = menuFilter([permissionRoutes[3], permissionRoutes[4], permissionRoutes[5], permissionRoutes[6], permissionRoutes[7],permissionRoutes[8],permissionRoutes[9],permissionRoutes[10],permissionRoutes[11]]);
       const menus = routeToMenuFn(menuRoutes);
       setMenuList(menus);
 

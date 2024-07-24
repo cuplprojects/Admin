@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Table, message } from 'antd';
+import { Table, notification, Badge} from 'antd';
 import { useProjectId } from '@/store/ProjectState';
 
 const apiurl = import.meta.env.VITE_API_URL;
@@ -15,17 +15,10 @@ const columns = [
     },
   },
   {
-    title: 'Barcode',
-    dataIndex: 'barcode',
+    title: 'Course',
+    dataIndex: 'course',
     sorter: {
-      compare: (a, b) => a.barcode - b.barcode,
-    },
-  },
-  {
-    title: 'Booklet Set',
-    dataIndex: 'correctScore',
-    sorter: {
-      compare: (a, b) => a.correctScore - b.correctScore,
+      compare: (a, b) => a.course - b.course,
     },
   },
   {
@@ -37,7 +30,44 @@ const columns = [
   },
 ];
 
-const ViewScore = () => {
+const expandedRowRender = (record) => {
+  const nestedColumns = [
+    {
+      title: 'Section Name',
+      dataIndex: 'sectionName',
+      key: 'sectionName',
+    },
+    {
+      title: 'Total Correct Answers',
+      dataIndex: 'totalCorrectAnswers',
+      key: 'totalCorrectAnswers',
+    },
+    {
+      title: 'Total Wrong Answers',
+      dataIndex: 'totalWrongAnswers',
+      key: 'totalWrongAnswers',
+    },
+    {
+      title: 'Total Score Sub',
+      dataIndex: 'totalScoreSub',
+      key: 'totalScoreSub',
+      
+    },
+  ];
+
+
+  const nestedData = record.sectionResult.map((section, index) => ({
+    key: index, // Assuming 'key' is unique within section results
+    sectionName: section.sectionName,
+    totalCorrectAnswers: section.totalCorrectAnswers,
+    totalWrongAnswers: section.totalWrongAnswers,
+    totalScoreSub: section.totalScoreSub,
+  }));
+  return <Table columns={nestedColumns} dataSource={nestedData} pagination={false} />
+}
+
+
+const ViewScore = ({courseName}) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const ProjectId = useProjectId();
@@ -45,24 +75,27 @@ const ViewScore = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(`${apiurl}/Score?WhichDatabase=Local&ProjectId=${ProjectId}`);
+        const response = await fetch(`${apiurl}/Score?WhichDatabase=Local&ProjectId=${ProjectId}&courseName=${encodeURIComponent(courseName)}`);
+        
         if (!response.ok) {
           throw new Error('Failed to fetch data');
         }
         const result = await response.json();
-        
-        // Transform the data if necessary
         const transformedData = result.map(item => ({
-          roll: item.scoreId,
-          barcode: item.barCode,
+          roll: item.rollNumber,
+          course: item.courseName,
           correctScore: item.scoreData,
           totalScore: item.totalScore,
+          sectionResult: item.sectionResult,
         }));
 
         setData(transformedData);
         setLoading(false);
       } catch (error) {
-        message.error('Failed to fetch scores');
+        notification.error({
+          message: 'Failed to fetch scores!',
+          duration: 3,
+        });
         setLoading(false);
       }
     };
@@ -80,6 +113,9 @@ const ViewScore = () => {
       dataSource={data}
       loading={loading}
       onChange={onChange}
+      expandable={{
+        expandedRowRender,
+      }}
       rowKey="roll"
     />
   );
