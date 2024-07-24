@@ -10,9 +10,12 @@ import { useThemeToken } from '@/theme/hooks';
 import { color } from 'framer-motion';
 import ImportOmr from './OmrImport/ImportOmr';
 import { useProjectId } from '@/store/ProjectState';
+
 import { handleDecrypt } from '@/Security/Security';
 
-//const apiurl = import.meta.env.VITE_API_URL_PROD;
+import { Upload, Button, Table, notification, Modal } from 'antd';
+
+
 const apiurl = import.meta.env.VITE_API_URL;
 
 const Import = () => {
@@ -24,8 +27,6 @@ const Import = () => {
   const [fieldMappings, setFieldMappings] = useState({});
   const [mapping, setMapping] = useState([]);
   const [registrationMapping, setRegistrationMapping] = useState([]);
-  const [alertMessage, setAlertMessage] = useState('');
-  const [alertType, setAlertType] = useState('');
   const [fieldNamesArray, setFieldNamesArray] = useState([]);
   const [lastUploadedFile, setLastUploadedFile] = useState('');
   const ProjectId = useProjectId();
@@ -125,13 +126,16 @@ const Import = () => {
           
   
           const responseData = await response.json();
-  
-          setAlertMessage('Upload successful!');
-          setAlertType('success');
+          notification.success({
+            message: 'Upload successful!',
+            duration: 3,
+          });
         } catch (error) {
           console.error('Error uploading data:', error);
-          setAlertMessage('Error uploading data.');
-          setAlertType('danger');
+          notification.error({
+            message: 'Error uploading data!',
+            duration: 3,
+          })
         } finally {
           setLoading(false);
         }
@@ -140,8 +144,10 @@ const Import = () => {
       reader.readAsArrayBuffer(selectedFile);
     } else {
       console.error('No file selected.');
-      setAlertMessage('No file selected.');
-      setAlertType('warning');
+      notification.error({
+        message: 'No file selected!',
+        duration: 3,
+      })
       setLoading(false);
     }
   
@@ -302,20 +308,27 @@ const Import = () => {
 
           if (contentType && contentType.indexOf('application/json') !== -1) {
             const data = await response.json();
-
-            setAlertMessage('Upload successful!');
-            setAlertType('success');
+           notification.success({
+            message: 'Upload successful!',
+            duration:3
+           })
+           
           } else {
             const text = await response.text();
 
-            setAlertMessage('Upload successful!');
-            setAlertType('success');
+            notification.success({
+              message: 'Upload successful!',
+              duration:3
+             })
           }
 
         } catch (error) {
           console.error('Error uploading data:', error);
-          setAlertMessage('Error uploading data.');
-          setAlertType('danger');
+          notification.error({
+            message: 'Error uploading data!',
+            duration:3
+           })
+         
         } finally {
           setLoading(false);
 
@@ -325,11 +338,12 @@ const Import = () => {
       reader.readAsText(selectedFile);
     } else {
       console.error('No file selected.');
-      setAlertMessage('No file selected.');
-      setAlertType('warning');
+      notification.warning({
+        message: 'No file selected!',
+        duration:3
+       })
       setLoading(false);
     }
-
   };
 
 
@@ -351,8 +365,10 @@ const Import = () => {
   
     if (!selectedFile) {
       console.error('No file selected.');
-      setAlertMessage('No file selected.');
-      setAlertType('warning');
+      notification.warning({
+        message: 'No file selected!',
+        duration:3
+       })
       setLoading(false);
       return;
     }
@@ -391,8 +407,10 @@ const Import = () => {
   
         if (validMappedData.length === 0) {
           console.warn('No valid data to upload. Ensure all required fields are mapped.');
-          setAlertMessage('No valid data to upload.');
-          setAlertType('warning');
+          notification.warning({
+            message: 'No valid data to upload.!',
+            duration:3
+           })
           setLoading(false);
           setSelectedFile(null);
           return;
@@ -411,13 +429,16 @@ const Import = () => {
         }
   
         const responseData = await response.json();
-  
-        setAlertMessage('Upload successful!');
-        setAlertType('success');
+        notification.success({
+          message: 'Upload successful!',
+          duration:3
+         })
       } catch (error) {
         console.error('Error uploading registration data:', error);
-        setAlertMessage('Error uploading data.');
-        setAlertType('danger');
+        notification.error({
+          message: 'Error uploading data!',
+          duration:3
+         })
       } finally {
         setLoading(false);
         setSelectedFile(null);

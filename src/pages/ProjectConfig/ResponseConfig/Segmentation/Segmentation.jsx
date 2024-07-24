@@ -62,6 +62,12 @@ const Segmentation = () => {
     newSections[index].name = e.target.value;
     setSections(newSections);
   };
+  const handleStartQuestionChange = (e, index) => {
+    const newSections = [...sections];
+    newSections[index].startQuestion = e.target.value;
+    setSections(newSections);
+  };
+
 
   const handleStartQuestionChange = (e, index) => {
     const newSections = [...sections];
@@ -107,6 +113,7 @@ const Segmentation = () => {
     setSections(newSections);
   };
 
+
      const handleSave = () => {
         // Check if there are any empty required fields
         const isValid = validateFields();
@@ -146,8 +153,31 @@ const Segmentation = () => {
         } else {
           setShowAlert(true); // Show alert for empty fields
         }
+
       };
-      
+      console.log(dataToSend)
+
+      // Example POST request using axios
+      axios.post(`${APIURL}/ResponseConfigs?WhichDatabase=Local`, dataToSend, {
+        headers: {
+          'Content-Type': 'application/json',
+          // Add any additional headers as needed
+        }
+      })
+        .then((response) => {
+          // Handle response from API (optional)
+          console.log('Data saved successfully:', response);
+          // Perform any additional actions after successful save
+        })
+        .catch((error) => {
+          console.error('Error saving data:', error);
+          // Handle error cases
+        });
+    } else {
+      setShowAlert(true); // Show alert for empty fields
+    }
+  };
+
   const validateFields = () => {
     if (isDivided === 'yes') {
       if (numSections === 0) {
@@ -317,6 +347,7 @@ const Segmentation = () => {
                         }}
                       />
                     </label>
+
                     <label style={{ marginBottom: '5px' }}>
                       Marks for Correct Answer:
                       <input
