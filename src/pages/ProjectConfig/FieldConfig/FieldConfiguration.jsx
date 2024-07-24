@@ -7,6 +7,7 @@ import { useThemeToken } from '@/theme/hooks';
 import { Col, Row } from 'react-bootstrap';
 import { useProjectId } from '@/store/ProjectState';
 import { usePreferredResponse } from '@/utils/PreferredResponse/PreferredResponseContext';
+import { handleDecrypt, handleEncrypt } from '@/Security/Security';
 
 const APIURL = import.meta.env.VITE_API_URL;
 const { Option } = Select;
@@ -38,24 +39,32 @@ const FieldConfiguration = () => {
   const [rangeError, setRangeError] = useState(false);
   const ProjectId = useProjectId();
 
-  console.log(ProjectId);
-
   useEffect(() => {
     getFields();
   }, []);
 
   useEffect(() => {
-    axios
-      .get(`${APIURL}/FieldConfigurations/GetByProjectId/${ProjectId}?WhichDatabase=Local`)
-      .then((response) => {
-        setSavedData(response.data);
-        setPagination({ ...pagination, total: response.data.length });
-      })
-      .catch((error) => {
-        console.error('Error fetching field configurations:', error);
-      });
+    getFieldConfig()
   }, []);
 
+  const getFieldConfig = async() =>{
+    axios
+    .get(`${APIURL}/FieldConfigurations/GetByProjectId/${ProjectId}?WhichDatabase=Local`)
+    .then((response) => {
+      console.log(response.data)
+      let decryptedData = handleDecrypt(response.data)
+      console.log(decryptedData)
+      let Jsondata = JSON.parse(decryptedData)
+      console.log(Jsondata)
+      setSavedData(Jsondata);
+      setPagination({ ...pagination, total: Jsondata.length });
+    })
+    .catch((error) => {
+      console.error('Error fetching field configurations:', error);
+    });
+  }
+
+  console.log(savedData)
   const getFields = () => {
     axios
       .get(`${APIURL}/Fields?WhichDatabase=Local`)
@@ -137,14 +146,21 @@ const FieldConfiguration = () => {
 
     console.log('Payload to be sent:', JSON.stringify(newConfig, null, 2));
 
+    let newConfigJson = JSON.stringify(newConfig)
+    let encrypteddata = handleEncrypt(newConfigJson)
+
+    const encrypteddatatosend = {
+      cyphertextt : encrypteddata
+    }
+
     if (selectedFieldIndex !== -1) {
       axios
         .put(
           `${APIURL}/FieldConfigurations/${newConfig.fieldConfigurationId}?WhichDatabase=Local`,
-          newConfig,
+          encrypteddatatosend,
         )
         .then((response) => {
-          const updatedData = [...savedData];
+          getFieldConfig()
           updatedData[selectedFieldIndex] = { ...updatedData[selectedFieldIndex], ...newConfig };
           setSavedData(updatedData);
           setSelectedFieldIndex(-1);
@@ -156,10 +172,10 @@ const FieldConfiguration = () => {
         });
     } else {
       axios
-        .post(`${APIURL}/FieldConfigurations?WhichDatabase=Local`, newConfig)
+        .post(`${APIURL}/FieldConfigurations?WhichDatabase=Local`, encrypteddatatosend)
         .then((response) => {
           const newFieldConfig = response.data;
-          setSavedData([...savedData, newFieldConfig]);
+          getFieldConfig()
           showAlert('Field configuration saved successfully.', 'success');
           setPagination({ ...pagination, total: savedData.length + 1 });
         })
@@ -190,12 +206,12 @@ const FieldConfiguration = () => {
     }
   }, [savedData]);
 
-  const handleDelete = (fieldConfigurationId) => {
+  const handleDelete = (FieldConfigurationId) => {
     axios
-      .delete(`${APIURL}/FieldConfigurations/${fieldConfigurationId}?WhichDatabase=Local`)
+      .delete(`${APIURL}/FieldConfigurations/${FieldConfigurationId}?WhichDatabase=Local`)
       .then(() => {
         setSavedData(
-          savedData.filter((item) => item.fieldConfigurationId !== fieldConfigurationId),
+          savedData.filter((item) => item.FieldConfigurationId !== FieldConfigurationId),
         );
         message.success('Field configuration deleted successfully.');
       })
@@ -247,34 +263,34 @@ const FieldConfiguration = () => {
   const columns = [
     {
       title: 'Field',
-      dataIndex: 'fieldName', // Use fieldName directly
+      dataIndex: 'FieldName', // Use fieldName directly
       key: 'fieldName',
       sorter: (a, b) => a.fieldName.localeCompare(b.fieldName),
     },
     {
       title: 'Min Range',
-      dataIndex: ['fieldAttributes', 0, 'minRange'],
+      dataIndex: ['FieldAttributes', 0, 'MinRange'],
       key: 'minRange',
       sorter: (a, b) =>
         parseInt(a.fieldAttributes[0].minRange) - parseInt(b.fieldAttributes[0].minRange),
     },
     {
       title: 'Max Range',
-      dataIndex: ['fieldAttributes', 0, 'maxRange'],
+      dataIndex: ['FieldAttributes', 0, 'MaxRange'],
       key: 'maxRange',
       sorter: (a, b) =>
         parseInt(a.fieldAttributes[0].maxRange) - parseInt(b.fieldAttributes[0].maxRange),
     },
     {
       title: 'Preferred Responses',
-      dataIndex: ['fieldAttributes', 0, 'responses'],
+      dataIndex: ['FieldAttributes', 0, 'Responses'],
       key: 'responses',
       sorter: (a, b) =>
         a.fieldAttributes[0].responses.localeCompare(b.fieldAttributes[0].responses),
     },
     {
       title: 'Number of Blocks',
-      dataIndex: ['fieldAttributes', 0, 'numberOfBlocks'],
+      dataIndex: ['FieldAttributes', 0, 'NumberOfBlocks'],
       key: 'numberOfBlocks',
       sorter: (a, b) =>
         parseInt(a.fieldAttributes[0].numberOfBlocks) -
@@ -290,7 +306,7 @@ const FieldConfiguration = () => {
           </Button>
           <Popconfirm
             title="Are you sure delete this configuration?"
-            onConfirm={() => handleDelete(record.fieldConfigurationId)}
+            onConfirm={() => handleDelete(record.FieldConfigurationId)}
             okText="Yes"
             cancelText="No"
           >

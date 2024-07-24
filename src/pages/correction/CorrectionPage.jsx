@@ -533,6 +533,7 @@ import ZoomedImage from './ZoomedImage';
 import FullImageView from './FullImageView';
 import { useProjectActions, useProjectId } from '@/store/ProjectState';
 import { CloseCircleOutlined, DeleteOutlined } from '@ant-design/icons';
+import { handleDecrypt } from '@/Security/Security';
 
 const apiurl = import.meta.env.VITE_API_URL;
 const { Option } = Select;
@@ -575,9 +576,9 @@ const CorrectionPage = () => {
 
   useEffect(() => {
     fetchFieldCounts();
-    fetchData();
+    fetchFlagData();
   }, [projectId, selectedField]);
-
+  console.log(currentIndex)
   useEffect(() => {
     const selectedfield = localStorage.getItem('selectedField');
     if (selectedfield) {
@@ -592,7 +593,6 @@ const CorrectionPage = () => {
 
   // Get Reg Filte Keys
   const GetRegFilterKeys = async () => {
-    setCurrentIndex(0)
     try {
       const response = await axios.get(
         `${apiurl}/Registration/GetKeys?whichDatabase=Local&ProjectId=${projectId}`,
@@ -614,21 +614,22 @@ const CorrectionPage = () => {
     }
   };
 
-  const fetchData = async () => {
-    setCurrentIndex(0);
+  const fetchFlagData = async () => {
     try {
       const flagsResponse = await axios.get(
         `${apiurl}/Correction/GetFlagsByCategory?WhichDatabase=Local&ProjectID=${projectId}&FieldName=${selectedField}`,
       );
-
+      
       const flagsResult = flagsResponse.data;
       const mergedData = await Promise.all(
         flagsResult.map(async (flag) => {
           const imageConfigResponse = await axios.get(`${apiurl}/ImageConfigs/ByProjectId/${projectId}?WhichDatabase=Local`, {
             headers: { accept: 'text/plain' },
           });
-          const imageConfigResult = imageConfigResponse.data[0];
-          const parsedAnnotations = JSON.parse(imageConfigResult.annotationsJson).map(
+          let decryptedData = handleDecrypt(imageConfigResponse.data)
+          let dataJson = JSON.parse(decryptedData)
+          const imageConfigResult = dataJson[0];
+          const parsedAnnotations = JSON.parse(imageConfigResult.AnnotationsJson).map(
             (annotation) => ({
               FieldName: annotation.FieldName,
               coordinates: JSON.parse(annotation.Coordinates.replace(/'/g, '"')),
@@ -636,7 +637,7 @@ const CorrectionPage = () => {
               imageUrl: '',
             }),
           );
-
+          
           const OmrimageResponse = await axios.get(
             `${apiurl}/OMRData/OMRImagebyName?WhichDatabase=Local&ProjectId=${projectId}&Name=${flag.barCode}`,
             {
@@ -644,7 +645,7 @@ const CorrectionPage = () => {
               headers: { accept: 'text/plain' },
             },
           );
-
+          
           return {
             ...parsedAnnotations.find((annotation) => annotation.FieldName === flag.field),
             flagId: flag.flagId,
@@ -659,7 +660,8 @@ const CorrectionPage = () => {
           };
         }),
       );
-
+      
+      setCurrentIndex(0);
       setData(mergedData);
       setLoading(false);
     } catch (error) {
@@ -724,7 +726,7 @@ const CorrectionPage = () => {
         fetchFieldCounts();
         setUnchangeData(data[currentIndex + 1]?.fieldNameValue);
       } else {
-        fetchData();
+        fetchFlagData();
       }
     }
   };

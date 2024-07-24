@@ -1,9 +1,9 @@
-
-
 import React, { useState, useEffect } from 'react';
 import { Button, Alert } from 'antd';
 import { useThemeToken } from '@/theme/hooks';
 import axios from 'axios';
+import { useProjectId } from '@/store/ProjectState';
+import { handleDecrypt, handleEncrypt } from '@/Security/Security';
 
 const APIURL = import.meta.env.VITE_API_URL;
 //const APIURL = import.meta.env.VITE_API_URL_PROD;
@@ -17,6 +17,7 @@ const Segmentation = () => {
   const [showAlert, setShowAlert] = useState(false); // State to control alert visibility
   const [responseOption, setResponseOption] = useState('ABC'); // State for selected response option
   const [numBlocks, setNumBlocks] = useState(4); // State for number of blocks
+  const projectId = useProjectId();
 
 
   // Effect to reset form state when switching between yes/no options
@@ -46,6 +47,8 @@ const Segmentation = () => {
       Array.from({ length: num }, () => ({
         name: '',
         numQuestions: 0,
+        startQuestion: '',
+        endQuestion: '',
         marksCorrect: 0,
         negativeMarking: false,
         marksWrong: 0,
@@ -57,6 +60,18 @@ const Segmentation = () => {
   const handleSectionNameChange = (e, index) => {
     const newSections = [...sections];
     newSections[index].name = e.target.value;
+    setSections(newSections);
+  };
+
+  const handleStartQuestionChange = (e, index) => {
+    const newSections = [...sections];
+    newSections[index].startQuestion = e.target.value;
+    setSections(newSections);
+  };
+
+  const handleEndQuestionChange = (e, index) => {
+    const newSections = [...sections];
+    newSections[index].endQuestion = e.target.value;
     setSections(newSections);
   };
 
@@ -103,12 +118,17 @@ const Segmentation = () => {
             sections,
             responseOption,
             numberOfBlocks : numBlocks,
-            projectId : 1,
+            projectId : projectId,
           };
-          console.log(dataToSend)
+          const datajson = JSON.stringify(dataToSend)
+          let encrypteddata = handleEncrypt(datajson)
+
+          const encrypteddatatosend = {
+            cyphertextt : encrypteddata
+          }
       
           // Example POST request using axios
-          axios.post(`${APIURL}/ResponseConfigs?WhichDatabase=Local`, dataToSend, {
+          axios.post(`${APIURL}/ResponseConfigs?WhichDatabase=Local`, encrypteddatatosend, {
             headers: {
               'Content-Type': 'application/json',
               // Add any additional headers as needed
@@ -264,7 +284,39 @@ const Segmentation = () => {
                         }}
                       />
                     </label>
-
+                    <label style={{ marginBottom: '5px' }}>
+                      Questions From:
+                      <input
+                        type="number"
+                        value={sections[index]?.startQuestion || ''}
+                        onChange={(e) => handleStartQuestionChange(e, index)}
+                        min="0"
+                        disabled={!isEditing}
+                        style={{
+                          marginLeft: '10px',
+                          padding: '5px',
+                          borderRadius: '3px',
+                          border: '1px solid #ccc',
+                          width: '4rem',
+                          marginRight: '1rem'
+                        }}
+                      />
+                      to
+                      <input
+                        type="number"
+                        value={sections[index]?.endQuestion || ''}
+                        onChange={(e) => handleEndQuestionChange(e, index)}
+                        min="0"
+                        disabled={!isEditing}
+                        style={{
+                          marginLeft: '10px',
+                          padding: '5px',
+                          borderRadius: '3px',
+                          border: '1px solid #ccc',
+                          width: '4rem'
+                        }}
+                      />
+                    </label>
                     <label style={{ marginBottom: '5px' }}>
                       Marks for Correct Answer:
                       <input

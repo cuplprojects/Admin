@@ -79,7 +79,7 @@ const Scanned = ({
           <button
             className="btn btn-primary"
             onClick={handleScannedUpload}
-            disabled={!isValidData || loading}
+            disabled={loading}
           >
             {loading ? 'Uploading...' : 'Upload'}
           </button>
