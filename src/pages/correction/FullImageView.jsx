@@ -1,14 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './style.css';
 
 const FullImageView = ({ data, onUpdate, onNext }) => {
   const [value, setValue] = useState('');
+  const inputRef = useRef(null);
 
+  // Update value when data changes
   useEffect(() => {
     if (data) {
       setValue(data.fieldNameValue);
+      // Select the input text when data changes
+      if (inputRef.current) {
+        inputRef.current.select();
+      }
     }
   }, [data]);
+
+  // Select input text on component mount
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.select();
+    }
+  }, []);
 
   const handleChange = (e) => {
     setValue(e.target.value);
@@ -39,7 +52,7 @@ const FullImageView = ({ data, onUpdate, onNext }) => {
       }}
     >
       <img
-        src={data.imageUrl}
+        src={imageUrl}
         alt="Full Image"
         style={{
           width: `${originalWidth}px`, // Set the image width to the original image width
@@ -58,6 +71,7 @@ const FullImageView = ({ data, onUpdate, onNext }) => {
       >
         <input
           type="text"
+          ref={inputRef}
           className="form-control border-danger text-center p-0"
           value={value}
           onChange={handleChange}
@@ -75,3 +89,4 @@ const FullImageView = ({ data, onUpdate, onNext }) => {
 };
 
 export default FullImageView;
+

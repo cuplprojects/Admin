@@ -1,9 +1,9 @@
-
-
 import React, { useState, useEffect } from 'react';
 import { Button, Alert } from 'antd';
 import { useThemeToken } from '@/theme/hooks';
 import axios from 'axios';
+import { useProjectId } from '@/store/ProjectState';
+import { handleDecrypt, handleEncrypt } from '@/Security/Security';
 
 const APIURL = import.meta.env.VITE_API_URL;
 //const APIURL = import.meta.env.VITE_API_URL_PROD;
@@ -17,6 +17,7 @@ const Segmentation = () => {
   const [showAlert, setShowAlert] = useState(false); // State to control alert visibility
   const [responseOption, setResponseOption] = useState('ABC'); // State for selected response option
   const [numBlocks, setNumBlocks] = useState(4); // State for number of blocks
+  const projectId = useProjectId();
 
 
   // Effect to reset form state when switching between yes/no options
@@ -67,11 +68,19 @@ const Segmentation = () => {
     setSections(newSections);
   };
 
+
+  const handleStartQuestionChange = (e, index) => {
+    const newSections = [...sections];
+    newSections[index].startQuestion = e.target.value;
+    setSections(newSections);
+  };
+
   const handleEndQuestionChange = (e, index) => {
     const newSections = [...sections];
     newSections[index].endQuestion = e.target.value;
     setSections(newSections);
   };
+
   const handleNumQuestionsChange = (e, index) => {
     const newSections = [...sections];
     newSections[index].numQuestions = parseInt(e.target.value);
@@ -104,18 +113,47 @@ const Segmentation = () => {
     setSections(newSections);
   };
 
-  const handleSave = () => {
-    // Check if there are any empty required fields
-    const isValid = validateFields();
-    if (isValid) {
-      setIsEditing(false); // Disable editing after saving
-      setShowAlert(false); // Hide alert if shown
 
-      const dataToSend = {
-        sections,
-        responseOption,
-        numberOfBlocks: numBlocks,
-        projectId: 1,
+     const handleSave = () => {
+        // Check if there are any empty required fields
+        const isValid = validateFields();
+        if (isValid) {
+          setIsEditing(false); // Disable editing after saving
+          setShowAlert(false); // Hide alert if shown
+          
+          const dataToSend = {
+            sections,
+            responseOption,
+            numberOfBlocks : numBlocks,
+            projectId : projectId,
+          };
+          const datajson = JSON.stringify(dataToSend)
+          let encrypteddata = handleEncrypt(datajson)
+
+          const encrypteddatatosend = {
+            cyphertextt : encrypteddata
+          }
+      
+          // Example POST request using axios
+          axios.post(`${APIURL}/ResponseConfigs?WhichDatabase=Local`, encrypteddatatosend, {
+            headers: {
+              'Content-Type': 'application/json',
+              // Add any additional headers as needed
+            }
+          })
+          .then((response) => {
+            // Handle response from API (optional)
+            console.log('Data saved successfully:', response);
+            // Perform any additional actions after successful save
+          })
+          .catch((error) => {
+            console.error('Error saving data:', error);
+            // Handle error cases
+          });
+        } else {
+          setShowAlert(true); // Show alert for empty fields
+        }
+
       };
       console.log(dataToSend)
 

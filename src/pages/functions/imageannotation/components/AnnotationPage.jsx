@@ -5,6 +5,8 @@ import AnnotationCanvas from './AnnotationCanvas';
 import Toolkit from './Toolkit';
 import { CloseOutlined } from '@ant-design/icons';
 import axios from 'axios';
+import { useProjectId } from '@/store/ProjectState';
+import { handleEncrypt, handleDecrypt } from '@/Security/Security';
 
 //const apiurl = import.meta.env.VITE_API_URL_PROD;
 const apiurl = import.meta.env.VITE_API_URL;
@@ -12,6 +14,7 @@ const apiurl = import.meta.env.VITE_API_URL;
 const { Option } = Select;
 
 const AnnotationPage = () => {
+  const projectId = useProjectId();
   const [imageUrl, setImageUrl] = useState(null);
   const [annotations, setAnnotations] = useState(() => {
     const savedAnnotations = localStorage.getItem('annotations');
@@ -24,20 +27,15 @@ const AnnotationPage = () => {
   const [openModal, setOpenModal] = useState(false);
   const [modalFields, setModalFields] = useState([]);
   const [coordinates, setCoordinates] = useState([]);
-  const [inputFields, setInputFields] = useState([
-    'Roll No',
-    'Booklet No',
-    'Booklet Series/Set',
-    'Year/Semester',
-  ]);
+  const [inputFields, setInputFields] = useState([]);
   const [open, setOpen] = useState(false);
+  const [annotationId, setAnnotationId] = useState(0);
 
   useEffect(() => {
     // Fetch input fields from API
     axios
       .get(`${apiurl}/Fields?WhichDatabase=Local`)
       .then((response) => {
-        console.log(response.data);
         const fieldNames = response.data.map((field) => field.fieldName); // Extract field names
         setInputFields(fieldNames);
       })
@@ -49,37 +47,37 @@ const AnnotationPage = () => {
   // get image config by perojecvt id
   useEffect(() => {
     // Fetch annotations by project ID
-    const projectId = 1; // Replace with your project ID
     axios
       .get(`${apiurl}/ImageConfigs/ByProjectId/${projectId}?WhichDatabase=Local`)
       .then((response) => {
-        const resdata = response.data[0].annotations;
-        console.log(resdata);
-  
-        const fetchedAnnotations = resdata.map(annotation => {
+        let decryptresponse = handleDecrypt(response.data);
+        let destrigifieddata = JSON.parse(decryptresponse)
+        const resdata = destrigifieddata[0].Annotations;
+        if (resdata.length<=0) {
+          localStorage.removeItem('annotations')
+        }
+        const fetchedAnnotations = resdata.map((annotation) => {
           // Fixing the coordinates format to be valid JSON
-          const fixedCoordinates = annotation.coordinates
+          const fixedCoordinates = annotation.Coordinates
             .replace(/'/g, '"') // Replace single quotes with double quotes
             .replace(/(\w+):/g, '"$1":'); // Wrap property names with double quotes
-  
+
           return {
-            FieldName: annotation.fieldName,
+            FieldName: annotation.FieldName,
             FieldValue: '', // Assuming you want an empty string for FieldValue
             coordinates: JSON.parse(fixedCoordinates), // Parse fixed coordinates JSON
           };
         });
-        setImageUrl(response.data[0].imageUrl)
-        console.log(fetchedAnnotations);
+        setAnnotationId(destrigifieddata[0].Id);
+        setImageUrl(destrigifieddata[0].ImageUrl);
         setAnnotations(fetchedAnnotations);
         localStorage.setItem('annotations', JSON.stringify(fetchedAnnotations));
       })
       .catch((error) => {
         console.error('Error fetching annotations:', error);
       });
-  }, []);
-  
-  
-  
+  }, [projectId]);
+
   useEffect(() => {
     const mappedFieldsObj = {};
     annotations.forEach((annotation) => {
@@ -229,7 +227,8 @@ const AnnotationPage = () => {
   const submitAnnotation = async () => {
     try {
       const postData = {
-        projectId: 1,
+        id: annotationId,
+        projectId,
         ImageUrl: imageUrl,
         annotations: annotations.map((annotation) => ({
           FieldName: annotation.FieldName,
@@ -237,22 +236,56 @@ const AnnotationPage = () => {
         })),
       };
 
-      console.log('Submitting annotations:', postData);
+      const putdatajson = JSON.stringify(postData)
+          let encrypteddata = handleEncrypt(putdatajson)
 
-      const response = await axios.post(`${apiurl}/ImageConfigs?WhichDatabase=Local`, postData, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      notification.success({
-        message: 'Annotations submitted successfully!',
-        duration: 3,
-      });
-      console.log('Response:', response.data);
+          const encrypteddatatosend = {
+            cyphertextt : encrypteddata
+          }
+      if (annotationId > 0) {
+        // Annotations exist, use PUT to update
+        const putResponse = await axios.put(
+          `${apiurl}/ImageConfigs/${annotationId}?WhichDatabase=Local`,
+          encrypteddatatosend,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          },
+        );
+        notification.success({
+          message: 'Annotations updated successfully!',
+          duration: 3,
+        });
+      } else {
+        // No annotations exist, use POST to create new annotations
+        const { id, ...postDataWithoutId } = postData; // Destructure to remove `id`
+
+        const putdatajson = JSON.stringify(postDataWithoutId)
+          let encrypteddata = handleEncrypt(putdatajson)
+
+          const encrypteddatatosend = {
+            cyphertextt : encrypteddata
+          }
+
+        const postResponse = await axios.post(
+          `${apiurl}/ImageConfigs?WhichDatabase=Local`,
+          encrypteddatatosend,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          },
+        );
+        setAnnotationId(postResponse.data.id);
+        notification.success({
+          message: 'Annotations submitted successfully!',
+          duration: 3,
+        });
+      }
     } catch (error) {
-      console.log(error.message);
       notification.error({
-        message: 'Failed to add Annotations',
+        message: 'Failed to add/update Annotations',
         description: error.message,
         duration: 3,
       });

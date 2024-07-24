@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Button, Progress,notification } from 'antd';
@@ -10,12 +9,12 @@ const apiurl = import.meta.env.VITE_API_URL;
 const ImportOmr = () => {
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [currentFileIndex, setCurrentFileIndex] = useState(0);
   const [showSkipBtn, setShowSkipBtn] = useState(false);
   const [showReplaceBtn, setShowReplaceBtn] = useState(false);
   const [showSkipAllBtn, setShowSkipAllBtn] = useState(false);
   const [showReplaceAllBtn, setShowReplaceAllBtn] = useState(false);
   const [conflictingFiles, setConflictingFiles] = useState([]);
+
   const [lastUploadedFile, setLastUploadedFile] = useState('');
   const [progress, setProgress] = useState(0);
   
@@ -55,30 +54,34 @@ const ImportOmr = () => {
   const handleFileChange = async (e) => {
     const selectedFiles = [...e.target.files];
     try {
-      await localforage.setItem('uploadFiles', selectedFiles);
-      setFiles(selectedFiles);
+      const response = await axios.get(
+        `${apiurl}/OMRData/omrdata/${ProjectId}/last-image-name?WhichDatabase=Local`,
+      );
+      setLastUploadedFile(response.data);
     } catch (error) {
-      console.error('Error storing data in localforage:', error);
+      console.error('Error fetching the last OMR image name:', error);
     }
   };
 
-  const removeFromLocalForage = async (file) => {
-    try {
-      let storedFiles = await localforage.getItem('uploadFiles') || [];
-      storedFiles = storedFiles.filter((f) => f.name !== file.name);
-      await localforage.setItem('uploadFiles', storedFiles);
-    } catch (error) {
-      console.error('Error removing data from localforage:', error);
-    }
+  const handleFileChange = (e) => {
+    const selectedFiles = [...e.target.files];
+    setFiles(selectedFiles);
+    setUploadStatus((prev) => ({
+      ...prev,
+      selected: selectedFiles.length,
+      pending: selectedFiles.length,
+    }));
   };
 
-  const removeCurrentFileIndex = async () => {
-    try {
-      await localforage.removeItem('currentFileIndex');
-    } catch (error) {
-      console.error('Error removing currentFileIndex from localforage:', error);
-    }
+  const readFileAsBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = (error) => reject(error);
+      reader.readAsDataURL(file);
+    });
   };
+
 
   const readFileAsBase64 = (file) => {
     return new Promise((resolve, reject) => {
@@ -94,8 +97,7 @@ const ImportOmr = () => {
     try {
       const base64File = await readFileAsBase64(file);
       const fileNameWithoutExtension = file.name.replace(/\.[^/.]+$/, "");
-      const response = await axios.post(
-        `${apiurl}/OMRData/upload-request?ProjectId=${ProjectId}&WhichDatabase=Local`,
+      const response = await axios.post(`${apiurl}/OMRData/upload-request?ProjectId=${ProjectId}&WhichDatabase=Local`,
         { omrImagesName: fileNameWithoutExtension, filePath: base64File, replace: replace },
         {
           headers: {
@@ -119,7 +121,6 @@ const ImportOmr = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-  
     const totalFiles = files.length;
     let uploadedCount = 0;
     let conflicts = [];
@@ -164,7 +165,6 @@ const ImportOmr = () => {
         duration: 3,
       });
     }
-  
     setLoading(false);
   };
   
