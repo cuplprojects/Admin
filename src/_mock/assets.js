@@ -528,7 +528,7 @@ const OTHERS_PERMISSION = [
     component: '/Report/index.tsx',
   },
   {
-    id: '3981225257359246',
+    id: '17',
     parentId: '',
     label: 'Archive',
     name: 'Archive',
