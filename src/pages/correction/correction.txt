@@ -89,35 +89,17 @@ const CorrectionPage = () => {
 
   const fetchFlagData = async () => {
     setCurrentIndex(0);
-    setLoading(true);
-
     try {
-      // Fetch field configurations
-      const fieldConfigResponse = await axios.get(
-        `${apiurl}/FieldConfigurations/GetByProjectId/${projectId}?WhichDatabase=Local`,
-      );
-      const fieldConfigurations = fieldConfigResponse.data;
-
-      // Create a map for quick lookup of field configurations by field name
-      const fieldConfigMap = fieldConfigurations.reduce((map, config) => {
-        map[config.fieldName] = config;
-        return map;
-      }, {});
-
-      // Fetch flags by category
       const flagsResponse = await axios.get(
         `${apiurl}/Correction/GetFlagsByCategory?WhichDatabase=Local&ProjectID=${projectId}&FieldName=${selectedField}`,
       );
-      const flagsResult = flagsResponse.data;
 
+      const flagsResult = flagsResponse.data;
       const mergedData = await Promise.all(
         flagsResult.map(async (flag) => {
-          const imageConfigResponse = await axios.get(
-            `${apiurl}/ImageConfigs/ByProjectId/${projectId}?WhichDatabase=Local`,
-            {
-              headers: { accept: 'text/plain' },
-            },
-          );
+          const imageConfigResponse = await axios.get(`${apiurl}/ImageConfigs/ByProjectId/${projectId}?WhichDatabase=Local`, {
+            headers: { accept: 'text/plain' },
+          });
           const imageConfigResult = imageConfigResponse.data[0];
           const parsedAnnotations = JSON.parse(imageConfigResult.annotationsJson).map(
             (annotation) => ({
@@ -128,7 +110,7 @@ const CorrectionPage = () => {
             }),
           );
 
-          const omrImageResponse = await axios.get(
+          const OmrimageResponse = await axios.get(
             `${apiurl}/OMRData/OMRImagebyName?WhichDatabase=Local&ProjectId=${projectId}&Name=${flag.barCode}`,
             {
               params: { WhichDatabase: 'Local' },
@@ -136,16 +118,8 @@ const CorrectionPage = () => {
             },
           );
 
-          // Find the annotation for the current flag's field name
-          const annotation = parsedAnnotations.find(
-            (annotation) => annotation.FieldName === flag.field,
-          );
-
-          // Get the field configuration for the current flag's field name
-          const fieldConfig = fieldConfigMap[flag.field] || {};
-
           return {
-            ...annotation,
+            ...parsedAnnotations.find((annotation) => annotation.FieldName === flag.field),
             flagId: flag.flagId,
             remarks: flag.remarks,
             fieldNameValue: flag.fieldNameValue || '',
@@ -153,18 +127,16 @@ const CorrectionPage = () => {
             barCode: flag.barCode,
             projectId: projectId,
             isCorrected: true,
-            imageUrl: 'data:image/png;base64,' + omrImageResponse.data.filePath,
+            imageUrl: 'data:image/png;base64,' + OmrimageResponse.data.filePath,
             noChangeRequired: false,
-            fieldConfig, // Adding the field configuration to the flag data
           };
         }),
       );
 
       setData(mergedData);
-      console.log(mergedData);
+      setLoading(false);
     } catch (error) {
       console.error('Error fetching data:', error);
-    } finally {
       setLoading(false);
     }
   };
@@ -219,6 +191,7 @@ const CorrectionPage = () => {
       return;
     } else {
       await sendPostRequest(currentData);
+
       if (currentIndex < fieldData.length - 1) {
         setCurrentIndex(currentIndex + 1);
         fetchFieldCounts();
@@ -257,7 +230,7 @@ const CorrectionPage = () => {
   }, [currentIndex, data, allDataCorrected]);
 
   if (loading) {
-    return <CircleLoading />;
+    return <p><CircleLoading/></p>;
   }
 
   const handleFilterChange = (index, field, value) => {
@@ -402,13 +375,7 @@ const CorrectionPage = () => {
       </div>
       <div className="h-75 d-flex">
         {isViewRegData ? (
-          <form
-            className="w-50 me-2 border p-2"
-            onSubmit={(e) => {
-              e.preventDefault(); // Prevent default form submission
-              handleSubmitFilter(); // Call your submit function
-            }}
-          >
+          <div className="w-50 me-2 border p-2">
             <div className="c-pointer text-end">
               <span onClick={() => setIsViewRegData(false)}>
                 <CloseCircleOutlined style={{ fontSize: '24px', color: 'red' }} />
@@ -446,7 +413,6 @@ const CorrectionPage = () => {
                         <div className="text-end">
                           <button
                             className="btn btn-danger btn-sm"
-                            type="button" // Button to remove filter
                             onClick={() => handleRemoveFilter(index)}
                           >
                             X
@@ -460,10 +426,7 @@ const CorrectionPage = () => {
                     <span className="c-pointer text-primary" onClick={addFilter}>
                       Add Filter
                     </span>
-                    <button
-                      className="btn btn-sm btn-primary"
-                      type="submit" // Submit button to trigger form submission
-                    >
+                    <button className="btn btn-sm btn-primary" onClick={handleSubmitFilter}>
                       Search
                     </button>
                   </div>
@@ -475,7 +438,7 @@ const CorrectionPage = () => {
               <div>
                 {parsedData ? (
                   <>
-                    <p className="text-danger m-2 text-center">{regData.length} Results Found</p>
+                    <p className="text-danger m-2 text-center">{regData.length} Resultes Found</p>
                     <table className="table-bordered table-striped mr-0 table">
                       <thead>
                         <tr>
@@ -517,7 +480,7 @@ const CorrectionPage = () => {
                 )}
               </div>
             </div>
-          </form>
+          </div>
         ) : (
           <Button type="primary" onClick={() => handleShowRegDataTableClick()}>
             Get Registration data

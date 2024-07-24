@@ -251,23 +251,18 @@ export default function Nav(props: Props) {
   
   useEffect(() => {
     // const parentIdsForProject = [ 'ProjectDashboard','correction'];
-    const parentIdsForOther = [ 'dashboard','superadmin','Masters','management'];
+    const excludeINBoth = [ 'default']
+    const parentIdsForOther = [ 'dashboard','superadmin','Masters','management','Archive',...excludeINBoth];
 
     let filteredRoutes;
 
     if (projectId > 0) {
-      console.log(permissionRoutes)
-
-      // Assuming permissionRoutes and parentIdsForProject are defined elsewhere
-
-      // Filter routes based on parent IDs for project
-      // filteredRoutes = filterRoutesByPath(permissionRoutes, parentIdsForProject);
-      // filteredRoutes = permissionRoutes;
+     
       filteredRoutes = filterRoutesByPathExclude(permissionRoutes, parentIdsForOther);
       // Output the results for debugging
     } else {
       // Filter routes based on other parent IDs
-      filteredRoutes = filterRoutesByPath(permissionRoutes, parentIdsForOther);
+      filteredRoutes = filterRoutesByPathExclude(filterRoutesByPath(permissionRoutes, parentIdsForOther),excludeINBoth);
       // filteredRoutes = permissionRoutes;
     }
     

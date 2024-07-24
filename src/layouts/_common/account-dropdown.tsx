@@ -10,6 +10,7 @@ import { useRouter } from '@/router/hooks';
 import { useUserInfo, useUserActions } from '@/store/UserDataStore';
 import { useThemeToken } from '@/theme/hooks';
 
+
 const { VITE_APP_HOMEPAGE: HOMEPAGE } = import.meta.env;
 const avatarimg = "https://placehold.co/400"
 /**
@@ -67,7 +68,7 @@ export default function AccountDropdown() {
     // },
     { label: <NavLink to={HOMEPAGE}>{t('sys.menu.dashboard')}</NavLink>, key: '1' },
     {
-      label: <NavLink to="/management/user/profile">{t('sys.menu.user.profile')}</NavLink>,
+      label: <NavLink to="/profile">{t('sys.menu.user.profile')}</NavLink>,
       key: '2',
     },
     // {

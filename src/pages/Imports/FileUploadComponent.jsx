@@ -1,65 +1,62 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { Button, Progress } from 'antd';
 import localforage from 'localforage';
-import { useFileUpload } from './Importfile';
 
-const FILE_STATUS = {
-  PENDING: 'pending',
-  UPLOADING: 'uploading',
-  PAUSED: 'paused',
-  COMPLETED: 'completed',
-  FAILED: 'failed',
-};
+const apiurl = import.meta.env.VITE_API_URL;
 
-const FileUploadComponent = () => {
-  const { uploadFiles, resumeFileUpload } = useFileUpload();
-  const [files, setFiles] = useState(new Map());
-  const [uploader, setUploader] = useState(null);
-  const [overallProgress, setOverallProgress] = useState(0);
-  const [selectedFiles, setSelectedFiles] = useState([]);
-  const [resumeButtonVisible, setResumeButtonVisible] = useState(false); 
+const ImportOmr = () => {
+  const [files, setFiles] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [currentFileIndex, setCurrentFileIndex] = useState(0);
+  const [showSkipBtn, setShowSkipBtn] = useState(false);
+  const [showReplaceBtn, setShowReplaceBtn] = useState(false);
+  const [currentFileName, setCurrentFileName] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertType, setAlertType] = useState('');
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    // Load files from localforage
-    localforage.getItem('uploadState').then((savedFiles) => {
-      if (savedFiles) {
-        // Filter out completed files
-        const incompleteFiles = savedFiles.filter(([file, fileObj]) => fileObj.status !== FILE_STATUS.COMPLETED);
-        const filesMap = new Map(incompleteFiles);
-        setFiles(filesMap);
-
-        // Initialize uploader based on incomplete files
-        const newUploader = uploadFiles(Array.from(filesMap.keys()), {
-          onProgress: handleProgress,
-          onError: handleError,
-          onAbort: handleAbort,
-          onComplete: handleComplete,
-        });
-        setUploader(newUploader);
-        filesMap.forEach((fileObj, file) => {
-          if (fileObj.status === FILE_STATUS.UPLOADING) {
-            newUploader.resumeFileUpload(file);
-          }else if (fileObj.status === FILE_STATUS.PAUSED) {
-            setResumeButtonVisible(true);
-          }
-        });
+    const fetchData = async () => {
+      try {
+        const storedFiles = await localforage.getItem('uploadFiles') || [];
+        const storedIndex = await localforage.getItem('currentFileIndex') || 0;
+        setFiles(storedFiles);
+        setCurrentFileIndex(storedIndex);
+      } catch (error) {
+        console.error('Error fetching data from localforage:', error);
       }
-    });
-  }, [uploadFiles]);
+    };
+    fetchData();
+  }, []);
 
+  const handleFileChange = async (e) => {
+    const selectedFiles = [...e.target.files];
+    try {
+      await localforage.setItem('uploadFiles', selectedFiles);
+      setFiles(selectedFiles);
+    } catch (error) {
+      console.error('Error storing data in localforage:', error);
+    }
+  };
 
-  useEffect(() => {
-    // Calculate overall progress whenever files state changes
-    const totalFiles = files.size;
-    const completedFiles = [...files.values()].filter(fileObj => fileObj.status === FILE_STATUS.COMPLETED).length;
-    const progress = totalFiles > 0 ? (completedFiles / totalFiles) * 100 : 0;
-    setOverallProgress(progress);
-  }, [files]);
+  const removeFromLocalForage = async (file) => {
+    try {
+      let storedFiles = await localforage.getItem('uploadFiles') || [];
+      storedFiles = storedFiles.filter((f) => f.name !== file.name);
+      await localforage.setItem('uploadFiles', storedFiles);
+    } catch (error) {
+      console.error('Error removing data from localforage:', error);
+    }
+  };
 
-
-  useEffect(() => {
-    // Save files to localforage whenever files state changes
-    localforage.setItem('uploadState', Array.from(files.entries()));
-  }, [files]);
+  const removeCurrentFileIndex = async () => {
+    try {
+      await localforage.removeItem('currentFileIndex');
+    } catch (error) {
+      console.error('Error removing currentFileIndex from localforage:', error);
+    }
+  };
 
   const handleFilesChange = (event) => {
     const uploadedFiles = event.target.files;
@@ -202,4 +199,4 @@ const FileUploadComponent = () => {
     );
   };
 
-  export default FileUploadComponent;
+export default ImportOmr;

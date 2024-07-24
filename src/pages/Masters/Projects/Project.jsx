@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Form, Input, InputNumber, Popconfirm, Table, Typography, message } from 'antd';
+import { Button, Form, Input, InputNumber, Popconfirm, Table, Typography, message, Select,Modal, notification } from 'antd';
 import './Project.css';
+import { useUserInfo } from '@/store/UserDataStore';
+import axios from 'axios';
 
 const apiurl = import.meta.env.VITE_API_URL;
 
@@ -11,10 +13,27 @@ function EditableCell({
   inputType,
   record,
   index,
+  options = [],
   children,
   ...restProps
 }) {
-  const inputNode = inputType === 'number' ? <InputNumber /> : <Input />;
+  let inputNode;
+  if (inputType === 'number') {
+    inputNode = <InputNumber />;
+  } else if (inputType === 'select') {
+    inputNode = (
+      <Select mode="multiple" style={{ width: '100%' }}>
+        {options.map(option => (
+          <Select.Option key={option.value} value={option.value}>
+            {option.label}
+          </Select.Option>
+        ))}
+      </Select>
+    );
+  } else {
+    inputNode = <Input />;
+  }
+
   return (
     <td {...restProps}>
       {editing ? (
@@ -44,18 +63,43 @@ function Project() {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [sortedInfo, setSortedInfo] = useState({});
   const [searchTerm, setSearchTerm] = useState('');
+  const [users, setUsers] = useState([]);
+  const {userId} = useUserInfo();
+  const [confirmModalVisible, setConfirmModalVisible] = useState(false);
+  const [projectToArchive, setProjectToArchive] = useState(null);
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertType, setAlertType] = useState('');
 
   useEffect(() => {
     fetchData();
+    fetchUsers();
   }, []);
+
+ 
 
   const fetchData = async () => {
     try {
-      const response = await fetch(`${apiurl}/Projects?WhichDatabase=Local`);
-      const data = await response.json();
-      setData(data.map((item, index) => ({ ...item, key: index.toString(), serialNo: index + 1 })));
+      const response = await axios.get(`${apiurl}/Projects/YourProject?WhichDatabase=Local&userId=${userId}`);
+      const fetchedData = response.data.map((item, index) => ({
+        ...item,
+        key: item.projectId.toString(),
+      }));
+    
+      setData(fetchedData);
+      // setFilteredData(fetchedData); // Update filteredData as well
     } catch (error) {
       console.error('Error fetching data:', error);
+    }
+  };
+  
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch(`${apiurl}/Users?WhichDatabase=Local`);
+      const users = await response.json();
+      console.log(users);
+      setUsers(users.map(user => ({ value: user.userId, label: user.fullName })));
+    } catch (error) {
+      console.error('Error fetching users:', error);
     }
   };
 
@@ -72,6 +116,7 @@ function Project() {
   const edit = (record) => {
     form.setFieldsValue({
       projectName: record.projectName,
+      userAssigned: record.userAssigned || [],
     });
     setEditingKey(record.key);
   };
@@ -80,7 +125,6 @@ function Project() {
     setEditingKey('');
     const lastRow = data[data.length - 1];
     if (lastRow && lastRow.projectName.trim() === '') {
-      // Remove the last row if Project Name is blank
       const newData = [...data];
       newData.pop();
       setData(newData);
@@ -93,35 +137,49 @@ function Project() {
       const row = await form.validateFields();
       const newData = [...data];
       const index = newData.findIndex((item) => key === item.key);
-
+  
       if (index > -1) {
-        // Check for duplicate projectName
         const isDuplicate = newData.some((item, idx) => idx !== index && item.projectName === row.projectName);
         if (isDuplicate) {
-          message.error('Project name already exists. Please enter a unique name.');
+          notification.error({
+            message: 'Duplicate Project Name',
+            description: 'Project name already exists. Please enter a unique name.',
+          });
           return;
         }
-
+  
         const item = newData[index];
+        const updatedRow = {
+          ...item,
+          ...row,
+          userAssigned: row.userAssigned.map(userName => users.find(user => user.label === userName)?.value || userName) // Convert user names to IDs
+        };
+  
         if (item.method === 'POST') {
-          await addRow({ ...item, ...row });
+          await addRow(updatedRow);
         } else {
-          newData.splice(index, 1, { ...item, ...row });
-          await updateRow(newData[index]);
+          newData.splice(index, 1, updatedRow);
+          await updateRow(updatedRow);
         }
         setData(newData);
         setEditingKey('');
         setHasUnsavedChanges(false);
       } else {
-        // Check for duplicate projectName before adding
         const isDuplicate = newData.some((item) => item.projectName === row.projectName);
         if (isDuplicate) {
-          message.error('Project name already exists. Please enter a unique name.');
+          notification.error({
+            message: 'Duplicate Project Name',
+            description: 'Project name already exists. Please enter a unique name.',
+          });
           return;
         }
-
-        await addRow(row);
-        setData([...newData, row]);
+  
+        const newRow = {
+          ...row,
+          userAssigned: row.userAssigned.map(userName => users.find(user => user.label === userName)?.value || userName) // Convert user names to IDs
+        };
+        await addRow(newRow);
+        setData([...newData, newRow]);
         setEditingKey('');
         setHasUnsavedChanges(false);
       }
@@ -129,6 +187,8 @@ function Project() {
       console.log('Validate Failed:', errInfo);
     }
   };
+  
+  
 
   const updateRow = async (updatedRow) => {
     try {
@@ -142,14 +202,15 @@ function Project() {
           body: JSON.stringify(updatedRow),
         },
       );
+      fetchData();
       if (!response.ok) {
         throw new Error('Failed to update project');
       }
-      // Handle success
     } catch (error) {
       console.error('Error updating project:', error);
     }
   };
+  
 
   const addRow = async (newRow) => {
     try {
@@ -165,16 +226,60 @@ function Project() {
         throw new Error('Failed to add new project');
       }
       fetchData();
-      // Handle success
       setHasUnsavedChanges(false);
     } catch (error) {
       console.error('Error adding new project:', error);
     }
   };
 
+  const showConfirmModal = (projectKey) => {
+    setProjectToArchive(projectKey);
+    setConfirmModalVisible(true);
+  };
+
+  const handleConfirmModalOk = async () => {
+    if (projectToArchive) {
+      try {
+        const response = await fetch(
+          `${apiurl}/Projects/${projectToArchive}/archive?userId=${userId}&WhichDatabase=Local`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          },
+        );
+  
+        if (response.ok) {
+          notification.success({
+            message: 'Success',
+            description: 'Project Archived successfully',
+            duration:2
+          });
+          setData(data.filter((item) => item.key !== projectToArchive));
+        } else {
+          notification.error({
+            message: 'Error',
+            description: 'Failed to Archive project',
+          });
+        }
+      } catch (error) {
+        console.error('Error Archiving project:', error);
+        notification.error({
+          message: 'Error',
+          description: 'Error Archiving project',
+        });
+      } finally {
+        setConfirmModalVisible(false);
+      }
+    }
+  };
+  
+  const handleConfirmModalCancel = () => {
+    setConfirmModalVisible(false);
+  };
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
-    // Filter data based on projectName containing searchTerm
     const filteredData = data.filter(item =>
       item.projectName.toLowerCase().includes(e.target.value.toLowerCase())
     );
@@ -186,7 +291,8 @@ function Project() {
     const newData = {
       key: newRowKey.toString(),
       serialNo: newRowKey,
-      projectName: '', // Start with blank projectName
+      projectName: '',
+      userAssigned: [],
       method: 'POST',
     };
     setData([...data, newData]);
@@ -196,46 +302,64 @@ function Project() {
 
   const columns = [
     {
-      title: 'Serial No',
-      dataIndex: 'serialNo',
-      width: '15%',
-      sorter: (a, b) => a.serialNo - b.serialNo,
-      sortOrder: sortedInfo.columnKey === 'serialNo' && sortedInfo.order,
+      title: 'Project ID', // Changed from 'Serial No' to 'Project ID'
+      dataIndex: 'projectId', // Changed from 'serialNo' to 'projectId'
+      width: '10%',
+      sorter: (a, b) => a.projectId - b.projectId, // Updated sorter
+      sortOrder: sortedInfo.columnKey === 'projectId' && sortedInfo.order, // Updated sortOrder
     },
     {
       title: 'Project Name',
       dataIndex: 'projectName',
-      width: '70%',
+      width: '50%',
       editable: true,
-      sorter: (a, b) => a.projectName.length - b.projectName.length,
-      sortOrder: sortedInfo.columnKey === 'projectName' && sortedInfo.order,
-      render: (_, record) => <span>{record.projectName}</span>,
+    },
+    {
+      title: 'User Assigned',
+      dataIndex: 'userAssigned',
+      width: '35%',
+      editable: true,
+      sorter: (a, b) => a.userAssigned.length - b.userAssigned.length,
+      sortOrder: sortedInfo.columnKey === 'userAssigned' && sortedInfo.order,
+      render: (_, record) => (
+        <span>
+          {Array.isArray(record.userAssigned) ? record.userAssigned.join(', ') : record.userAssigned}
+        </span>
+      ),
     },
     {
       title: 'Actions',
       dataIndex: 'operation',
+      width: '20%',
       render: (_, record) => {
         const editable = isEditing(record);
-        return (
-          <div>
-            {editable ? (
-              <span>
-                <Typography.Link onClick={() => save(record.key)} style={{ marginRight: 8 }}>
-                  Save
-                </Typography.Link>
-                <Popconfirm title="Sure to cancel?" onConfirm={cancel}>
-                  <a>Cancel</a>
-                </Popconfirm>
-              </span>
-            ) : (
-              <Typography.Link
-                disabled={editingKey !== '' && editingKey !== record.key}
-                onClick={() => edit(record)}
-              >
-                Edit
-              </Typography.Link>
-            )}
-          </div>
+        return editable ? (
+          <span>
+            <Button
+              onClick={() => save(record.key)}
+              style={{ marginRight: 8 }}
+              type="primary"
+            >
+              Save
+            </Button>
+            <Button onClick={cancel}>Cancel</Button>
+          </span>
+        ) : (
+          <span className='d-flex'>
+            <Button
+              onClick={() => edit(record)}
+              style={{ marginRight: 8 }}
+              type="link"
+            >
+              Edit
+            </Button>
+            <Popconfirm
+              title="Are you sure to archive this project?"
+              onConfirm={() => showConfirmModal(record.key)}
+            >
+              <Button type="link" danger>Archive</Button>
+            </Popconfirm>
+          </span>
         );
       },
     },
@@ -249,10 +373,11 @@ function Project() {
       ...col,
       onCell: (record) => ({
         record,
-        inputType: col.dataIndex === 'projectId' ? 'number' : 'text',
+        inputType: col.dataIndex === 'serialNo' ? 'number' : col.dataIndex === 'userAssigned' ? 'select' : 'text',
         dataIndex: col.dataIndex,
         title: col.title,
         editing: isEditing(record),
+        options: col.dataIndex === 'userAssigned' ? users : [],
       }),
     };
   });
@@ -287,14 +412,27 @@ function Project() {
           dataSource={data}
           columns={mergedColumns}
           rowClassName="editable-row"
-          pagination={{
-            onChange: cancel,
-          }}
+          pagination={{ onChange: cancel }}
           onChange={handleChange}
         />
       </Form>
+      <Modal
+        title="Confirm Archive"
+        open={confirmModalVisible}
+        onOk={handleConfirmModalOk}
+        onCancel={handleConfirmModalCancel}
+      >
+        <p>Are you sure you want to Archive this project?</p>
+        {alertMessage && (
+        <div className={`alert alert-${alertType} mt-3`} role="alert">
+          {alertMessage}
+        </div>
+      )}
+      </Modal>
     </div>
   );
 }
 
 export default Project;
+
+

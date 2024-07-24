@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 // import { AiFillGithub, AiFillGoogleCircle, AiFillWechat } from 'react-icons/ai';
 
-import { DEFAULT_USER } from '@/_mock/assets';
 import { SignInReq } from '@/api/services/userService';
 import { useSignIn } from '@/store/UserDataStore';
 // import ProTag from '@/theme/antd/components/tag';
@@ -38,8 +37,8 @@ function LoginForm() {
         size="large"
         initialValues={{
           remember: true,
-          username: DEFAULT_USER.username,
-          password: DEFAULT_USER.password,
+          username: '',
+          password: '',
         }}
         onFinish={handleFinish}
       >

@@ -1,6 +1,5 @@
 import { faker } from '@faker-js/faker';
 import { Row, Col, Typography, Timeline, Table, Space, Avatar, Progress } from 'antd';
-import { ColumnsType } from 'antd/es/table';
 
 import { fakeAvatars } from '@/_mock/utils';
 import Card from '@/components/card';
@@ -10,19 +9,10 @@ import { useUserInfo } from '@/store/UserDataStore';
 import ProTag from '@/theme/antd/components/tag';
 import { useThemeToken } from '@/theme/hooks';
 
-interface DataType {
-  key: string;
-  avatar: string;
-  name: string;
-  date: string;
-  leader: string;
-  team: string[];
-  status: number;
-}
-
-export default function ProfileTab() {
+const ProfileTab = () => {
   const { username } = useUserInfo();
   const theme = useThemeToken();
+
   const AboutItems = [
     { icon: <Iconify icon="fa-solid:user" size={18} />, label: 'Full Name', val: username },
     { icon: <Iconify icon="eos-icons:role-binding" size={18} />, label: 'Role', val: 'Developer' },
@@ -39,34 +29,7 @@ export default function ProfileTab() {
       connections: `${faker.number.int(100)} Connections`,
       connected: faker.datatype.boolean(),
     },
-
-    {
-      avatar: faker.image.avatarLegacy(),
-      name: faker.person.fullName(),
-      connections: `${faker.number.int(100)} Connections`,
-      connected: faker.datatype.boolean(),
-    },
-
-    {
-      avatar: faker.image.avatarLegacy(),
-      name: faker.person.fullName(),
-      connections: `${faker.number.int(100)} Connections`,
-      connected: faker.datatype.boolean(),
-    },
-
-    {
-      avatar: faker.image.avatarLegacy(),
-      name: faker.person.fullName(),
-      connections: `${faker.number.int(100)} Connections`,
-      connected: faker.datatype.boolean(),
-    },
-
-    {
-      avatar: faker.image.avatarLegacy(),
-      name: faker.person.fullName(),
-      connections: `${faker.number.int(100)} Connections`,
-      connected: faker.datatype.boolean(),
-    },
+    // More items here...
   ];
 
   const TeamItems = [
@@ -76,35 +39,11 @@ export default function ProfileTab() {
       members: `${faker.number.int(100)} Members`,
       tag: <ProTag color="warning">Developer</ProTag>,
     },
-    {
-      avatar: <Iconify icon="devicon:figma" size={36} />,
-      name: 'UI Designer',
-      members: `${faker.number.int(100)} Members`,
-      tag: <ProTag color="cyan">Designer</ProTag>,
-    },
-    {
-      avatar: <Iconify icon="logos:jest" size={36} />,
-      name: 'Test Team',
-      members: `${faker.number.int(100)} Members`,
-      tag: <ProTag color="success">Test</ProTag>,
-    },
-    {
-      avatar: <Iconify icon="logos:nestjs" size={36} />,
-      name: 'Nest.js Developers',
-      members: `${faker.number.int(100)} Members`,
-      tag: <ProTag color="warning">Developer</ProTag>,
-    },
-
-    {
-      avatar: <Iconify icon="logos:twitter" size={36} />,
-      name: 'Digital Marketing',
-      members: `${faker.number.int(100)} Members`,
-      tag: <ProTag>Marketing</ProTag>,
-    },
+    // More items here...
   ];
 
   const fakeProjectItems = () => {
-    const arr: DataType[] = [];
+    const arr = [];
     for (let i = 0; i <= 25; i += 1) {
       arr.push({
         key: faker.string.uuid(),
@@ -119,7 +58,7 @@ export default function ProfileTab() {
     return arr;
   };
 
-  const ProjectColumns: ColumnsType<DataType> = [
+  const ProjectColumns = [
     {
       title: 'NAME',
       dataIndex: 'name',
@@ -141,7 +80,7 @@ export default function ProfileTab() {
     {
       title: 'TEAM',
       dataIndex: 'team',
-      render: (val: string[]) => (
+      render: (val) => (
         <Avatar.Group>
           {val.map((item, index) => (
             <Avatar src={item} key={index} />
@@ -216,55 +155,7 @@ export default function ProfileTab() {
                     </div>
                   ),
                 },
-                {
-                  color: theme.colorPrimaryActive,
-                  children: (
-                    <div className="flex flex-col">
-                      <div className="flex items-center justify-between">
-                        <Typography.Text strong>Create a new project for client 😎</Typography.Text>
-                        <div className="opacity-50">April, 18</div>
-                      </div>
-                      <Typography.Text type="secondary" className="text-xs">
-                        Invoices have been paid to the company.
-                      </Typography.Text>
-                      <div className="mt-2 flex items-center gap-2">
-                        <img
-                          alt=""
-                          src={faker.image.avatarLegacy()}
-                          className="h-8 w-8 rounded-full"
-                        />
-                        <span className="font-medium opacity-60">
-                          {faker.person.fullName()} (client)
-                        </span>
-                      </div>
-                    </div>
-                  ),
-                },
-                {
-                  color: theme.colorInfo,
-                  children: (
-                    <div className="flex flex-col">
-                      <div className="flex items-center justify-between">
-                        <Typography.Text strong>Order #37745 from September</Typography.Text>
-                        <div className="opacity-50">January, 10</div>
-                      </div>
-                      <Typography.Text type="secondary" className="text-xs">
-                        Invoices have been paid to the company.
-                      </Typography.Text>
-                    </div>
-                  ),
-                },
-                {
-                  color: theme.colorWarning,
-                  children: (
-                    <div className="flex flex-col">
-                      <div className="flex items-center justify-between">
-                        <Typography.Text strong>Public Meeting</Typography.Text>
-                        <div className="opacity-50">September, 30</div>
-                      </div>
-                    </div>
-                  ),
-                },
+                // More timeline items here...
               ]}
             />
           </Card>
@@ -349,9 +240,9 @@ export default function ProfileTab() {
             <div className="!mt-4 w-full">
               <Scrollbar>
                 <Table
-                  rowSelection={{ type: 'checkbox' }}
                   columns={ProjectColumns}
                   dataSource={fakeProjectItems()}
+                  pagination={false}
                 />
               </Scrollbar>
             </div>
@@ -360,4 +251,5 @@ export default function ProfileTab() {
       </Row>
     </>
   );
-}
+};
+export default ProfileTab;

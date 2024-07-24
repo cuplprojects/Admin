@@ -175,7 +175,7 @@ const GenerateScore = () => {
           {alertMessage}
         </div>
       )}
-      {(keyCount && (entryCount <= 1)) ? (
+      {/* {(keyCount && (entryCount <= 1)) ? ( */}
           <Button
             type="primary"
             onClick={handleProcessScore}
@@ -184,9 +184,9 @@ const GenerateScore = () => {
           >
             {processing ? 'Processing...' : 'Process Score'}
           </Button>
-        ):(
+        {/* ):(
           <></>
-        )}
+        )} */}
         <div className='text-end'>
         <Button
           type="primary"

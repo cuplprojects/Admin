@@ -60,7 +60,7 @@ const DASHBOARD_PERMISSION = {
   ],
 };
 
-// parent 3 
+// parent 3
 const DEVELOPER_PERMISSION = {
   id: '3',
   parentId: '',
@@ -90,15 +90,6 @@ const MANAGEMENT_PERMISSION = {
       type: PermissionType.CATALOGUE,
       route: 'user',
       children: [
-        // {
-        //   id: '4754063958766648',
-        //   parentId: '2781684678535711',
-        //   label: 'sys.menu.profile',
-        //   name: 'Profile',
-        //   type: PermissionType.MENU,
-        //   route: 'profile',
-        //   component: '/management/user/profile/index.tsx',
-        // },
         {
           id: '4.1.1',
           parentId: '4.1',
@@ -106,7 +97,16 @@ const MANAGEMENT_PERMISSION = {
           name: 'AddUser',
           type: PermissionType.MENU,
           route: 'AddUser',
-          component: '/management/user/account/index.tsx',
+          component: '/management/user/addUser/index.tsx',
+        },
+        {
+          id: '4.1.2',
+          parentId: '4.1',
+          label: 'sys.menu.user.allusers',
+          name: 'allusers',
+          type: PermissionType.MENU,
+          route: 'allusers',
+          component: '/management/system/user/index.tsx',
         },
       ],
     },
@@ -118,15 +118,6 @@ const MANAGEMENT_PERMISSION = {
       type: PermissionType.CATALOGUE,
       route: 'system',
       children: [
-        // {
-        //   id: '1985890042972842',
-        //   parentId: '0249937641030250',
-        //   label: 'sys.menu.system.organization',
-        //   name: 'Organization',
-        //   type: PermissionType.MENU,
-        //   route: 'organization',
-        //   component: '/management/system/organization/index.tsx',
-        // },
         {
           id: '4.2.1',
           parentId: '4.2',
@@ -145,41 +136,12 @@ const MANAGEMENT_PERMISSION = {
           route: 'role',
           component: '/management/system/role/index.tsx',
         },
-        {
-          id: '4.2.3',
-          parentId: '4.2',
-          label: 'sys.menu.user.allusers',
-          name: 'allusers',
-          type: PermissionType.MENU,
-          route: 'allusers',
-          component: '/management/system/user/index.tsx',
-        },
-        // {
-        //   id: '0157880245365434',
-        //   parentId: '0249937641030250',
-        //   label: 'sys.menu.system.user_detail',
-        //   name: 'User Detail',
-        //   type: PermissionType.MENU,
-        //   route: 'user/:id',
-        //   component: '/management/system/user/detail.tsx',
-        //   hide: true,
-        // },
-        // {
-        //   id: '0157880245365435',
-        //   parentId: '0249937641030250',
-        //   label: 'users',
-        //   name: 'All Users',
-        //   type: PermissionType.MENU,
-        //   route: 'allusers',
-        //   component: '/management/system/alluser/index.tsx',
-        //   hide: true,
-        // },
       ],
     },
   ],
 };
 
-// parent 5 
+// parent 5
 const COMPONENTS_PERMISSION = {
   id: '5',
   parentId: '',
@@ -294,15 +256,6 @@ const FUNCTIONS_PERMISSION = {
   route: 'functions',
   order: 4,
   children: [
-    // {
-    //   id: '3667930780705750',
-    //   parentId: '8132044808088488',
-    //   label: 'sys.menu.clipboard',
-    //   name: 'Clipboard',
-    //   type: PermissionType.MENU,
-    //   route: 'clipboard',
-    //   component: '/components/icon/index.tsx',
-    // },
     {
       id: '6.1',
       parentId: '6',
@@ -344,8 +297,6 @@ const MENU_LEVEL_PERMISSION = {
       route: 'Fields',
       component: '/Masters/Fields/index.tsx',
     },
-   
-    
   ],
 };
 
@@ -390,9 +341,8 @@ const ERRORS_PERMISSION = {
   ],
 };
 
-// parent 9 
+// parent 9
 const OTHERS_PERMISSION = [
-
   {
     id: '9',
     parentId: '',
@@ -402,7 +352,6 @@ const OTHERS_PERMISSION = [
     type: PermissionType.MENU,
     route: 'ProjectDashboard',
     component: '/ProjectDashboard/index.tsx',
-
   },
   //ProjectConfig Permission --Akshaya
   {
@@ -437,7 +386,6 @@ const OTHERS_PERMISSION = [
     type: PermissionType.MENU,
     route: 'GenerateScore',
     component: '/ScoreProcessing/index.tsx',
-
   },
   //Audit
   {
@@ -449,53 +397,8 @@ const OTHERS_PERMISSION = [
     type: PermissionType.MENU,
     route: 'AuditPage/Audit',
     component: '/AuditPage/index.tsx',
-
   },
-  
-//   {
-//     id: '3981225257359246',
-//     parentId: '',
-//     label: 'sys.menu.calendar',
-//     name: 'Calendar',
-//     icon: 'solar:calendar-bold-duotone',
-//     type: PermissionType.MENU,
-//     route: 'calendar',
-//     component: '/sys/others/calendar/index.tsx',
-//   },
-//   {
-//     id: '3513985683886393',
-//     parentId: '',
-//     label: 'sys.menu.kanban',
-//     name: 'kanban',
-//     icon: 'solar:clipboard-bold-duotone',
-//     type: PermissionType.MENU,
-//     route: 'kanban',
-//     component: '/sys/others/kanban/index.tsx',
-//   },
-//   {
-//     id: '5455837930804461',
-//     parentId: '',
-//     label: 'sys.menu.disabled',
-//     name: 'Disabled',
-//     icon: 'ic_disabled',
-//     type: PermissionType.MENU,
-//     route: 'disabled',
-//     status: BasicStatus.DISABLE,
-//     component: '/sys/others/calendar/index.tsx',
-//   },
-//   {
-//     id: '7728048658221587',
-//     parentId: '',
-//     label: 'sys.menu.label',
-//     name: 'Label',
-//     icon: 'ic_label',
-//     type: PermissionType.MENU,
-//     route: 'label',
-//     newFeature: true,
-//     component: '/sys/others/blank.tsx',
-//   },
-
-  // correctin window
+  // Correction window
   {
     id: '14',
     parentId: '',
@@ -506,16 +409,16 @@ const OTHERS_PERMISSION = [
     route: 'correction',
     component: '/correction/index.tsx',
   },
-  {
-    id: '15',
-    parentId: '',
-    label: 'Ambiguity',
-    name: 'Ambiguity',
-    icon: 'solar:document-add-bold-duotone',
-    type: PermissionType.MENU,
-    route: 'Ambiguity',
-    component: '/Ambiguity/index.tsx',
-  },
+  // {
+  //   id: '15',
+  //   parentId: '',
+  //   label: 'Ambiguity',
+  //   name: 'Ambiguity',
+  //   icon: 'solar:document-add-bold-duotone',
+  //   type: PermissionType.MENU,
+  //   route: 'Ambiguity',
+  //   component: '/Ambiguity/index.tsx',
+  // },
 
   {
     id: '16',
@@ -524,139 +427,51 @@ const OTHERS_PERMISSION = [
     name: 'Report',
     icon: 'solar:document-add-bold-duotone',
     type: PermissionType.MENU,
-    route:'Report',
+    route: 'Report',
     component: '/Report/index.tsx',
   },
-
-
-  //   {
-  //     id: '3513985683886393',
-  //     parentId: '',
-  //     label: 'sys.menu.kanban',
-  //     name: 'kanban',
-  //     icon: 'solar:clipboard-bold-duotone',
-  //     type: PermissionType.MENU,
-  //     route: 'kanban',
-  //     component: '/sys/others/kanban/index.tsx',
-  //   },
-  //   {
-  //     id: '5455837930804461',
-  //     parentId: '',
-  //     label: 'sys.menu.disabled',
-  //     name: 'Disabled',
-  //     icon: 'ic_disabled',
-  //     type: PermissionType.MENU,
-  //     route: 'disabled',
-  //     status: BasicStatus.DISABLE,
-  //     component: '/sys/others/calendar/index.tsx',
-  //   },
-  //   {
-  //     id: '7728048658221587',
-  //     parentId: '',
-  //     label: 'sys.menu.label',
-  //     name: 'Label',
-  //     icon: 'ic_label',
-  //     type: PermissionType.MENU,
-  //     route: 'label',
-  //     newFeature: true,
-  //     component: '/sys/others/blank.tsx',
-  //   },
-
-  // {
-  //   id: '3981225257359246',
-  //   parentId: '',
-  //   label: 'sys.menu.calendar',
-  //   name: 'Calendar',
-  //   icon: 'solar:calendar-bold-duotone',
-  //   type: PermissionType.MENU,
-  //   route: 'calendar',
-  //   component: '/sys/others/calendar/index.tsx',
-  // },
-  // {
-  //   id: '3513985683886393',
-  //   parentId: '',
-  //   label: 'sys.menu.kanban',
-  //   name: 'kanban',
-  //   icon: 'solar:clipboard-bold-duotone',
-  //   type: PermissionType.MENU,
-  //   route: 'kanban',
-  //   component: '/sys/others/kanban/index.tsx',
-  // },
-  // {
-  //   id: '5455837930804461',
-  //   parentId: '',
-  //   label: 'sys.menu.disabled',
-  //   name: 'Disabled',
-  //   icon: 'ic_disabled',
-  //   type: PermissionType.MENU,
-  //   route: 'disabled',
-  //   status: BasicStatus.DISABLE,
-  //   component: '/sys/others/calendar/index.tsx',
-  // },
-  // {
-  //   id: '7728048658221587',
-  //   parentId: '',
-  //   label: 'sys.menu.label',
-  //   name: 'Label',
-  //   icon: 'ic_label',
-  //   type: PermissionType.MENU,
-  //   route: 'label',
-  //   newFeature: true,
-  //   component: '/sys/others/blank.tsx',
-  // },
-  // {
-  //   id: '5733704222120995',
-  //   parentId: '',
-  //   label: 'sys.menu.frame',
-  //   name: 'Frame',
-  //   icon: 'ic_external',
-  //   type: PermissionType.CATALOGUE,
-  //   route: 'frame',
-  //   children: [
-  //     {
-  //       id: '9884486809510480',
-  //       parentId: '5733704222120995',
-  //       label: 'sys.menu.external_link',
-  //       name: 'External Link',
-  //       type: PermissionType.MENU,
-  //       route: 'external_link',
-  //       hideTab: true,
-  //       component: '/sys/others/iframe/external-link.tsx',
-  //       frameSrc: 'https://ant.design/',
-  //     },
-  //     {
-  //       id: '9299640886731819',
-  //       parentId: '5733704222120995',
-  //       label: 'sys.menu.iframe',
-  //       name: 'Iframe',
-  //       type: PermissionType.MENU,
-  //       route: 'frame',
-  //       component: '/sys/others/iframe/index.tsx',
-  //       frameSrc: 'https://ant.design/',
-  //     },
-  //   ],
-  // },
-  // {
-  //   id: '0941594969900756',
-  //   parentId: '',
-  //   label: 'sys.menu.blank',
-  //   name: 'Disabled',
-  //   icon: 'ic_blank',
-  //   type: PermissionType.MENU,
-  //   route: 'blank',
-  //   component: '/sys/others/blank.tsx',
-  // },
+  {
+    id: '17',
+    parentId: '',
+    label: 'Archive',
+    name: 'Archive',
+    icon: 'solar:document-add-bold-duotone',
+    type: PermissionType.MENU,
+    route: 'Archive',
+    component: '/Archive/index.tsx',
+  },
 ];
+
+const DEFAULT_PPERMISSIONS = {
+  id: '20',
+  parentId: '',
+  label: 'default',
+  name: 'default',
+  icon: 'ic-analysis',
+  type: PermissionType.CATALOGUE,
+  route: 'default',
+  order: 0,
+  children: [
+    {
+      id: '20.1',
+      parentId: '20',
+      label: 'Profile',
+      name: 'Profile',
+      type: PermissionType.MENU,
+      route: 'profile',
+      component: '/management/user/profile/index.tsx',
+    },
+  ],
+};
+// parent 20
 
 export const PERMISSION_LIST = [
   DASHBOARD_PERMISSION,
   MANAGEMENT_PERMISSION,
-  // COMPONENTS_PERMISSION,
-  //FUNCTIONS_PERMISSION,
   MENU_LEVEL_PERMISSION,
-  // ERRORS_PERMISSION,
   ...OTHERS_PERMISSION,
-  SUPER_ADMIN
+  SUPER_ADMIN,
+  DEFAULT_PPERMISSIONS,
 ];
 
 /**

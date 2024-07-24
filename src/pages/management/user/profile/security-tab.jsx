@@ -3,13 +3,7 @@ import { useState } from 'react';
 
 import Card from '@/components/card';
 
-type FieldType = {
-  oldPassword?: string;
-  newPassword?: string;
-  confirmPassword?: string;
-};
-
-export default function SecurityTab() {
+const SecurityTab = () => {
   const { notification } = App.useApp();
   const [loading, setLoading] = useState(false);
   const initFormValues = {
@@ -18,7 +12,7 @@ export default function SecurityTab() {
     confirmPassword: '',
   };
 
-  const handleSubmit = async (values: FieldType) => {
+  const handleSubmit = async (values) => {
     if (values.newPassword !== values.confirmPassword) {
       notification.error({
         message: 'New password and confirm password do not match!',
@@ -72,7 +66,7 @@ export default function SecurityTab() {
         labelCol={{ span: 8 }}
         className="w-full"
       >
-        <Form.Item<FieldType>
+        <Form.Item
           label="Old Password"
           name="oldPassword"
           rules={[{ required: true, message: 'Please input your old password!' }]}
@@ -80,7 +74,7 @@ export default function SecurityTab() {
           <Input.Password />
         </Form.Item>
 
-        <Form.Item<FieldType>
+        <Form.Item
           label="New Password"
           name="newPassword"
           rules={[{ required: true, message: 'Please input your new password!' }]}
@@ -88,7 +82,7 @@ export default function SecurityTab() {
           <Input.Password />
         </Form.Item>
 
-        <Form.Item<FieldType>
+        <Form.Item
           label="Confirm New Password"
           name="confirmPassword"
           rules={[{ required: true, message: 'Please confirm your new password!' }]}
@@ -104,4 +98,5 @@ export default function SecurityTab() {
       </Form>
     </Card>
   );
-}
+};
+export default SecurityTab;

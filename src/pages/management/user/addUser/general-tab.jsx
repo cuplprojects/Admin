@@ -3,6 +3,8 @@ import Card from '@/components/card';
 import { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 
+const apiurl = import.meta.env.VITE_API_URL;
+
 export default function GeneralTab() {
   const { notification } = App.useApp();
   const [form] = Form.useForm(); // Create form instance
@@ -13,7 +15,7 @@ export default function GeneralTab() {
   useEffect(() => {
     const fetchRoles = async () => {
       try {
-        const res = await axios.get('https://localhost:7290/api/Roles?WhichDatabase=Local'); // Adjust the API endpoint as needed
+        const res = await axios.get(`${apiurl}/Roles?WhichDatabase=Local`); // Adjust the API endpoint as needed
         setRoles(res.data);
       } catch (error) {
         console.log(error.message);
@@ -29,7 +31,7 @@ export default function GeneralTab() {
     }
     isSubmitting.current = true; // Set the flag to true
     try {
-      await axios.post("https://localhost:7290/api/Users?WhichDatabase=Local", values);
+      await axios.post(`${apiurl}/Users?WhichDatabase=Local`, values);
       form.resetFields(); // Reset form fields
       notification.success({
         message: 'User added successfully!',
@@ -44,17 +46,6 @@ export default function GeneralTab() {
 
   return (
     <Row gutter={[16, 16]}>
-      {/* <Col span={24} lg={8}>
-        <Card className="flex-col !px-6 !pb-10 !pt-20">
-          <Space className="py-6">
-            <div>Public Profile</div>
-            <Switch size="small" />
-          </Space>
-          <Button type="primary" danger>
-            Delete User
-          </Button>
-        </Card>
-      </Col> */}
       <Col span={24} lg={16}>
         <Card>
           <Form

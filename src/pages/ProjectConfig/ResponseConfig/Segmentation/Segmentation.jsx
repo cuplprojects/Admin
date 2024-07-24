@@ -1,7 +1,7 @@
 
 
 import React, { useState, useEffect } from 'react';
-import { Button, Alert } from 'antd';
+import { Button, Alert, notification } from 'antd';
 import { useThemeToken } from '@/theme/hooks';
 import axios from 'axios';
 
@@ -17,6 +17,8 @@ const Segmentation = () => {
   const [showAlert, setShowAlert] = useState(false); // State to control alert visibility
   const [responseOption, setResponseOption] = useState('ABC'); // State for selected response option
   const [numBlocks, setNumBlocks] = useState(4); // State for number of blocks
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertType, setAlertType] = useState('');
 
 
   // Effect to reset form state when switching between yes/no options
@@ -46,6 +48,8 @@ const Segmentation = () => {
       Array.from({ length: num }, () => ({
         name: '',
         numQuestions: 0,
+        startQuestion: '',
+        endQuestion: '',
         marksCorrect: 0,
         negativeMarking: false,
         marksWrong: 0,
@@ -59,7 +63,17 @@ const Segmentation = () => {
     newSections[index].name = e.target.value;
     setSections(newSections);
   };
+  const handleStartQuestionChange = (e, index) => {
+    const newSections = [...sections];
+    newSections[index].startQuestion = e.target.value;
+    setSections(newSections);
+  };
 
+  const handleEndQuestionChange = (e, index) => {
+    const newSections = [...sections];
+    newSections[index].endQuestion = e.target.value;
+    setSections(newSections);
+  };
   const handleNumQuestionsChange = (e, index) => {
     const newSections = [...sections];
     newSections[index].numQuestions = parseInt(e.target.value);
@@ -92,42 +106,53 @@ const Segmentation = () => {
     setSections(newSections);
   };
 
-     const handleSave = () => {
-        // Check if there are any empty required fields
-        const isValid = validateFields();
-        if (isValid) {
-          setIsEditing(false); // Disable editing after saving
-          setShowAlert(false); // Hide alert if shown
-          
-          const dataToSend = {
-            sections,
-            responseOption,
-            numberOfBlocks : numBlocks,
-            projectId : 1,
-          };
-          console.log(dataToSend)
-      
-          // Example POST request using axios
-          axios.post(`${APIURL}/ResponseConfigs?WhichDatabase=Local`, dataToSend, {
-            headers: {
-              'Content-Type': 'application/json',
-              // Add any additional headers as needed
-            }
-          })
-          .then((response) => {
-            // Handle response from API (optional)
-            console.log('Data saved successfully:', response);
-            // Perform any additional actions after successful save
-          })
-          .catch((error) => {
-            console.error('Error saving data:', error);
-            // Handle error cases
-          });
-        } else {
-          setShowAlert(true); // Show alert for empty fields
-        }
+  const handleSave = () => {
+    // Check if there are any empty required fields
+    const isValid = validateFields();
+    if (isValid) {
+      setIsEditing(false); // Disable editing after saving
+      setShowAlert(false); // Hide alert if shown
+
+      const dataToSend = {
+        sections,
+        responseOption,
+        numberOfBlocks: numBlocks,
+        projectId: 1,
       };
-      
+      console.log(dataToSend)
+
+      // Example POST request using axios
+      axios.post(`${APIURL}/ResponseConfigs?WhichDatabase=Local`, dataToSend, {
+        headers: {
+          'Content-Type': 'application/json',
+          // Add any additional headers as needed
+        }
+      })
+        .then((response) => {
+          notification.success({
+            message: 'Response saved successfully',
+            duration: 2,
+          })
+          console.log('Data saved successfully:', response);
+          // Perform any additional actions after successful save
+        })
+        .catch((error) => {
+          console.error('Error saving data:', error);
+          notification.error({
+            message: 'Error saving data',
+            description: 'Please try again later',
+            duration: 2,
+          })
+          // setAlertMessage("Error in saving Response");
+
+          // setAlertType('danger');
+          // Handle error cases
+        });
+    } else {
+      setShowAlert(true); // Show alert for empty fields
+    }
+  };
+
   const validateFields = () => {
     if (isDivided === 'yes') {
       if (numSections === 0) {
@@ -261,6 +286,39 @@ const Segmentation = () => {
                           padding: '5px',
                           borderRadius: '3px',
                           border: '1px solid #ccc',
+                        }}
+                      />
+                    </label>
+                    <label style={{ marginBottom: '5px' }}>
+                      Questions From:
+                      <input
+                        type="number"
+                        value={sections[index]?.startQuestion || ''}
+                        onChange={(e) => handleStartQuestionChange(e, index)}
+                        min="0"
+                        disabled={!isEditing}
+                        style={{
+                          marginLeft: '10px',
+                          padding: '5px',
+                          borderRadius: '3px',
+                          border: '1px solid #ccc',
+                          width: '4rem',
+                          marginRight: '1rem'
+                        }}
+                      />
+                      to
+                      <input
+                        type="number"
+                        value={sections[index]?.endQuestion || ''}
+                        onChange={(e) => handleEndQuestionChange(e, index)}
+                        min="0"
+                        disabled={!isEditing}
+                        style={{
+                          marginLeft: '10px',
+                          padding: '5px',
+                          borderRadius: '3px',
+                          border: '1px solid #ccc',
+                          width: '4rem'
                         }}
                       />
                     </label>
@@ -549,6 +607,8 @@ const Segmentation = () => {
         >
           Save
         </Button>
+
+       
       </div>
     </>
   );

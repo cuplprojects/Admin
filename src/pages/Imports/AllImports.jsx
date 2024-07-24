@@ -167,7 +167,7 @@ const Import = () => {
     // Fetch field mappings from the backend
     const fetchFieldMappings = async () => {
       try {
-        const response = await fetch(`${apiurl}/FieldConfigurations?WhichDatabase=Local`);
+        const response = await fetch(`${apiurl}/FieldConfigurations/GetByProjectId/${ProjectId}?WhichDatabase=Local`);
         if (!response.ok) {
           throw new Error('Failed to fetch field mappings');
         }
@@ -195,7 +195,7 @@ const Import = () => {
   useEffect(() => {
     const fetchRegistrationMappings = async () => {
       try {
-        const response = await fetch(`${apiurl}/FieldConfigurations?WhichDatabase=Local`);
+        const response = await fetch(`${apiurl}/FieldConfigurations/GetByProjectId/${ProjectId}?WhichDatabase=Local`);
         if (!response.ok) {
           throw new Error('Failed to fetch field mappings');
         }

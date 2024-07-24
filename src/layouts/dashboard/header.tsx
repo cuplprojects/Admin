@@ -72,6 +72,7 @@ export default function Header({ className = '', offsetTop = false }: Props) {
     const fetchProjects = async () => {
       try {
         const response = await axios.get(`${apiUrl}/Projects?WhichDatabase=Local`);
+        console.log(response)
         setProjects(response.data);
       } catch (error) {
         console.error('Error fetching projects:', error);
@@ -79,7 +80,7 @@ export default function Header({ className = '', offsetTop = false }: Props) {
     };
 
     fetchProjects();
-  }, [apiUrl]);
+  }, []);
 
   const handleProjectChange = (value: number) => {
     setProjectId(value);

@@ -11,10 +11,15 @@ const RoleModal = ({ title, show, formValue, onOk, onCancel }) => {
 
   useEffect(() => {
     form.setFieldsValue({ ...formValue });
+
+    // Flatten permissions tree and get checked keys from form value
     const initialCheckedKeys = flattenTrees(PERMISSIONS, 'children')
       .filter((permission) => formValue.permissionList.includes(permission.id))
       .map((permission) => permission.id);
-    setCheckedKeys(initialCheckedKeys);
+
+    // Add the default key `20` if not already present
+    const defaultCheckedKeys = Array.from(new Set([...initialCheckedKeys, '20'])); // Ensures key `20` is always included
+    setCheckedKeys(defaultCheckedKeys);
   }, [formValue, form]);
 
   const handleOk = async () => {
@@ -33,7 +38,9 @@ const RoleModal = ({ title, show, formValue, onOk, onCancel }) => {
   };
 
   const onTreeCheck = (checkedKeysValue) => {
-    setCheckedKeys(checkedKeysValue);
+    // Ensure key `20` is always included
+    const newCheckedKeys = Array.from(new Set([...checkedKeysValue, '20']));
+    setCheckedKeys(newCheckedKeys);
   };
 
   return (
