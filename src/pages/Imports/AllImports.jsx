@@ -5,13 +5,13 @@ import Absentee from './Absentee';
 import * as XLSX from 'xlsx';
 import axios from 'axios';
 import FileUploadComponent from './FileUploadComponent';
-import './style.css'
+import './style.css';
 import { useThemeToken } from '@/theme/hooks';
 import { color } from 'framer-motion';
 import ImportOmr from './OmrImport/ImportOmr';
 import { useProjectId } from '@/store/ProjectState';
 
-import { handleDecrypt } from '@/Security/Security';
+import { handleDecrypt, handleEncrypt } from '@/Security/Security';
 
 import { Upload, Button, Table, notification, Modal } from 'antd';
 
@@ -31,19 +31,20 @@ const Import = () => {
   const [lastUploadedFile, setLastUploadedFile] = useState('');
   const ProjectId = useProjectId();
 
-
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (file && activetab === 'OMRImages') {
       setSelectedFile(file);
-
     } else if (file && ['scanned', 'registration', 'absentee'].includes(activetab)) {
-      if (activetab === 'scanned' && (file.type === 'text/csv' || file.type === 'application/dat')) {
-
+      if (
+        activetab === 'scanned' &&
+        (file.type === 'text/csv' || file.type === 'application/dat')
+      ) {
         setSelectedFile(file);
-
-      } else if ((activetab === 'registration' || activetab === 'absentee') && file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
-
+      } else if (
+        (activetab === 'registration' || activetab === 'absentee') &&
+        file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      ) {
         setSelectedFile(file);
 
         const reader = new FileReader();
@@ -65,12 +66,13 @@ const Import = () => {
     }
   };
 
-
   useEffect(() => {
     // Fetch mapping fields from backend
     const fetchMappingFields = async () => {
       try {
-        const response = await fetch(`${apiurl}/Absentee/absentee/mapping-fields?WhichDatabase=Local`);
+        const response = await fetch(
+          `${apiurl}/Absentee/absentee/mapping-fields?WhichDatabase=Local`,
+        );
         const data = await response.json();
 
         // Transform array data into object format
@@ -87,21 +89,20 @@ const Import = () => {
     fetchMappingFields();
   }, []);
 
-
   const handleAbsenteeUpload = async (projectId) => {
     if (selectedFile) {
       setLoading(true);
       const reader = new FileReader();
-  
+
       reader.onload = async (event) => {
         const data = new Uint8Array(event.target.result);
         const workbook = XLSX.read(data, { type: 'array' });
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
         const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-  
+
         const rows = jsonData.slice(1); // Exclude headers
-        const mappedData = rows.map(row => {
+        const mappedData = rows.map((row) => {
           const rowData = {};
           for (let property in mapping) {
             const header = mapping[property];
@@ -113,18 +114,25 @@ const Import = () => {
           rowData['projectId'] = ProjectId;
           return rowData;
         });
-        
+
         try {
-          const response = await fetch(`${apiurl}/Absentee/upload?WhichDatabase=Local&ProjectId=${ProjectId}`, {
-            method: 'POST',
+          const jsonmappeddata = JSON.stringify(mappedData);
+          const encryptedData = handleEncrypt(jsonmappeddata);
+          const encrypteddatatosend = {
+            cyphertextt: encryptedData,
+          };
+
+          const response = await axios.post(`${apiurl}/Absentee/upload`, encrypteddatatosend, {
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify(mappedData),
+            params: {
+              WhichDatabase: 'Local',
+              ProjectId: ProjectId,
+            },
           });
           
   
-          const responseData = await response.json();
           notification.success({
             message: 'Upload successful!',
             duration: 3,
@@ -139,7 +147,7 @@ const Import = () => {
           setLoading(false);
         }
       };
-  
+
       reader.readAsArrayBuffer(selectedFile);
     } else {
       console.error('No file selected.');
@@ -147,53 +155,56 @@ const Import = () => {
         message: 'No file selected!',
         duration: 3,
       })
+      notification.error({
+        message: 'No file selected!',
+        duration: 3,
+      })
       setLoading(false);
     }
-  
+
     setSelectedFile(null); // Reset selected file after upload
   };
-  
 
   useEffect(() => {
-    if (activetab === "scanned") {
+    if (activetab === 'scanned') {
       if (selectedFile) {
         const reader = new FileReader();
         reader.onload = (event) => {
           const content = event.target.result;
-          const rows = content.split('\n').map(row => row.split(','));
-          const headersFromFile = rows[0].map(header => header.trim().replace(/"/g, ''));
+          const rows = content.split('\n').map((row) => row.split(','));
+          const headersFromFile = rows[0].map((header) => header.trim().replace(/"/g, ''));
           setHeaders(headersFromFile);
         };
         reader.readAsText(selectedFile);
       }
     }
-
   }, [selectedFile]);
 
   useEffect(() => {
     // Fetch field mappings from the backend
     const fetchFieldMappings = async () => {
       try {
-
-        const response = await axios.get(`${apiurl}/FieldConfigurations/GetByProjectId/${ProjectId}?WhichDatabase=Local`);
+        const response = await axios.get(
+          `${apiurl}/FieldConfigurations/GetByProjectId/${ProjectId}?WhichDatabase=Local`,
+        );
         if (response.data.length == 0) {
 
           throw new Error('Failed to fetch field mappings');
         }
-        let decryptedData = handleDecrypt(response.data)
-        let dataJson = JSON.parse(decryptedData)
+        let decryptedData = handleDecrypt(response.data);
+        let dataJson = JSON.parse(decryptedData);
 
         const mappings = dataJson?.map((item) => ({
-          field: item.FieldName
-
+          field: item.FieldName,
         }));
 
-        mappings.push({ field: "Answers" });
-        mappings.push({ field: "Barcode" });
-        mappings.push({ field: "NCS" });
+        mappings.push({ field: 'Answers' });
+        mappings.push({ field: 'Barcode' });
+        mappings.push({ field: 'NCS' });
 
-
-        setFieldMappings(mappings.reduce((acc, current) => ({ ...acc, [current.field]: current }), {}));
+        setFieldMappings(
+          mappings.reduce((acc, current) => ({ ...acc, [current.field]: current }), {}),
+        );
       } catch (error) {
         console.error('Error fetching field mappings:', error);
       }
@@ -201,26 +212,23 @@ const Import = () => {
     fetchFieldMappings();
   }, []);
 
-
   useEffect(() => {
     const fetchRegistrationMappings = async () => {
       try {
-
-        const response = await axios.get(`${apiurl}/FieldConfigurations/GetByProjectId/${ProjectId}?WhichDatabase=Local`);
-        if (response.data.length==0) {
-
+        const response = await axios.get(
+          `${apiurl}/FieldConfigurations/GetByProjectId/${ProjectId}?WhichDatabase=Local`,
+        );
+        if (response.data.length == 0) {
           throw new Error('Failed to fetch field mappings');
         }
-        let decryptedData = handleDecrypt(response.data)
-        let dataJson = JSON.parse(decryptedData)
-
+        let decryptedData = handleDecrypt(response.data);
+        let dataJson = JSON.parse(decryptedData);
 
         // Transform array data into object format
         const initialMapping = dataJson.reduce((acc, item) => {
           acc[item.FieldName] = '';
           return acc;
         }, {});
-
 
         setRegistrationMapping(initialMapping);
       } catch (error) {
@@ -230,12 +238,9 @@ const Import = () => {
     fetchRegistrationMappings();
   }, []);
 
-
-
   const handleFieldMappingChange = (e, field) => {
-    setFieldMappings((prevMappings) => ({ ...prevMappings, [field]: e.target.value || ''}));
+    setFieldMappings((prevMappings) => ({ ...prevMappings, [field]: e.target.value || '' }));
   };
-
 
   const handleScannedUpload = async () => {
     if (selectedFile) {
@@ -248,7 +253,9 @@ const Import = () => {
         const mappingObject = {};
 
         headers.forEach((header) => {
-          const matchingField = Object.keys(fieldMappings).find(key => fieldMappings[key] === header);
+          const matchingField = Object.keys(fieldMappings).find(
+            (key) => fieldMappings[key] === header,
+          );
           if (matchingField) {
             mappingObject[header] = matchingField;
           } else {
@@ -266,18 +273,6 @@ const Import = () => {
             }
           });
 
-          // if (rowData['Answers']) {
-          //   const answers = {};
-          //   const ansArray = rowData['Answers'].split('');
-          //   for (let i = 0; i < 100; i++) {
-          //     if (i < ansArray.length) {
-          //       answers[i + 1] = `'${ansArray[i]}'`;
-          //     } else {
-          //       answers[i + 1] = "''";
-          //     }
-          //   }
-          //   rowData['Answers'] = JSON.stringify(answers).replace(/"/g, '');
-          // }
 
           if (rowData['Answers']) {
             const answers = {};
@@ -300,31 +295,35 @@ const Import = () => {
         });
 
         try {
-          const response = await fetch(`${apiurl}/OMRData/uploadcsv?WhichDatabase=Local&ProjectId=${ProjectId}`, {
-            method: 'POST',
+          const jsonmappedscanneddata = JSON.stringify(parsedData);
+          console.log(jsonmappedscanneddata);
+          const encryptedData = handleEncrypt(jsonmappedscanneddata);
+          console.log(encryptedData);
+          const encryptedscanneddatatosend = {
+            cyphertextt: encryptedData,
+          };
+          const response = await axios.post(`${apiurl}/OMRData/uploadcsv`, encryptedscanneddatatosend, {
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify(parsedData),
+            params: {
+              WhichDatabase: 'Local',
+              ProjectId: ProjectId,
+            },
           });
           const contentType = response.headers.get('content-type');
 
           if (contentType && contentType.indexOf('application/json') !== -1) {
-            const data = await response.json();
            notification.success({
             message: 'Upload successful!',
             duration:3
-           })
-           
+           })           
           } else {
-            const text = await response.text();
-
             notification.success({
               message: 'Upload successful!',
               duration:3
              })
           }
-
         } catch (error) {
           console.error('Error uploading data:', error);
           notification.error({
@@ -349,23 +348,18 @@ const Import = () => {
     }
   };
 
-
-
   const handleRegistrationMappingChange = (e, field) => {
-    setRegistrationMapping(prevMappings => ({
+    setRegistrationMapping((prevMappings) => ({
       ...prevMappings,
-      [field]: e.target.value || ''
+      [field]: e.target.value || '',
     }));
   };
 
-  useEffect(() => {
-  }, [registrationMapping]);
-
-
+  useEffect(() => {}, [registrationMapping]);
 
   const handleRegistrationUpload = async (event) => {
     event.preventDefault();
-  
+
     if (!selectedFile) {
       console.error('No file selected.');
       notification.warning({
@@ -375,10 +369,10 @@ const Import = () => {
       setLoading(false);
       return;
     }
-  
+
     setLoading(true);
     const reader = new FileReader();
-  
+
     reader.onload = async (e) => {
       try {
         const data = new Uint8Array(e.target.result);
@@ -388,8 +382,8 @@ const Import = () => {
         const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
         const headers = jsonData[0]; // Extract headers from the first row
         const rows = jsonData.slice(1); // Exclude headers
-  
-        const mappedData = rows.map(row => {
+
+        const mappedData = rows.map((row) => {
           const rowData = {};
           for (let property in registrationMapping) {
             const header = registrationMapping[property];
@@ -397,17 +391,19 @@ const Import = () => {
             if (index !== -1) {
               rowData[property] = String(row[index]); // Ensure data is converted to a string if necessary
             } else {
-              console.warn(`Header '${header}' not found in Excel data. Skipping field '${property}'.`);
+              console.warn(
+                `Header '${header}' not found in Excel data. Skipping field '${property}'.`,
+              );
             }
           }
           return rowData;
         });
-  
-        const validMappedData = mappedData.filter(row => {
+
+        const validMappedData = mappedData.filter((row) => {
           // Check if all mapped fields have corresponding headers
-          return Object.keys(row).every(field => row[field] !== undefined && row[field] !== '');
+          return Object.keys(row).every((field) => row[field] !== undefined && row[field] !== '');
         });
-  
+
         if (validMappedData.length === 0) {
           console.warn('No valid data to upload. Ensure all required fields are mapped.');
           notification.warning({
@@ -418,21 +414,30 @@ const Import = () => {
           setSelectedFile(null);
           return;
         }
-  
-        const response = await fetch(`${apiurl}/Registration?WhichDatabase=Local&ProjectId=${ProjectId}`, {
-          method: 'POST',
+
+        const jsonmappedregdata = JSON.stringify(mappedData);
+        const encryptedData = handleEncrypt(jsonmappedregdata);
+        const encryptedregdatatosend = {
+          cyphertextt: encryptedData,
+        };
+
+        // const response = await fetch(`${apiurl}/Registration?WhichDatabase=Local&ProjectId=${ProjectId}`, {
+        //   method: 'POST',
+        //   headers: {
+        //     'Content-Type': 'application/json',
+        //   },
+        //   body: JSON.stringify(validMappedData),
+        // });
+        const response = await axios.post(`${apiurl}/Registration?`, encryptedregdatatosend, {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(validMappedData),
+          params: {
+            WhichDatabase: 'Local',
+            ProjectId: ProjectId,
+          },
         });
-  
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-  
-        const responseData = await response.json();
-        notification.success({
+      notification.success({
           message: 'Upload successful!',
           duration:3
          })
@@ -447,73 +452,105 @@ const Import = () => {
         setSelectedFile(null);
       }
     };
-  
+
     reader.readAsArrayBuffer(selectedFile); // Read file as ArrayBuffer
   };
-  
 
   const handleMappingChange = (e, property) => {
     setMapping((prevMapping) => ({
       ...prevMapping,
-      [property]: e.target.value || ''
+      [property]: e.target.value || '',
     }));
   };
 
-
-
   return (
     <div>
-
-      <section style={{ minHeight: "70vh" }} className=' container-fluid pb-4 border border-2 rounded'>
+      <section
+        style={{ minHeight: '70vh' }}
+        className=" container-fluid rounded border border-2 pb-4"
+      >
         <div className="container">
           <div className="row">
             <div className="board-pq">
               <div className="">
                 <ul className="d-flex align-items-center justify-content-around my-4" id="myTab">
-                  <li style={{ border: `2px solid ${colorPrimary}` }} className='tabcircle' onClick={() => { setActivetab('OMRImages'); setSelectedFile(null); }}>
+                  <li
+                    style={{ border: `2px solid ${colorPrimary}` }}
+                    className="tabcircle"
+                    onClick={() => {
+                      setActivetab('OMRImages');
+                      setSelectedFile(null);
+                    }}
+                  >
                     <a data-toggle="tab" title="OMR Images">
                       <span className="round-tabs-pq one-pq">
                         <i className="fa-regular fa-image " style={{ color: colorPrimary }}></i>
                       </span>
                     </a>
                   </li>
-                  <span className='tabline'></span>
+                  <span className="tabline"></span>
 
-                  <li style={{ border: `2px solid ${colorPrimary}` }} className='tabcircle' onClick={() => { setActivetab('scanned'); setSelectedFile(null); setAlertMessage(null); setAlertType(null); setHeaders([]); }}>
-                    <a data-toggle="tab" title="Scanned Data" >
-
+                  <li
+                    style={{ border: `2px solid ${colorPrimary}` }}
+                    className="tabcircle"
+                    onClick={() => {
+                      setActivetab('scanned');
+                      setSelectedFile(null);
+                      setAlertMessage(null);
+                      setAlertType(null);
+                      setHeaders([]);
+                    }}
+                  >
+                    <a data-toggle="tab" title="Scanned Data">
                       <span className="round-tabs-pq two-pq">
                         <i className="fa-solid fa-file-csv" style={{ color: colorPrimary }}></i>
                       </span>
                     </a>
                   </li>
-                  <span className='tabline'></span>
+                  <span className="tabline"></span>
 
-                  <li style={{ border: `2px solid ${colorPrimary}` }} className='tabcircle' onClick={() => { setActivetab('registration'); setSelectedFile(null); setHeaders([]); setAlertMessage(null); setAlertType(null); }}>
+                  <li
+                    style={{ border: `2px solid ${colorPrimary}` }}
+                    className="tabcircle"
+                    onClick={() => {
+                      setActivetab('registration');
+                      setSelectedFile(null);
+                      setHeaders([]);
+                      setAlertMessage(null);
+                      setAlertType(null);
+                    }}
+                  >
                     <a data-toggle="tab" title="Registration Data">
                       <span className="round-tabs-pq three-pq">
                         <i className="fa-regular fa-id-card" style={{ color: colorPrimary }}></i>
                       </span>
                     </a>
                   </li>
-                  <span className='tabline'></span>
+                  <span className="tabline"></span>
 
-                  <li style={{ border: `2px solid ${colorPrimary}` }} className='tabcircle' onClick={() => { setActivetab('absentee'); setSelectedFile(null); setHeaders([]); setAlertMessage(null); setAlertType(null); }}>
+                  <li
+                    style={{ border: `2px solid ${colorPrimary}` }}
+                    className="tabcircle"
+                    onClick={() => {
+                      setActivetab('absentee');
+                      setSelectedFile(null);
+                      setHeaders([]);
+                      setAlertMessage(null);
+                      setAlertType(null);
+                    }}
+                  >
                     <a data-toggle="tab" title="Absentee Data">
-
                       <span className="round-tabs-pq four-pq ">
-                        <i className="fa-solid fa-file-excel" style={{ color: colorPrimary }} ></i>
+                        <i className="fa-solid fa-file-excel" style={{ color: colorPrimary }}></i>
                       </span>
                     </a>
                   </li>
                 </ul>
               </div>
               <div className="tab-content-pq">
-                {fieldNamesArray.map((item) => {
-
-                })}
+                {fieldNamesArray.map((item) => {})}
                 {activetab === 'OMRImages' && <ImportOmr />}
-                {activetab === 'scanned' &&
+                {activetab === 'scanned' && (
                   <Scanned
                     handleFileUpload={handleFileUpload}
                     handleScannedUpload={handleScannedUpload}
@@ -524,8 +561,9 @@ const Import = () => {
                     headers={headers}
                     fieldMappings={fieldMappings}
                     handleFieldMappingChange={handleFieldMappingChange}
-                  />}
-                {activetab === 'registration' &&
+                  />
+                )}
+                {activetab === 'registration' && (
                   <Registration
                     handleFileUpload={handleFileUpload}
                     handleRegistrationUpload={handleRegistrationUpload}
@@ -536,7 +574,8 @@ const Import = () => {
                     registrationMapping={registrationMapping}
                     handleRegistrationMappingChange={handleRegistrationMappingChange}
                     loading={loading}
-                  />}
+                  />
+                )}
                 {activetab === 'absentee' && (
                   <Absentee
                     handleFileUpload={handleFileUpload}
@@ -548,7 +587,8 @@ const Import = () => {
                     mapping={mapping}
                     handleMappingChange={handleMappingChange}
                     loading={loading}
-                  />)}
+                  />
+                )}
                 <div className="clearfix-pq"></div>
               </div>
             </div>
@@ -557,7 +597,6 @@ const Import = () => {
       </section>
     </div>
   );
-
 };
 
 export default Import;
