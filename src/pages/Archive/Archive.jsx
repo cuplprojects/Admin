@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Typography, Input } from 'antd';
+import { Table, Typography, Input, Modal, notification } from 'antd';
 import './../Masters/Projects/Project.css';
+import { useUserInfo } from '@/store/UserDataStore';
 
 const apiurl = import.meta.env.VITE_API_URL;
 
 function Archive() {
   const [data, setData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
   const [sortedInfo, setSortedInfo] = useState({});
   const [searchTerm, setSearchTerm] = useState('');
+  const [confirmModalVisible, setConfirmModalVisible] = useState(false);
+  const [projectToUnarchive, setProjectToUnarchive] = useState(null);
+  const { userId } = useUserInfo();
 
   useEffect(() => {
     fetchData();
@@ -15,16 +20,70 @@ function Archive() {
 
   const fetchData = async () => {
     try {
-      const response = await fetch(`${apiurl}/Projects?WhichDatabase=Local`);
+      const response = await fetch(
+        `${apiurl}/Projects/ArchivedByUser?userId=${userId}&WhichDatabase=Local`,
+      );
       const data = await response.json();
-      setData(data.map((item, index) => ({ ...item, key: index.toString(), serialNo: index + 1 })));
+      const processedData = data.map((item) => ({
+        ...item,
+        key: item.projectId.toString(),
+      }));
+      setData(processedData);
+      setFilteredData(processedData);
     } catch (error) {
       console.error('Error fetching data:', error);
     }
   };
 
+  const showConfirmModal = (projectId) => {
+    setProjectToUnarchive(projectId);
+    setConfirmModalVisible(true);
+  };
+
+  const handleConfirmModalOk = async () => {
+    if (projectToUnarchive) {
+      try {
+        const response = await fetch(
+          `${apiurl}/Projects/${projectToUnarchive}/unarchive?userId=${userId}&WhichDatabase=Local`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          },
+        );
+
+        if (response.ok) {
+          fetchData();
+          notification.success({
+            message: 'Success',
+            description: 'Project unarchived successfully',
+          });
+          setData(data.filter((item) => item.projectId !== projectToUnarchive));
+          setFilteredData(filteredData.filter((item) => item.projectId !== projectToUnarchive));
+        } else {
+          notification.error({
+            message: 'Error',
+            description: 'Failed to unarchive project',
+          });
+        }
+      } catch (error) {
+        console.error('Error unarchiving project:', error);
+        notification.error({
+          message: 'Error',
+          description: 'Error unarchiving project',
+        });
+      } finally {
+        setConfirmModalVisible(false);
+      }
+    }
+  };
+
+  const handleConfirmModalCancel = () => {
+    setConfirmModalVisible(false);
+  };
+
   const handleChange = (pagination, filters, sorter) => {
-    console.log('Various parameters', pagination, filters, sorter);
     setSortedInfo({
       order: sorter.order,
       columnKey: sorter.field,
@@ -33,30 +92,20 @@ function Archive() {
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
-    const filteredData = data.filter(item =>
-      item.projectName.toLowerCase().includes(e.target.value.toLowerCase())
+    const filteredData = data.filter((item) =>
+      item.projectName.toLowerCase().includes(e.target.value.toLowerCase()),
     );
-    setData(filteredData);
-  };
-
-  const handleArchive = async (key) => {
-    try {
-      // Implement your archive logic here
-      console.log('Archive project with key:', key);
-      // Assuming you want to fetch updated data after archiving
-      fetchData();
-    } catch (error) {
-      console.error('Error archiving project:', error);
-    }
+    setFilteredData(filteredData);
   };
 
   const columns = [
     {
       title: 'Serial No',
-      dataIndex: 'serialNo',
+      dataIndex: 'projectId',
       width: '10%',
-      sorter: (a, b) => a.serialNo - b.serialNo,
-      sortOrder: sortedInfo.columnKey === 'serialNo' && sortedInfo.order,
+      sorter: (a, b) => a.projectId - b.projectId,
+      sortOrder: sortedInfo.columnKey === 'projectId' && sortedInfo.order,
+      render: (text) => <span>{text}</span>,
     },
     {
       title: 'Project Name',
@@ -71,7 +120,9 @@ function Archive() {
       width: '35%',
       render: (_, record) => (
         <span>
-          {Array.isArray(record.userAssigned) ? record.userAssigned.join(', ') : record.userAssigned}
+          {Array.isArray(record.userAssigned)
+            ? record.userAssigned.join(', ')
+            : record.userAssigned}
         </span>
       ),
     },
@@ -79,18 +130,17 @@ function Archive() {
       title: 'Actions',
       dataIndex: 'operation',
       render: (_, record) => (
-        <Typography.Link
-          onClick={() => handleArchive(record.key)}
-        >
-          Unarchive
-        </Typography.Link>
+        <Typography.Link onClick={() => showConfirmModal(record.projectId)}>Unarchive</Typography.Link>
       ),
     },
   ];
 
   return (
     <div className="mt-5">
-      <div className="d-flex align-items-center justify-content-between w-100" style={{ marginBottom: 16 }}>
+      <div
+        className="d-flex align-items-center justify-content-between w-100"
+        style={{ marginBottom: 16 }}
+      >
         <Input
           placeholder="Search Project"
           value={searchTerm}
@@ -100,11 +150,19 @@ function Archive() {
       </div>
       <Table
         bordered
-        dataSource={data}
+        dataSource={filteredData}
         columns={columns}
         rowKey="key"
         onChange={handleChange}
       />
+      <Modal
+        title="Confirm Unarchive"
+        open={confirmModalVisible}
+        onOk={handleConfirmModalOk}
+        onCancel={handleConfirmModalCancel}
+      >
+        <p>Are you sure you want to unarchive this project?</p>
+      </Modal>
     </div>
   );
 }

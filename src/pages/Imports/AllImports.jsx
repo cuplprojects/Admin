@@ -35,7 +35,6 @@ const Import = () => {
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (file && activetab === 'OMRImages') {
-      console.log('Files uploaded:', e.target.files);
       setSelectedFile(file);
 
     } else if (file && ['scanned', 'registration', 'absentee'].includes(activetab)) {
@@ -175,8 +174,10 @@ const Import = () => {
     // Fetch field mappings from the backend
     const fetchFieldMappings = async () => {
       try {
+
         const response = await axios.get(`${apiurl}/FieldConfigurations/GetByProjectId/${ProjectId}?WhichDatabase=Local`);
         if (response.data.length == 0) {
+
           throw new Error('Failed to fetch field mappings');
         }
         let decryptedData = handleDecrypt(response.data)
@@ -204,8 +205,10 @@ const Import = () => {
   useEffect(() => {
     const fetchRegistrationMappings = async () => {
       try {
+
         const response = await axios.get(`${apiurl}/FieldConfigurations/GetByProjectId/${ProjectId}?WhichDatabase=Local`);
         if (response.data.length==0) {
+
           throw new Error('Failed to fetch field mappings');
         }
         let decryptedData = handleDecrypt(response.data)

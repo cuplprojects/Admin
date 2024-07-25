@@ -17,6 +17,7 @@ const Audit = lazy(() => import('@/pages/AuditPage/Audit'));
 
 const Correction = lazy(() => import('@/pages/correction/CorrectionPage'));
 const ProjectDashboard = lazy(() => import('@/pages/ProjectDashboard'));
+const UserProfile =  lazy(() => import('@/pages/management/user/profile'));
 
 
 
@@ -64,6 +65,19 @@ const others: AppRouteObject[] = [
       label: 'sys.menu.correctionwindow',
       icon: <Iconify icon="solar:document-add-bold-duotone" size={24} />,
       key: '/correction',
+    },
+  },
+  {
+    path: 'profile',
+    element: (
+      <Wrapper>
+        <UserProfile />
+      </Wrapper>
+    ),
+    meta: {
+      label: 'User Profile',
+      icon: <Iconify icon="solar:user-bold-duotone" size={24} />,
+      key: '/user/profile',
     },
   },
   {

@@ -1,18 +1,36 @@
-import { Button, Form, Input } from 'antd';
+import { Button, Form, Input, notification } from 'antd';
 import { useTranslation } from 'react-i18next';
+import axios from 'axios';
 
 import { SvgIcon } from '@/components/icon';
-
 import { ReturnButton } from './components/ReturnButton';
 import { LoginStateEnum, useLoginStateContext } from './providers/LoginStateProvider';
 
-function ResetForm() {
-  const onFinish = (values: any) => {
-    console.log('Received values of form: ', values);
-  };
+const apiUrl = import.meta.env.VITE_API_URL;
 
+function ResetForm() {
   const { t } = useTranslation();
   const { loginState, backToLogin } = useLoginStateContext();
+
+  const onFinish = async (values: any) => {
+    try {
+      const resetdata = {
+        email: values.email,
+        password: 'string',
+      };
+
+      const response = await axios.put(`${apiUrl}/Login/Forgotpassword`, resetdata);
+
+      if (response.status === 200) {
+        notification.success({ message: 'Reset password link sent to your email' });
+      } else {
+        notification.error({ message: 'Failed to send reset password link' });
+      }
+    } catch (error) {
+      console.error('Error in sending reset password request:', error);
+      notification.error({ message: 'Error', description: error.message, duration: 2 });
+    }
+  };
 
   if (loginState !== LoginStateEnum.RESET_PASSWORD) return null;
 
@@ -33,11 +51,10 @@ function ResetForm() {
           <Input placeholder={t('sys.login.email')} />
         </Form.Item>
         <Form.Item>
-          <Button type="primary" htmlType="submit" className="w-full !bg-black">
+          <Button type="primary" htmlType="submit" className="w-full">
             {t('sys.login.sendEmailButton')}
           </Button>
         </Form.Item>
-
         <ReturnButton onClick={backToLogin} />
       </Form>
     </>

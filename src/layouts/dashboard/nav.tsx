@@ -165,7 +165,6 @@
 
 // export default Nav;
 
-
 import { MenuUnfoldOutlined, MenuFoldOutlined } from '@ant-design/icons';
 import { Menu, MenuProps } from 'antd';
 
@@ -188,6 +187,7 @@ import { NAV_COLLAPSED_WIDTH, NAV_WIDTH } from './config';
 import { ThemeLayout } from '#/enum';
 import { ItemType } from 'antd/es/menu/interface';
 import { useProjectId } from '@/store/ProjectState';
+import { AppRouteObject } from '#/router';
 
 const slideInLeft = varSlide({ distance: 10 }).inLeft;
 
@@ -221,7 +221,7 @@ export default function Nav(props: Props) {
   const [selectedKeys, setSelectedKeys] = useState<string[]>(['']);
   const [menuList, setMenuList] = useState<ItemType[]>([]);
   const [menuMode, setMenuMode] = useState<MenuProps['mode']>('inline');
-const projectId = useProjectId();
+  const projectId = useProjectId();
 
   useEffect(() => {
     if (menuList?.length > 0) {
@@ -235,22 +235,48 @@ const projectId = useProjectId();
     }
   }, [menuList, pathname, matches, collapsed, themeLayout]);
 
+  const filterRoutesByPath = (routes: AppRouteObject[], paths: string[]) => {
+    return routes.filter((route) => {
+      const routePath = route.path ?? '';
+      return paths.includes(routePath);
+    });
+  };
+  
+  const filterRoutesByPathExclude = (routes: AppRouteObject[], paths: string[]) => {
+    return routes.filter((route) => {
+      const routePath = route.path ?? '';
+      return !paths.includes(routePath);
+    });
+  };
+  
   useEffect(() => {
-    if (projectId>0) {
-      const menuRoutes = menuFilter([permissionRoutes[3], permissionRoutes[4], permissionRoutes[5], permissionRoutes[6], permissionRoutes[7],permissionRoutes[8],permissionRoutes[9],permissionRoutes[10],permissionRoutes[11]]);
-      const menus = routeToMenuFn(menuRoutes);
-      setMenuList(menus);
 
+    // const parentIdsForProject = [ 'ProjectDashboard','correction'];
+    const excludeINBoth = [ 'default']
+    const parentIdsForOther = [ 'dashboard','superadmin','Masters','management','Archive',...excludeINBoth];
+
+
+    let filteredRoutes;
+
+    if (projectId > 0) {
+     
+      filteredRoutes = filterRoutesByPathExclude(permissionRoutes, parentIdsForOther);
+      // Output the results for debugging
+    } else {
+      // Filter routes based on other parent IDs
+      filteredRoutes = filterRoutesByPathExclude(filterRoutesByPath(permissionRoutes, parentIdsForOther),excludeINBoth);
+      // filteredRoutes = permissionRoutes;
     }
-    else {
-      const menuRoutes = menuFilter([permissionRoutes[0], permissionRoutes[1], permissionRoutes[2]]);
+    
+    // Process the filtered routes with menuFilter
+    const menuRoutes = menuFilter(filteredRoutes);
 
-      const menus = routeToMenuFn(menuRoutes);
-      setMenuList(menus);
-    }
+    // Convert routes to menu items
+    const menus = routeToMenuFn(menuRoutes);
 
-
-  }, [permissionRoutes, routeToMenuFn,projectId]);
+    // Set the menu list state
+    setMenuList(menus);
+  }, [permissionRoutes, routeToMenuFn, projectId]);
 
   useEffect(() => {
     if (themeLayout === ThemeLayout.Vertical) {
@@ -270,7 +296,6 @@ const projectId = useProjectId();
     setOpenKeys(keys);
   };
   const onClick: MenuProps['onClick'] = ({ key }) => {
-
     //Match the currently clicked one from the flattened routing information
     const nextLink = flattenedRoutes?.find((el) => el.key === key);
 
@@ -328,7 +353,6 @@ const projectId = useProjectId();
           {collapsed ? <MenuUnfoldOutlined size={20} /> : <MenuFoldOutlined size={20} />}
         </button>
       </div>
-
 
       <Scrollbar
         style={{

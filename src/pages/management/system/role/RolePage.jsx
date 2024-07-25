@@ -1,92 +1,94 @@
-import React, { useState } from 'react';
-import { Button, Card, Table, Popconfirm, message } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Button, Card, Table, Popconfirm, notification } from 'antd';
+import axios from 'axios';
 import { IconButton, Iconify } from '@/components/icon';
 import RoleModal from './role-modal';
-import { BasicStatus } from '#/enum'; // Assuming this is correctly imported
 
-// Mock data for roles (replace with actual data handling logic)
-let ROLES = [
-  {
-    id: '1',
-    name: 'Role A',
-    label: 'Role A Label',
-    status: BasicStatus.ENABLE,
-    permission: ['1.1', '1.1.1', '1.2', '1.2.1', '1.2.2', '1.2.3'],
-    desc: 'Description for Role A',
-    order: 1,
-  },
-  {
-    id: '2',
-    name: 'Role B',
-    label: 'Role B Label',
-    status: BasicStatus.DISABLE,
-    permission: ['2.1', '2.1.1', '2.2', '2.2.1', '2.2.2'],
-    desc: 'Description for Role B',
-    order: 2,
-  },
-];
+const apiUrl = import.meta.env.VITE_API_URL;
 
 const DEFAULT_ROLE_VALUE = {
-  id: '',
-  name: '',
-  label: '',
-  status: BasicStatus.ENABLE,
-  permission: [],
-  desc: '',
-  order: 0,
+  roleId: 0,
+  roleName: '',
+  isActive: true,
+  permissionList: [],
 };
 
 const RolePage = () => {
+  const [roles, setRoles] = useState([]);
+
+  useEffect(() => {
+    getRoles();
+  }, []);
+
+  const getRoles = async () => {
+    try {
+      const response = await axios.get(`${apiUrl}/Roles?WhichDatabase=Local`);
+      setRoles(response.data);
+    } catch (error) {
+      notification.error({
+        message: 'Error',
+        description: 'Error getting roles',
+        duration: 2,
+      });
+    }
+  };
+
   const [roleModalProps, setRoleModalProps] = useState({
     formValue: { ...DEFAULT_ROLE_VALUE },
     title: 'New',
     show: false,
-    onOk: (role) => {
-      if (role.id) {
-        // Update existing role
-        console.log('Updated Role:', role); // Log updated role data
-        message.success('Role updated successfully');
-      } else {
-        // Add new role
-        // role.id = String(ROLES.length + 1); // Replace with actual ID logic
-        // ROLES.push(role);
-        console.log('Created Role:', role); // Log newly created role data
-        message.success('Role created successfully');
+    onOk: async (role) => {
+      try {
+        if (role.roleId) {
+          // Update existing role
+          await axios.put(`${apiUrl}/Roles/${role.roleId}?WhichDatabase=Local`, role);
+          notification.success({
+            message: 'Success',
+            description: 'Role updated successfully',
+            duration: 2
+          });
+        } else {
+          // Add new role
+          await axios.post(`${apiUrl}/Roles?WhichDatabase=Local`, role);
+          notification.success({
+            message: 'Success',
+            description: 'Role added successfully',
+            duration: 2,
+          });
+        }
+        getRoles(); // Refresh roles
+      } catch (error) {
+        notification.error({
+          message: 'Error',
+          description: 'Failed to save role',
+          duration: 2,
+        });
+      } finally {
+        setRoleModalProps((prev) => ({ ...prev, show: false }));
       }
-      setRoleModalProps((prev) => ({ ...prev, show: false }));
     },
     onCancel: () => {
       setRoleModalProps((prev) => ({ ...prev, show: false }));
     },
   });
-
+  
   const columns = [
     {
+      title: 'ID',
+      dataIndex: 'roleId',
+      width: 100,
+    },
+    {
       title: 'Name',
-      dataIndex: 'name',
+      dataIndex: 'roleName',
       width: 200,
     },
     {
-      title: 'Label',
-      dataIndex: 'label',
-    },
-    {
-      title: 'Order',
-      dataIndex: 'order',
-      width: 60,
-    },
-    {
       title: 'Status',
-      dataIndex: 'status',
+      dataIndex: 'isActive',
       align: 'center',
       width: 100,
-      render: (status) => (
-        <span>{status === BasicStatus.DISABLE ? 'Disable' : 'Enable'}</span>
-      ),
-    },
-    {
-      title: 'Desc',
-      dataIndex: 'desc',
+      render: (status) => <span>{status === false ? 'Disable' : 'Enable'}</span>,
     },
     {
       title: 'Action',
@@ -102,15 +104,11 @@ const RolePage = () => {
             title="Delete the Role?"
             okText="Yes"
             cancelText="No"
-            onConfirm={() => onDelete(record.id)}
+            onConfirm={() => onDelete(record.roleId)}
             placement="left"
           >
             <IconButton>
-              <Iconify
-                icon="mingcute:delete-2-fill"
-                size={18}
-                className="text-error"
-              />
+              <Iconify icon="mingcute:delete-2-fill" size={18} className="text-error" />
             </IconButton>
           </Popconfirm>
         </div>
@@ -132,15 +130,22 @@ const RolePage = () => {
       ...prev,
       show: true,
       title: 'Edit',
-      formValue,
+      formValue: { ...formValue }, // Pass the record to edit
     }));
   };
 
-  const onDelete = (roleId) => {
-    // Delete logic here (e.g., call API or update state)
-    const updatedRoles = ROLES.filter((role) => role.id !== roleId);
-    ROLES = updatedRoles; // Update the ROLES array
-    message.success('Role deleted successfully');
+  const onDelete = async (roleId) => {
+    try {
+      await axios.delete(`${apiUrl}/Roles/${roleId}?WhichDatabase=Local`);
+      setRoles((prevRoles) => prevRoles.filter((role) => role.roleId !== roleId));
+      message.success('Role deleted successfully');
+    } catch (error) {
+      notification.error({
+        message: 'Error',
+        description: 'Failed to delete role',
+        duration: 2,
+      });
+    }
   };
 
   return (
@@ -152,13 +157,7 @@ const RolePage = () => {
         </Button>
       }
     >
-      <Table
-        rowKey="id"
-        size="small"
-        pagination={false}
-        columns={columns}
-        dataSource={ROLES}
-      />
+      <Table rowKey="roleId" size="small" pagination={false} columns={columns} dataSource={roles} />
       <RoleModal {...roleModalProps} />
     </Card>
   );

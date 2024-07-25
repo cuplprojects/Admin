@@ -53,4 +53,6 @@ export type AppRouteObject = {
   order?: number;
   meta?: RouteMeta;
   children?: AppRouteObject[];
+  parentId?: string;  // Add this line
+  id?: string;  // Add this line
 } & Omit<RouteObject, 'children'>;

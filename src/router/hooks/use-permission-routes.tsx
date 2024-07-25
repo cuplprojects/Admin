@@ -4,7 +4,7 @@ import { Navigate, Outlet } from 'react-router-dom';
 
 import { Iconify } from '@/components/icon';
 import { CircleLoading } from '@/components/loading';
-import { useUserPermission } from '@/store/userStore';
+import { useUserPermission } from '@/store/UserDataStore';
 import ProTag from '@/theme/antd/components/tag';
 import { flattenTrees } from '@/utils/tree';
 
@@ -19,7 +19,7 @@ const pages = {
   ...import.meta.glob('/src/pages/**/*.jsx'),
 };
 
-export const pagesSelect = Object.entries(pages).map(([path]) => {
+export const pagesSelect = Object.entries(pages).map(([path]) => {  
   const pagePath = path.replace(entryPath, '');
   return {
     label: pagePath,
@@ -35,11 +35,25 @@ function resolveComponent(path: string) {
 /**
  * return routes about permission
  */
+// export function usePermissionRoutes() {
+//   const permissions = useUserPermission();
+
+//   return useMemo(() => {
+//     const flattenedPermissions = flattenTrees(permissions!);
+//     const permissionRoutes = transformPermissionToMenuRoutes(
+//       permissions || [],
+//       flattenedPermissions,
+//     );
+//     return [...permissionRoutes];
+//   }, [permissions]);
+// }
+
+
 export function usePermissionRoutes() {
   const permissions = useUserPermission();
 
   return useMemo(() => {
-    const flattenedPermissions = flattenTrees(permissions!);
+    const flattenedPermissions = flattenTrees(permissions!) as Permission[]; // Ensure flattenedPermissions is of type Permission[]
     const permissionRoutes = transformPermissionToMenuRoutes(
       permissions || [],
       flattenedPermissions,
@@ -47,7 +61,6 @@ export function usePermissionRoutes() {
     return [...permissionRoutes];
   }, [permissions]);
 }
-
 /**
  * transform Permission[] to AppRouteObject[]
  * @param permissions
