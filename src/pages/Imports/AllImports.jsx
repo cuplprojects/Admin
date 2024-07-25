@@ -11,7 +11,11 @@ import { color } from 'framer-motion';
 import ImportOmr from './OmrImport/ImportOmr';
 import { useProjectId } from '@/store/ProjectState';
 
-//const apiurl = import.meta.env.VITE_API_URL_PROD;
+import { handleDecrypt } from '@/Security/Security';
+
+import { Upload, Button, Table, notification, Modal } from 'antd';
+
+
 const apiurl = import.meta.env.VITE_API_URL;
 
 const Import = () => {
@@ -23,8 +27,6 @@ const Import = () => {
   const [fieldMappings, setFieldMappings] = useState({});
   const [mapping, setMapping] = useState([]);
   const [registrationMapping, setRegistrationMapping] = useState([]);
-  const [alertMessage, setAlertMessage] = useState('');
-  const [alertType, setAlertType] = useState('');
   const [fieldNamesArray, setFieldNamesArray] = useState([]);
   const [lastUploadedFile, setLastUploadedFile] = useState('');
   const ProjectId = useProjectId();
@@ -123,13 +125,16 @@ const Import = () => {
           
   
           const responseData = await response.json();
-  
-          setAlertMessage('Upload successful!');
-          setAlertType('success');
+          notification.success({
+            message: 'Upload successful!',
+            duration: 3,
+          });
         } catch (error) {
           console.error('Error uploading data:', error);
-          setAlertMessage('Error uploading data.');
-          setAlertType('danger');
+          notification.error({
+            message: 'Error uploading data!',
+            duration: 3,
+          })
         } finally {
           setLoading(false);
         }
@@ -138,8 +143,10 @@ const Import = () => {
       reader.readAsArrayBuffer(selectedFile);
     } else {
       console.error('No file selected.');
-      setAlertMessage('No file selected.');
-      setAlertType('warning');
+      notification.error({
+        message: 'No file selected!',
+        duration: 3,
+      })
       setLoading(false);
     }
   
@@ -167,14 +174,17 @@ const Import = () => {
     // Fetch field mappings from the backend
     const fetchFieldMappings = async () => {
       try {
-        const response = await fetch(`${apiurl}/FieldConfigurations/GetByProjectId/${ProjectId}?WhichDatabase=Local`);
-        if (!response.ok) {
+
+        const response = await axios.get(`${apiurl}/FieldConfigurations/GetByProjectId/${ProjectId}?WhichDatabase=Local`);
+        if (response.data.length == 0) {
+
           throw new Error('Failed to fetch field mappings');
         }
-        const data = await response.json();
+        let decryptedData = handleDecrypt(response.data)
+        let dataJson = JSON.parse(decryptedData)
 
-        const mappings = data.map((item) => ({
-          field: item.fieldName
+        const mappings = dataJson?.map((item) => ({
+          field: item.FieldName
 
         }));
 
@@ -195,16 +205,19 @@ const Import = () => {
   useEffect(() => {
     const fetchRegistrationMappings = async () => {
       try {
-        const response = await fetch(`${apiurl}/FieldConfigurations/GetByProjectId/${ProjectId}?WhichDatabase=Local`);
-        if (!response.ok) {
+
+        const response = await axios.get(`${apiurl}/FieldConfigurations/GetByProjectId/${ProjectId}?WhichDatabase=Local`);
+        if (response.data.length==0) {
+
           throw new Error('Failed to fetch field mappings');
         }
-        const data = await response.json();
+        let decryptedData = handleDecrypt(response.data)
+        let dataJson = JSON.parse(decryptedData)
 
 
         // Transform array data into object format
-        const initialMapping = data.reduce((acc, item) => {
-          acc[item.fieldName] = '';
+        const initialMapping = dataJson.reduce((acc, item) => {
+          acc[item.FieldName] = '';
           return acc;
         }, {});
 
@@ -220,7 +233,7 @@ const Import = () => {
 
 
   const handleFieldMappingChange = (e, field) => {
-    setFieldMappings((prevMappings) => ({ ...prevMappings, [field]: e.target.value }));
+    setFieldMappings((prevMappings) => ({ ...prevMappings, [field]: e.target.value || ''}));
   };
 
 
@@ -246,19 +259,36 @@ const Import = () => {
         const parsedData = rows.slice(1, -1).map((row) => {
           const rowData = {};
           row.forEach((value, index) => {
-            const cleanedValue = value.trim().replace(/"/g, '');
+            const cleanedValue = value.replace(/"/g, '');
             const matchingField = mappingObject[headers[index]];
             if (matchingField) {
               rowData[matchingField] = cleanedValue;
             }
           });
 
+          // if (rowData['Answers']) {
+          //   const answers = {};
+          //   const ansArray = rowData['Answers'].split('');
+          //   for (let i = 0; i < 100; i++) {
+          //     if (i < ansArray.length) {
+          //       answers[i + 1] = `'${ansArray[i]}'`;
+          //     } else {
+          //       answers[i + 1] = "''";
+          //     }
+          //   }
+          //   rowData['Answers'] = JSON.stringify(answers).replace(/"/g, '');
+          // }
+
           if (rowData['Answers']) {
             const answers = {};
             const ansArray = rowData['Answers'].split('');
             for (let i = 0; i < 100; i++) {
               if (i < ansArray.length) {
-                answers[i + 1] = `'${ansArray[i]}'`;
+                let answer = ansArray[i];
+                // Trim trailing white spaces
+                answer = answer.replace(/\s+$/, '');
+                // Preserve leading white spaces and wrap in quotes
+                answers[i + 1] = `'${answer}'`;
               } else {
                 answers[i + 1] = "''";
               }
@@ -281,20 +311,27 @@ const Import = () => {
 
           if (contentType && contentType.indexOf('application/json') !== -1) {
             const data = await response.json();
-
-            setAlertMessage('Upload successful!');
-            setAlertType('success');
+           notification.success({
+            message: 'Upload successful!',
+            duration:3
+           })
+           
           } else {
             const text = await response.text();
 
-            setAlertMessage('Upload successful!');
-            setAlertType('success');
+            notification.success({
+              message: 'Upload successful!',
+              duration:3
+             })
           }
 
         } catch (error) {
           console.error('Error uploading data:', error);
-          setAlertMessage('Error uploading data.');
-          setAlertType('danger');
+          notification.error({
+            message: 'Error uploading data!',
+            duration:3
+           })
+         
         } finally {
           setLoading(false);
 
@@ -304,11 +341,12 @@ const Import = () => {
       reader.readAsText(selectedFile);
     } else {
       console.error('No file selected.');
-      setAlertMessage('No file selected.');
-      setAlertType('warning');
+      notification.warning({
+        message: 'No file selected!',
+        duration:3
+       })
       setLoading(false);
     }
-
   };
 
 
@@ -330,8 +368,10 @@ const Import = () => {
   
     if (!selectedFile) {
       console.error('No file selected.');
-      setAlertMessage('No file selected.');
-      setAlertType('warning');
+      notification.warning({
+        message: 'No file selected!',
+        duration:3
+       })
       setLoading(false);
       return;
     }
@@ -370,8 +410,10 @@ const Import = () => {
   
         if (validMappedData.length === 0) {
           console.warn('No valid data to upload. Ensure all required fields are mapped.');
-          setAlertMessage('No valid data to upload.');
-          setAlertType('warning');
+          notification.warning({
+            message: 'No valid data to upload.!',
+            duration:3
+           })
           setLoading(false);
           setSelectedFile(null);
           return;
@@ -390,13 +432,16 @@ const Import = () => {
         }
   
         const responseData = await response.json();
-  
-        setAlertMessage('Upload successful!');
-        setAlertType('success');
+        notification.success({
+          message: 'Upload successful!',
+          duration:3
+         })
       } catch (error) {
         console.error('Error uploading registration data:', error);
-        setAlertMessage('Error uploading data.');
-        setAlertType('danger');
+        notification.error({
+          message: 'Error uploading data!',
+          duration:3
+         })
       } finally {
         setLoading(false);
         setSelectedFile(null);

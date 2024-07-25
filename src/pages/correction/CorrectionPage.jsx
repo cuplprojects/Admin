@@ -6,7 +6,9 @@ import ZoomedImage from './ZoomedImage';
 import FullImageView from './FullImageView';
 import { useProjectActions, useProjectId } from '@/store/ProjectState';
 import { CloseCircleOutlined, DeleteOutlined } from '@ant-design/icons';
-import { CircleLoading } from '@/components/loading';
+
+import { handleDecrypt } from '@/Security/Security';
+
 
 const apiurl = import.meta.env.VITE_API_URL;
 const { Option } = Select;
@@ -51,7 +53,7 @@ const CorrectionPage = () => {
     fetchFieldCounts();
     fetchFlagData();
   }, [projectId, selectedField]);
-
+  console.log(currentIndex)
   useEffect(() => {
     const selectedfield = localStorage.getItem('selectedField');
     if (selectedfield) {
@@ -88,8 +90,8 @@ const CorrectionPage = () => {
   };
 
   const fetchFlagData = async () => {
-    setCurrentIndex(0);
-    setLoading(true);
+
+
 
     try {
       // Fetch field configurations
@@ -108,18 +110,18 @@ const CorrectionPage = () => {
       const flagsResponse = await axios.get(
         `${apiurl}/Correction/GetFlagsByCategory?WhichDatabase=Local&ProjectID=${projectId}&FieldName=${selectedField}`,
       );
+      
       const flagsResult = flagsResponse.data;
 
       const mergedData = await Promise.all(
         flagsResult.map(async (flag) => {
-          const imageConfigResponse = await axios.get(
-            `${apiurl}/ImageConfigs/ByProjectId/${projectId}?WhichDatabase=Local`,
-            {
-              headers: { accept: 'text/plain' },
-            },
-          );
-          const imageConfigResult = imageConfigResponse.data[0];
-          const parsedAnnotations = JSON.parse(imageConfigResult.annotationsJson).map(
+          const imageConfigResponse = await axios.get(`${apiurl}/ImageConfigs/ByProjectId/${projectId}?WhichDatabase=Local`, {
+            headers: { accept: 'text/plain' },
+          });
+          let decryptedData = handleDecrypt(imageConfigResponse.data)
+          let dataJson = JSON.parse(decryptedData)
+          const imageConfigResult = dataJson[0];
+
             (annotation) => ({
               FieldName: annotation.FieldName,
               coordinates: JSON.parse(annotation.Coordinates.replace(/'/g, '"')),
@@ -128,7 +130,9 @@ const CorrectionPage = () => {
             }),
           );
 
-          const omrImageResponse = await axios.get(
+          
+          const OmrimageResponse = await axios.get(
+
             `${apiurl}/OMRData/OMRImagebyName?WhichDatabase=Local&ProjectId=${projectId}&Name=${flag.barCode}`,
             {
               params: { WhichDatabase: 'Local' },
@@ -136,16 +140,10 @@ const CorrectionPage = () => {
             },
           );
 
-          // Find the annotation for the current flag's field name
-          const annotation = parsedAnnotations.find(
-            (annotation) => annotation.FieldName === flag.field,
-          );
-
-          // Get the field configuration for the current flag's field name
-          const fieldConfig = fieldConfigMap[flag.field] || {};
-
+          
           return {
-            ...annotation,
+            ...parsedAnnotations.find((annotation) => annotation.FieldName === flag.field),
+
             flagId: flag.flagId,
             remarks: flag.remarks,
             fieldNameValue: flag.fieldNameValue || '',
@@ -153,12 +151,14 @@ const CorrectionPage = () => {
             barCode: flag.barCode,
             projectId: projectId,
             isCorrected: true,
-            imageUrl: 'data:image/png;base64,' + omrImageResponse.data.filePath,
+
+            imageUrl: 'data:image/png;base64,' + OmrimageResponse.data.filePath,
             noChangeRequired: false,
-            fieldConfig, // Adding the field configuration to the flag data
           };
         }),
       );
+      
+      setCurrentIndex(0);
 
       setData(mergedData);
       console.log(mergedData);
@@ -402,13 +402,9 @@ const CorrectionPage = () => {
       </div>
       <div className="h-75 d-flex">
         {isViewRegData ? (
-          <form
-            className="w-50 me-2 border p-2"
-            onSubmit={(e) => {
-              e.preventDefault(); // Prevent default form submission
-              handleSubmitFilter(); // Call your submit function
-            }}
-          >
+
+          <div className="w-50 me-2 border p-2">
+
             <div className="c-pointer text-end">
               <span onClick={() => setIsViewRegData(false)}>
                 <CloseCircleOutlined style={{ fontSize: '24px', color: 'red' }} />

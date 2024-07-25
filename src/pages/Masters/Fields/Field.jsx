@@ -82,7 +82,7 @@ const Field = () => {
 
   const cancel = () => {
     const lastRow = data[data.length - 1];
-    if (lastRow && lastRow.projectName.trim() === '') {
+    if (lastRow && lastRow?.projectName?.trim() === '') {
       // Remove the last row if Project Name is blank
       const newData = [...data];
       newData.pop();

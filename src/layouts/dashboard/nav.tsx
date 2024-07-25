@@ -250,9 +250,11 @@ export default function Nav(props: Props) {
   };
   
   useEffect(() => {
+
     // const parentIdsForProject = [ 'ProjectDashboard','correction'];
     const excludeINBoth = [ 'default']
     const parentIdsForOther = [ 'dashboard','superadmin','Masters','management','Archive',...excludeINBoth];
+
 
     let filteredRoutes;
 

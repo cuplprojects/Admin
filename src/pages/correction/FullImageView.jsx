@@ -3,17 +3,26 @@ import './style.css';
 
 const FullImageView = ({ data, onUpdate, onNext }) => {
   const [value, setValue] = useState('');
+
   const [error, setError] = useState('');
+
   const inputRef = useRef(null);
 
+  // Update value when data changes
   useEffect(() => {
     if (data) {
       setValue(data.fieldNameValue);
+
+      // Select the input text when data changes
+
       if (inputRef.current) {
         inputRef.current.select();
       }
     }
   }, [data]);
+
+
+  // Select input text on component mount
 
   useEffect(() => {
     if (inputRef.current) {
@@ -69,12 +78,14 @@ const FullImageView = ({ data, onUpdate, onNext }) => {
     responses && responses.length > 0 && !(responses.length === 1 && responses[0] === '');
 
   return (
+
     <>
       {error && (
         <div className="alert alert-info mt-2" role="alert">
           {error}
         </div>
       )}
+
       <div
         className="zoomimg m-auto"
         style={{
@@ -83,9 +94,11 @@ const FullImageView = ({ data, onUpdate, onNext }) => {
           margin: 'auto',
         }}
       >
+
         <img
           src={imageUrl}
           alt="Full Image"
+
           style={{
             width: `${originalWidth}px`,
           }}
@@ -130,3 +143,4 @@ const FullImageView = ({ data, onUpdate, onNext }) => {
 };
 
 export default FullImageView;
+

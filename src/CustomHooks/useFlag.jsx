@@ -3,7 +3,6 @@ import axios from 'axios';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
-
 const useFlags = (projectId) => {
   const [flags, setFlags] = useState([]);
   const [remarksCounts, setRemarksCounts] = useState([]);

@@ -58,12 +58,14 @@ const ZoomedImage = ({ data, onUpdate, onNext }) => {
     responses && responses.length > 0 && !(responses.length === 1 && responses[0] === '');
 
   return (
+
     <>
       {error && (
         <div className="alert alert-danger mt-2" role="alert">
           {error}
         </div>
       )}
+
       <div
         className="zoomimg m-auto"
         style={{

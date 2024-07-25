@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './FieldConfig.css';
-import { Button, Table, Input, Select, Space, Popconfirm, message, Tooltip } from 'antd';
+import { Button, Table, Input, Select, Space, Popconfirm, notification, Tooltip } from 'antd';
 import { DeleteOutlined, RedoOutlined } from '@ant-design/icons';
 import { useThemeToken } from '@/theme/hooks';
 import { Col, Row } from 'react-bootstrap';
 import { useProjectId } from '@/store/ProjectState';
 import { usePreferredResponse } from '@/utils/PreferredResponse/PreferredResponseContext';
+import { handleDecrypt, handleEncrypt } from '@/Security/Security';
 
 const APIURL = import.meta.env.VITE_API_URL;
 const { Option } = Select;
@@ -25,8 +26,6 @@ const FieldConfiguration = () => {
   const [fieldName, setFieldName] = useState(''); // New state for fieldName
   const [savedData, setSavedData] = useState([]);
   const [fields, setFields] = useState([]);
-  const [alertMessage, setAlertMessage] = useState('');
-  const [alertType, setAlertType] = useState('');
   const [selectedFieldIndex, setSelectedFieldIndex] = useState(-1);
   const [pagination, setPagination] = useState({
     current: 1,
@@ -38,24 +37,32 @@ const FieldConfiguration = () => {
   const [rangeError, setRangeError] = useState(false);
   const ProjectId = useProjectId();
 
-  console.log(ProjectId);
-
   useEffect(() => {
     getFields();
   }, []);
 
   useEffect(() => {
-    axios
-      .get(`${APIURL}/FieldConfigurations/GetByProjectId/${ProjectId}?WhichDatabase=Local`)
-      .then((response) => {
-        setSavedData(response.data);
-        setPagination({ ...pagination, total: response.data.length });
-      })
-      .catch((error) => {
-        console.error('Error fetching field configurations:', error);
-      });
+    getFieldConfig()
   }, []);
 
+  const getFieldConfig = async() =>{
+    axios
+    .get(`${APIURL}/FieldConfigurations/GetByProjectId/${ProjectId}?WhichDatabase=Local`)
+    .then((response) => {
+      console.log(response.data)
+      let decryptedData = handleDecrypt(response.data)
+      console.log(decryptedData)
+      let Jsondata = JSON.parse(decryptedData)
+      console.log(Jsondata)
+      setSavedData(Jsondata);
+      setPagination({ ...pagination, total: Jsondata.length });
+    })
+    .catch((error) => {
+      console.error('Error fetching field configurations:', error);
+    });
+  }
+
+  console.log(savedData)
   const getFields = () => {
     axios
       .get(`${APIURL}/Fields?WhichDatabase=Local`)
@@ -102,18 +109,28 @@ const FieldConfiguration = () => {
     e.preventDefault();
 
     if (!fieldName || !formData.numberOfBlocks) {
-      showAlert('Please fill in all fields.', 'danger');
+      notification.error({
+        message: 'Please fill in all fields!',
+        duration:3
+       })
       return;
     }
 
     if (parseInt(formData.minRange) > parseInt(formData.maxRange)) {
-      showAlert('Maximum range cannot be less than minimum range.', 'danger');
+      notification.error({
+        message: 'Maximum range cannot be less than minimum range!',
+        duration:3
+       })
       return;
     }
 
     if (formData.maxRange) {
       if (formData.numberOfBlocks !== formData.maxRange.toString().length.toString()) {
-        showAlert('Number of blocks must match the length of the max range.', 'danger');
+        notification.error({
+          message: 'Number of blocks must match the length of the max range!',
+          duration:3
+         })
+        
         return;
       }
     }
@@ -137,35 +154,56 @@ const FieldConfiguration = () => {
 
     console.log('Payload to be sent:', JSON.stringify(newConfig, null, 2));
 
+    let newConfigJson = JSON.stringify(newConfig)
+    let encrypteddata = handleEncrypt(newConfigJson)
+
+    const encrypteddatatosend = {
+      cyphertextt : encrypteddata
+    }
+
     if (selectedFieldIndex !== -1) {
       axios
         .put(
           `${APIURL}/FieldConfigurations/${newConfig.fieldConfigurationId}?WhichDatabase=Local`,
-          newConfig,
+          encrypteddatatosend,
         )
         .then((response) => {
-          const updatedData = [...savedData];
+          getFieldConfig()
           updatedData[selectedFieldIndex] = { ...updatedData[selectedFieldIndex], ...newConfig };
           setSavedData(updatedData);
           setSelectedFieldIndex(-1);
-          showAlert('Field configuration updated successfully.', 'success');
+          notification.success({
+            message: 'Field configuration updated successfully!',
+            duration:3
+           })
         })
         .catch((error) => {
           console.error('Error updating field configuration:', error);
-          showAlert('Error updating field configuration. Please try again later.', 'danger');
+          notification.error({
+            message: 'Error updating field configuration. Please try again later!',
+            duration:3
+           })
+          
         });
     } else {
       axios
-        .post(`${APIURL}/FieldConfigurations?WhichDatabase=Local`, newConfig)
+        .post(`${APIURL}/FieldConfigurations?WhichDatabase=Local`, encrypteddatatosend)
         .then((response) => {
           const newFieldConfig = response.data;
           setSavedData([...savedData, newFieldConfig]);
-          showAlert('Field configuration saved successfully.', 'success');
+          notification.success({
+            message:'Field configuration saved successfully.',
+            duration:3,
+          })
+         
           setPagination({ ...pagination, total: savedData.length + 1 });
         })
         .catch((error) => {
           console.error('Error saving field configuration:', error);
-          showAlert('Error saving field configuration. Please try again later.', 'danger');
+          notification.error({
+            message:'Error saving field configuration. Please try again later.',
+            duration:3,
+          })
           if (error.response) {
             console.error('Response data:', error.response.data);
           }
@@ -190,18 +228,26 @@ const FieldConfiguration = () => {
     }
   }, [savedData]);
 
-  const handleDelete = (fieldConfigurationId) => {
+  const handleDelete = (FieldConfigurationId) => {
     axios
-      .delete(`${APIURL}/FieldConfigurations/${fieldConfigurationId}?WhichDatabase=Local`)
+      .delete(`${APIURL}/FieldConfigurations/${FieldConfigurationId}?WhichDatabase=Local`)
       .then(() => {
         setSavedData(
-          savedData.filter((item) => item.fieldConfigurationId !== fieldConfigurationId),
+          savedData.filter((item) => item.FieldConfigurationId !== FieldConfigurationId),
         );
-        message.success('Field configuration deleted successfully.');
+        notification.success({
+          message:'Field configuration deleted successfully.',
+          duration:3,
+        })
+        
       })
       .catch((error) => {
         console.error('Error deleting field configuration:', error);
-        message.error('Error deleting field configuration. Please try again later.');
+        notification.success({
+          message:'Error deleting field configuration. Please try again later.',
+          duration:3,
+        })
+        
       });
   };
 
@@ -234,47 +280,39 @@ const FieldConfiguration = () => {
     }
   };
 
-  const showAlert = (message, type) => {
-    setAlertMessage(message);
-    setAlertType(type);
-
-    setTimeout(() => {
-      setAlertMessage('');
-      setAlertType('');
-    }, 3000);
-  };
+ 
 
   const columns = [
     {
       title: 'Field',
-      dataIndex: 'fieldName', // Use fieldName directly
+      dataIndex: 'FieldName', // Use fieldName directly
       key: 'fieldName',
       sorter: (a, b) => a.fieldName.localeCompare(b.fieldName),
     },
     {
       title: 'Min Range',
-      dataIndex: ['fieldAttributes', 0, 'minRange'],
+      dataIndex: ['FieldAttributes', 0, 'MinRange'],
       key: 'minRange',
       sorter: (a, b) =>
         parseInt(a.fieldAttributes[0].minRange) - parseInt(b.fieldAttributes[0].minRange),
     },
     {
       title: 'Max Range',
-      dataIndex: ['fieldAttributes', 0, 'maxRange'],
+      dataIndex: ['FieldAttributes', 0, 'MaxRange'],
       key: 'maxRange',
       sorter: (a, b) =>
         parseInt(a.fieldAttributes[0].maxRange) - parseInt(b.fieldAttributes[0].maxRange),
     },
     {
       title: 'Preferred Responses',
-      dataIndex: ['fieldAttributes', 0, 'responses'],
+      dataIndex: ['FieldAttributes', 0, 'Responses'],
       key: 'responses',
       sorter: (a, b) =>
         a.fieldAttributes[0].responses.localeCompare(b.fieldAttributes[0].responses),
     },
     {
       title: 'Number of Blocks',
-      dataIndex: ['fieldAttributes', 0, 'numberOfBlocks'],
+      dataIndex: ['FieldAttributes', 0, 'NumberOfBlocks'],
       key: 'numberOfBlocks',
       sorter: (a, b) =>
         parseInt(a.fieldAttributes[0].numberOfBlocks) -
@@ -290,7 +328,7 @@ const FieldConfiguration = () => {
           </Button>
           <Popconfirm
             title="Are you sure delete this configuration?"
-            onConfirm={() => handleDelete(record.fieldConfigurationId)}
+            onConfirm={() => handleDelete(record.FieldConfigurationId)}
             okText="Yes"
             cancelText="No"
           >
@@ -312,11 +350,6 @@ const FieldConfiguration = () => {
       >
         {isFormVisible ? 'Hide Form' : 'Add New Configuration'}
       </Button>
-      {alertMessage && (
-        <div className={`alert alert-${alertType}`} role="alert">
-          {alertMessage}
-        </div>
-      )}
       {isFormVisible && (
         <form onSubmit={handleSave} className="config-form">
           <Row>

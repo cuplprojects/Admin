@@ -15,9 +15,15 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { CheckCircleOutlined } from '@ant-design/icons'; // Import Ant Design icon
+
 import useFlags from '@/CustomHooks/useFlag';
 
 const apiUrl = import.meta.env.VITE_API_URL;
+
+import axios from 'axios';
+
+
+
 const ProjectDashboard = () => {
   // State variables
   const [projectName, setProjectName] = useState('');
@@ -25,9 +31,11 @@ const ProjectDashboard = () => {
   const { setProjectId } = useProjectActions();
   const navigate = useNavigate();
   const { colorPrimary } = useThemeToken();
+
   const {totalCount, corrected, remaining, getFlags} = useFlags(projectId)
   const [dataCounts, setDataCounts] = useState([]);
   const [progress, setProgress] = useState(0); 
+
   const [fcName, setFCName] = useState('');
   const [recName, setRECName] = useState('');
   const [imcName, setIMCName] = useState('');
@@ -54,7 +62,9 @@ const ProjectDashboard = () => {
   // Function to fetch project details from an API
   const fetchProjectDetails = (projectId) => {
     // Replace with actual API call to fetch project details
+
     fetch(`${apiUrl}/Projects/${projectId}?WhichDatabase=Local`)
+
       .then((response) => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
@@ -69,6 +79,7 @@ const ProjectDashboard = () => {
   };
 
   // Function to fetch counts
+
   const fetchCounts = (projectId) => {
     fetch(
       `${apiUrl}/OMRData/omrdata/${projectId}/total-images?WhichDatabase=Local`,
@@ -108,15 +119,18 @@ const ProjectDashboard = () => {
           .catch((error) => console.error('Error fetching Omr Data count:', error));
       })
       .catch((error) => console.error('Error fetching omr images count:', error));
+
   };
 
   const checkApiCompletion = async (projectId) => {
     try {
       // Fetch data from all three APIs concurrently
       const responses = await Promise.all([
+
         fetch(`${apiUrl}/FieldConfigurations/GetByProjectId/${projectId}?WhichDatabase=Local`),
         fetch(`${apiUrl}/ResponseConfigs/byproject/${projectId}?WhichDatabase=Local`),
         fetch(`${apiUrl}/ImageConfigs/ByProjectId/${projectId}?WhichDatabase=Local`),
+
       ]);
 
       // Check if all responses are successful
@@ -146,6 +160,7 @@ const ProjectDashboard = () => {
               {projectId}. {projectName}
             </strong>
           </p>
+
         </div>
         <div className="text-end">
           <Button
@@ -217,6 +232,7 @@ const ProjectDashboard = () => {
             </Col>
           </Row>
         </div>
+
       </div>
 
       <div className="mt-4">
