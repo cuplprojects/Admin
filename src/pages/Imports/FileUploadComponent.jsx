@@ -1,208 +1,198 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { Button, Progress } from 'antd';
 import localforage from 'localforage';
-import { useFileUpload } from './Importfile';
 
-const FILE_STATUS = {
-  PENDING: 'pending',
-  UPLOADING: 'uploading',
-  PAUSED: 'paused',
-  COMPLETED: 'completed',
-  FAILED: 'failed',
+const apiurl = import.meta.env.VITE_API_URL;
+
+const ImportOmr = () => {
+  const [files, setFiles] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [currentFileIndex, setCurrentFileIndex] = useState(0);
+  const [showSkipBtn, setShowSkipBtn] = useState(false);
+  const [showReplaceBtn, setShowReplaceBtn] = useState(false);
+  const [currentFileName, setCurrentFileName] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertType, setAlertType] = useState('');
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const storedFiles = await localforage.getItem('uploadFiles') || [];
+        const storedIndex = await localforage.getItem('currentFileIndex') || 0;
+        setFiles(storedFiles);
+        setCurrentFileIndex(storedIndex);
+      } catch (error) {
+        console.error('Error fetching data from localforage:', error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const handleFileChange = async (e) => {
+    const selectedFiles = [...e.target.files];
+    try {
+      await localforage.setItem('uploadFiles', selectedFiles);
+      setFiles(selectedFiles);
+    } catch (error) {
+      console.error('Error storing data in localforage:', error);
+    }
+  };
+
+  const removeFromLocalForage = async (file) => {
+    try {
+      let storedFiles = await localforage.getItem('uploadFiles') || [];
+      storedFiles = storedFiles.filter((f) => f.name !== file.name);
+      await localforage.setItem('uploadFiles', storedFiles);
+    } catch (error) {
+      console.error('Error removing data from localforage:', error);
+    }
+  };
+
+  const removeCurrentFileIndex = async () => {
+    try {
+      await localforage.removeItem('currentFileIndex');
+    } catch (error) {
+      console.error('Error removing currentFileIndex from localforage:', error);
+    }
+  };
+
+  const readFileAsBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result.split(',')[1]); // Get the base64 string without the metadata prefix
+      reader.onerror = (error) => reject(error);
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const uploadFile = async (index, replace = false) => {
+    setProgress(0);
+    try {
+      const base64File = await readFileAsBase64(files[index]);
+      const response = await axios.post(
+        `${apiurl}/OMRData/upload-request`,
+        { omrImagesName: files[index].name, filePath: base64File, replace: replace },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          onUploadProgress: (progressEvent) => {
+            const totalLength = progressEvent.lengthComputable
+              ? progressEvent.total
+              : progressEvent.target.getResponseHeader('content-length') ||
+                progressEvent.target.getResponseHeader('x-decompressed-content-length');
+            if (totalLength !== null) {
+              setProgress(Math.round((progressEvent.loaded * 100) / totalLength));
+            }
+          }
+        },
+      );
+      console.log(`File ${index + 1} uploaded successfully:`, response);
+      await removeFromLocalForage(files[index]); // Remove the file from localforage after successful upload
+      const nextFileIndex = index + 1;
+      setCurrentFileIndex(nextFileIndex);
+      await localforage.setItem('currentFileIndex', nextFileIndex);
+
+      if (nextFileIndex >= files.length) {
+        await removeCurrentFileIndex();
+      }
+
+      setAlertMessage('');
+      setAlertType('');
+      setShowSkipBtn(false);
+      setShowReplaceBtn(false);
+      return true;
+    } catch (error) {
+      if (error.response && error.response.status === 409) {
+        setShowSkipBtn(true);
+        setShowReplaceBtn(true);
+        setCurrentFileName(files[index].name);
+        setAlertMessage('File with the same name already exists!');
+        setAlertType('danger');
+      } else {
+        console.error(`Error uploading file ${index + 1}:`, error);
+        setAlertMessage('Error uploading file!');
+        setAlertType('danger');
+      }
+      return false;
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    const fileCount = files.length;
+    for (let i = currentFileIndex; i < fileCount; i++) {
+      const uploadSuccess = await uploadFile(i);
+      if (!uploadSuccess) {
+        break;
+      }
+    }
+    setLoading(false);
+  };
+
+  const skipFile = async () => {
+    await removeFromLocalForage(files[currentFileIndex]);
+    const nextFileIndex = currentFileIndex + 1;
+    setCurrentFileIndex(nextFileIndex);
+    await localforage.setItem('currentFileIndex', nextFileIndex);
+    if (nextFileIndex >= files.length) {
+      await removeCurrentFileIndex();
+    }
+    setShowSkipBtn(false);
+    setShowReplaceBtn(false);
+    setAlertMessage('');
+    setAlertType('');
+  };
+
+  const replaceFile = async () => {
+    setShowReplaceBtn(false);
+    setShowSkipBtn(false);
+    await uploadFile(currentFileIndex, true);
+  };
+
+  return (
+    <div>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="file"
+          name="files"
+          onChange={handleFileChange}
+          multiple
+          accept=".jpg,.jpeg"
+          required
+        />
+        <Button
+          type="primary"
+          htmlType="submit"
+          loading={loading}
+          disabled={files.length === 0}
+        >
+          Upload Files
+        </Button>
+      </form>
+      {alertMessage && (
+        <div className={`alert alert-${alertType}`} role="alert">
+          {alertMessage}
+        </div>
+      )}
+      {showSkipBtn && (
+        <Button type="danger" onClick={skipFile}>
+          Skip
+        </Button>
+      )}
+      {showReplaceBtn && (
+        <Button type="primary" onClick={replaceFile}>
+          Replace
+        </Button>
+      )}
+      {loading && (
+        <Progress percent={progress} status="active" />
+      )}
+    </div>
+  );
 };
 
-const FileUploadComponent = () => {
-  const { uploadFiles, resumeFileUpload } = useFileUpload();
-  const [files, setFiles] = useState(new Map());
-  const [uploader, setUploader] = useState(null);
-  const [overallProgress, setOverallProgress] = useState(0);
-  const [selectedFiles, setSelectedFiles] = useState([]);
-  const [resumeButtonVisible, setResumeButtonVisible] = useState(false); 
-
-  useEffect(() => {
-    // Load files from localforage
-    localforage.getItem('uploadState').then((savedFiles) => {
-      if (savedFiles) {
-        // Filter out completed files
-        const incompleteFiles = savedFiles.filter(([file, fileObj]) => fileObj.status !== FILE_STATUS.COMPLETED);
-        const filesMap = new Map(incompleteFiles);
-        setFiles(filesMap);
-
-        // Initialize uploader based on incomplete files
-        const newUploader = uploadFiles(Array.from(filesMap.keys()), {
-          onProgress: handleProgress,
-          onError: handleError,
-          onAbort: handleAbort,
-          onComplete: handleComplete,
-        });
-        setUploader(newUploader);
-        filesMap.forEach((fileObj, file) => {
-          if (fileObj.status === FILE_STATUS.UPLOADING) {
-            newUploader.resumeFileUpload(file);
-          }else if (fileObj.status === FILE_STATUS.PAUSED) {
-            setResumeButtonVisible(true);
-          }
-        });
-      }
-    });
-  }, [uploadFiles]);
-
-
-  useEffect(() => {
-    // Calculate overall progress whenever files state changes
-    const totalFiles = files.size;
-    const completedFiles = [...files.values()].filter(fileObj => fileObj.status === FILE_STATUS.COMPLETED).length;
-    const progress = totalFiles > 0 ? (completedFiles / totalFiles) * 100 : 0;
-    setOverallProgress(progress);
-  }, [files]);
-
-
-  useEffect(() => {
-    // Save files to localforage whenever files state changes
-    localforage.setItem('uploadState', Array.from(files.entries()));
-  }, [files]);
-
-  const handleFilesChange = (event) => {
-    const uploadedFiles = event.target.files;
-    const filesMap = new Map();
-
-    [...uploadedFiles].forEach((file) => {
-      filesMap.set(file, {
-        file,
-        status: FILE_STATUS.PENDING,
-        percentage: 0,
-        uploadedChunkSize: 0,
-      });
-    });
-
-    setSelectedFiles(uploadedFiles);
-    setFiles(filesMap);
-    setResumeButtonVisible(false);
-  };
-
-  const handleUpload = () => {
-    const newUploader = uploadFiles(selectedFiles, {
-      onProgress: handleProgress,
-      onError: handleError,
-      onAbort: handleAbort,
-      onComplete: handleComplete,
-    });
-
-    setUploader(newUploader);
-  };
-
-  const handleProgress = (e, file) => {
-    setFiles((prevFiles) => {
-      const fileObj = prevFiles.get(file);
-      if (!fileObj) return prevFiles; // Check if fileObj is defined
-
-      fileObj.status = FILE_STATUS.UPLOADING;
-      fileObj.percentage = e.percentage;
-      fileObj.uploadedChunkSize = e.loaded;
-      return new Map(prevFiles);
-    });
-  };
-
-  const handleComplete = (e, file) => {
-    setFiles((prevFiles) => {
-      const fileObj = prevFiles.get(file);
-      if (!fileObj) return prevFiles; // Check if fileObj is defined
-
-      fileObj.status = FILE_STATUS.COMPLETED;
-      fileObj.percentage = 100;
-      return new Map(prevFiles);
-    });
-
-    // Remove the completed file from localforage
-    localforage.removeItem(`${file.name}-upload`);
-  };
-
-  const handleError = (error, file) => {
-  
-    setFiles((prevFiles) => {
-      const fileObj = prevFiles.get(file);
-      if (!fileObj) return prevFiles; // Check if fileObj is defined
-    
-      fileObj.status = FILE_STATUS.FAILED;
-      return new Map(prevFiles);
-    });
-    setResumeButtonVisible(true);
-  };
-  
-  
-  
-  
-    const handleAbort = (e, file) => {
-      setFiles((prevFiles) => {
-        const fileObj = prevFiles.get(file);
-        if (!fileObj) return prevFiles; // Check if fileObj is defined
-
-        fileObj.status = FILE_STATUS.PAUSED;
-        return new Map(prevFiles);
-      });
-      setResumeButtonVisible(true);
-    };
-    const handleResumeUpload = () => {
-      console.log('handleResumeUpload called');
-      console.log('selectedFiles:', selectedFiles);
-      const filesArray = Array.from(selectedFiles);
-      localforage.getItem('lastSuccessfulFileIndex').then((lastUploadedFileIndex) => {
-        if (lastUploadedFileIndex!== null) {
-          const filesToResume = filesArray.slice(lastUploadedFileIndex); // get the files to resume from the last uploaded file
-          filesToResume.forEach((file, index) => {
-            try {
-              console.log(`Resuming upload of file: ${file.name}`);
-              resumeFileUpload(file, lastUploadedFileIndex + index); // pass the file and the correct chunk index
-              setFiles((prevFiles) => {
-                const fileObj = prevFiles.get(file);
-                if (fileObj) {
-                  fileObj.status = FILE_STATUS.UPLOADING;
-                  console.log(`File status updated to UPLOADING: ${file.name}`);
-                  return new Map(prevFiles);
-                }
-                return prevFiles;
-              });
-            } catch (error) {
-              console.error(`Error resuming upload of file ${file.name}:`, error);
-            }
-          });
-          setResumeButtonVisible(false);
-        } else {
-          console.log('No last uploaded file index found, cannot resume upload');
-        }
-      });
-    };
-    return (
-      <div>
-        <div className="tab-pane active d-flex align-items-center justify-content-around py-3 mt-5" id="OMRImages">
-          <h3 className="head text-center fs-3">Upload OMR Images</h3>
-          <div className="d-flex justify-content-center align-items-center">
-            <p>
-              <input type="file" multiple onChange={handleFilesChange} accept=".jpg,.jpeg" />
-            </p>
-          </div>
-          <div className="d-flex justify-content-center mt-4">
-            {selectedFiles.length > 0 && (
-              <button className="btn btn-primary align-items-center" onClick={handleUpload}>Upload</button>
-            )}
-          </div>
-          <div className="d-flex justify-content-center mt-4">
-          {resumeButtonVisible && (
-            <button className="btn btn-success align-items-center" onClick={handleResumeUpload}>Resume Upload</button>
-          )}
-        </div>
-        </div>
-        <div>Overall Progress: {overallProgress}%</div>
-        {/* <div>
-        {[...files.entries()].map(([file, fileObj]) => (
-          <div key={file.name}>
-            <div>{file.name}</div>
-            <div>Status: {fileObj.status}</div>
-            <div>Progress: {fileObj.percentage}%</div>
-          </div>
-        ))}
-      </div> */}
-      </div>
-    );
-  };
-
-  export default FileUploadComponent;
+export default ImportOmr;

@@ -100,7 +100,6 @@ const GenerateScore = () => {
 
   const handleFileChange = (file, courseName) => {
     if (beforeUpload(file)) {
-      console.log('file selected')
       setFile({ file, courseName });
       setFileInfo(prev => ({
         ...prev,

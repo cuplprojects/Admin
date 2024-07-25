@@ -119,6 +119,7 @@
       "Imports" : "Imports",
       "AllImports" : "All Imports",
       "GenerateScore" : "Generate Score",
+      "Archive" : "Archive",
 
       "menulevel": {
         "index": "Menu Level",

@@ -74,11 +74,11 @@ const Registration = ({
           </button>
         )}
       </div>
-      {alertMessage && (
+      {/* {alertMessage && (
         <div className={`alert alert-${alertType} mt-3`} role="alert">
           {alertMessage}
         </div>
-      )}
+      )} */}
     </>
   );
 };

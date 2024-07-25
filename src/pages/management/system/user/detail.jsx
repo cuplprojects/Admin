@@ -7,6 +7,8 @@ import { Icon } from '@iconify/react';
 import editOutlined from '@iconify/icons-ant-design/edit-outlined';
 import deleteOutlined from '@iconify/icons-ant-design/delete-outlined';
 
+const apiurl = import.meta.env.VITE_API_URL;
+
 export default function GeneralTab() {
   const { push } = useRouter();
   const [userData, setUserData] = useState({
@@ -28,8 +30,8 @@ export default function GeneralTab() {
     const fetchUsersAndRoles = async () => {
       try {
         const [usersRes, rolesRes] = await Promise.all([
-          axios.get('https://localhost:7290/api/Users?WhichDatabase=Local'),
-          axios.get('https://localhost:7290/api/Roles?WhichDatabase=Local'),
+          axios.get(`${apiurl}/Users?WhichDatabase=Local`),
+          axios.get(`${apiurl}/Roles?WhichDatabase=Local`),
         ]);
 
         const roleMap = rolesRes.data.reduce((acc, role) => {
@@ -73,7 +75,7 @@ export default function GeneralTab() {
 
       const updatedUser = { ...user, isActive: checked };
 
-      await axios.put(`https://localhost:7290/api/Users/${userId}?WhichDatabase=Local`, updatedUser);
+      await axios.put(`${apiurl}/Users/${userId}?WhichDatabase=Local`, updatedUser);
       
       setUserList((prev) =>
         prev.map((user) => (user.userId === userId ? { ...user, isActive: checked } : user))
@@ -91,7 +93,7 @@ export default function GeneralTab() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('https://localhost:7290/api/Users?WhichDatabase=Local', userData);
+      await axios.post(`${apiurl}/Users?WhichDatabase=Local`, userData);
       setUserData({
         firstName: '',
         lastName: '',
@@ -104,7 +106,7 @@ export default function GeneralTab() {
         message: 'User added successfully!',
         duration: 3,
       });
-      const res = await axios.get('https://localhost:7290/api/Users?WhichDatabase=Local');
+      const res = await axios.get(`${apiurl}/Users?WhichDatabase=Local`);
       setUserList(res.data);
     } catch (error) {
       console.error('Error adding user:', error.message);
@@ -118,7 +120,7 @@ export default function GeneralTab() {
 
   const handleSave = async (userId) => {
     try {
-      await axios.put(`https://localhost:7290/api/Users/${userId}?WhichDatabase=Local`, userData);
+      await axios.put(`${apiurl}/Users/${userId}?WhichDatabase=Local`, userData);
       setEditingUserId(null);
       setUserData({
         firstName: '',
@@ -132,7 +134,7 @@ export default function GeneralTab() {
         message: 'User updated successfully!',
         duration: 3,
       });
-      const res = await axios.get('https://localhost:7290/api/Users?WhichDatabase=Local');
+      const res = await axios.get(`${apiurl}/Users?WhichDatabase=Local`);
       setUserList(res.data);
     } catch (error) {
       console.error('Error updating user:', error.message);
@@ -158,12 +160,12 @@ export default function GeneralTab() {
 
   const handleDelete = async () => {
     try {
-      await axios.delete(`https://localhost:7290/api/Users/${userIdToDelete}?WhichDatabase=Local`);
+      await axios.delete(`${apiurl}/Users/${userIdToDelete}?WhichDatabase=Local`);
       notification.success({
         message: 'User deleted successfully!',
         duration: 3,
       });
-      const res = await axios.get('https://localhost:7290/api/Users?WhichDatabase=Local');
+      const res = await axios.get(`${apiurl}/Users?WhichDatabase=Local`);
       setUserList(res.data);
       setDeleteModalVisible(false);
     } catch (error) {

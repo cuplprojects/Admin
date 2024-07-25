@@ -5,6 +5,10 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios'; // Import axios for HTTP requests
 import { useProjectActions } from '@/store/ProjectState';
 
+
+const apiurl = import.meta.env.VITE_API_URL;
+
+
 const NewDashboard = () => {
     const navigate = useNavigate();
     const [projects, setProjects] = useState([]); // State to store fetched projects
@@ -17,7 +21,7 @@ const NewDashboard = () => {
     const fetchProjects = async () => {
         try {
             // Fetch projects from API
-            const response = await axios.get('https://localhost:7290/api/Projects?WhichDatabase=Local');
+            const response = await axios.get(`${apiurl}/Projects?WhichDatabase=Local`);
             setProjects(response.data); // Update projects state with fetched data
         } catch (error) {
             console.error('Error fetching projects:', error);
