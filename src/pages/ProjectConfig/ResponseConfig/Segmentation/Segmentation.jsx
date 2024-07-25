@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Alert } from 'antd';
+import { Button, Alert, notification } from 'antd';
 import { useThemeToken } from '@/theme/hooks';
 import axios from 'axios';
 import { useProjectId } from '@/store/ProjectState';
@@ -17,7 +17,12 @@ const Segmentation = () => {
   const [showAlert, setShowAlert] = useState(false); // State to control alert visibility
   const [responseOption, setResponseOption] = useState('ABC'); // State for selected response option
   const [numBlocks, setNumBlocks] = useState(4); // State for number of blocks
+
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertType, setAlertType] = useState('');
+
   const projectId = useProjectId();
+
 
 
   // Effect to reset form state when switching between yes/no options
@@ -165,12 +170,23 @@ const Segmentation = () => {
         }
       })
         .then((response) => {
-          // Handle response from API (optional)
+          notification.success({
+            message: 'Response saved successfully',
+            duration: 2,
+          })
           console.log('Data saved successfully:', response);
           // Perform any additional actions after successful save
         })
         .catch((error) => {
           console.error('Error saving data:', error);
+          notification.error({
+            message: 'Error saving data',
+            description: 'Please try again later',
+            duration: 2,
+          })
+          // setAlertMessage("Error in saving Response");
+
+          // setAlertType('danger');
           // Handle error cases
         });
     } else {
@@ -632,6 +648,8 @@ const Segmentation = () => {
         >
           Save
         </Button>
+
+       
       </div>
     </>
   );

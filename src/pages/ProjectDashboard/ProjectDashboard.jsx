@@ -15,9 +15,15 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { CheckCircleOutlined } from '@ant-design/icons'; // Import Ant Design icon
+
+import useFlags from '@/CustomHooks/useFlag';
+
+const apiUrl = import.meta.env.VITE_API_URL;
+
 import axios from 'axios';
 
-const APIURL = import.meta.env.VITE_API_URL;
+
+
 const ProjectDashboard = () => {
   // State variables
   const [projectName, setProjectName] = useState('');
@@ -25,11 +31,11 @@ const ProjectDashboard = () => {
   const { setProjectId } = useProjectActions();
   const navigate = useNavigate();
   const { colorPrimary } = useThemeToken();
+
+  const {totalCount, corrected, remaining, getFlags} = useFlags(projectId)
   const [dataCounts, setDataCounts] = useState([]);
-  const [remaining, setRemaining] = useState(0);
-  const [totalCount, setTotalCount] = useState(0);
-  const [corrected, setCorrected] = useState(0);
-  const [progress, setProgress] = useState(0); // Progress state
+  const [progress, setProgress] = useState(0); 
+
   const [fcName, setFCName] = useState('');
   const [recName, setRECName] = useState('');
   const [imcName, setIMCName] = useState('');
@@ -47,18 +53,7 @@ const ProjectDashboard = () => {
     setProjectId(0);
     navigate('/dashboard/workbench');
   };
-  const getFlags = async () => {
-    try {
-      const response = await fetch(`${APIURL}/Flags/counts/projectId?projectId=${projectId}`);
-      const result = await response.json();
-      console.log(result);
-      setTotalCount(result.totalCount);
-      setRemaining(result.remaining);
-      setCorrected(result.corrected);
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
+
 
   useEffect(() => {
     getFlags();
@@ -67,7 +62,9 @@ const ProjectDashboard = () => {
   // Function to fetch project details from an API
   const fetchProjectDetails = (projectId) => {
     // Replace with actual API call to fetch project details
-    fetch(`https://localhost:7290/api/Projects/${projectId}?WhichDatabase=Local`)
+
+    fetch(`${apiUrl}/Projects/${projectId}?WhichDatabase=Local`)
+
       .then((response) => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
@@ -82,53 +79,58 @@ const ProjectDashboard = () => {
   };
 
   // Function to fetch counts
-  const fetchCounts = async (projectId) => {
-    try {
-      const omrImagesResponse = await axios.get(
-        `https://localhost:7290/api/OMRData/omrdata/${projectId}/total-images?WhichDatabase=Local`,
-      );
-      const omrImagesCount = omrImagesResponse.data;
 
-      const omrDataResponse = await axios.get(
-        `https://localhost:7290/api/OMRData/count/${projectId}?WhichDatabase=Local`,
-      );
-      const omrDataCount = omrDataResponse.data;
+  const fetchCounts = (projectId) => {
+    fetch(
+      `${apiUrl}/OMRData/omrdata/${projectId}/total-images?WhichDatabase=Local`,
+    )
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then((omrImagesCount) => {
+        fetch(`${apiUrl}/OMRData/count/${projectId}?WhichDatabase=Local`)
+          .then((response) => response.json())
+          .then((omrDataCount) => {
+            fetch(
+              `${apiUrl}/Absentee/absentee/count/${projectId}?WhichDatabase=Local`,
+            )
+              .then((response) => response.json())
+              .then((absenteeCount) => {
+                fetch(
+                  `${apiUrl}/Key/count?WhichDatabase=Local&ProjectId=${projectId}`,
+                )
+                  .then((response) => response.json())
+                  .then((keyCount) => {
+                    // Set all counts in state
+                    setDataCounts([
+                      { name: 'OMR Images', count: omrImagesCount },
+                      { name: 'Scanned Data', count: omrDataCount },
+                      { name: 'Absentees Upload', count: absenteeCount },
+                      { name: 'Keys Upload', count: keyCount },
+                    ]);
+                  })
+                  .catch((error) => console.error('Error fetching Key Count:', error));
+              })
+              .catch((error) => console.error('Error fetching Absentee Count:', error));
+          })
+          .catch((error) => console.error('Error fetching Omr Data count:', error));
+      })
+      .catch((error) => console.error('Error fetching omr images count:', error));
 
-      const absenteeResponse = await axios.get(
-        `https://localhost:7290/api/Absentee/absentee/count/${projectId}?WhichDatabase=Local`,
-      );
-      const absenteeCount = absenteeResponse.data;
-
-      const keyResponse = await axios.get(
-        `https://localhost:7290/api/Key/count?WhichDatabase=Local&ProjectId=${projectId}`,
-      );
-      const keyCount = keyResponse.data;
-
-      const registrationResponse = await axios.get(
-        `https://localhost:7290/api/Registration/CountByProjectId?whichDatabase=Local&ProjectId=${projectId}`,
-      );
-      const registrationCount = registrationResponse.data;
-
-      // Set all counts
-      setDataCounts([
-        { name: 'OMR ', count: omrImagesCount },
-        { name: 'Scanned ', count: omrDataCount },
-        { name: 'Absentees', count: absenteeCount },
-        { name: 'Keys ', count: keyCount },
-        { name: 'Registration ', count: registrationCount },
-      ]);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    }
   };
 
   const checkApiCompletion = async (projectId) => {
     try {
       // Fetch data from all three APIs concurrently
       const responses = await Promise.all([
-        fetch(`${APIURL}/FieldConfigurations/GetByProjectId/${projectId}?WhichDatabase=Local`),
-        fetch(`${APIURL}/ResponseConfigs/byproject/${projectId}?WhichDatabase=Local`),
-        fetch(`${APIURL}/ImageConfigs/ByProjectId/${projectId}?WhichDatabase=Local`),
+
+        fetch(`${apiUrl}/FieldConfigurations/GetByProjectId/${projectId}?WhichDatabase=Local`),
+        fetch(`${apiUrl}/ResponseConfigs/byproject/${projectId}?WhichDatabase=Local`),
+        fetch(`${apiUrl}/ImageConfigs/ByProjectId/${projectId}?WhichDatabase=Local`),
+
       ]);
 
       // Check if all responses are successful
@@ -158,6 +160,7 @@ const ProjectDashboard = () => {
               {projectId}. {projectName}
             </strong>
           </p>
+
         </div>
         <div className="text-end">
           <Button
@@ -172,7 +175,7 @@ const ProjectDashboard = () => {
       <div className="mt-4">
         <div>
           <Row>
-            <Col className='col-12 col-md-8'>
+            <Col>
               <Row gutter={16}>
                 <Col span={24}>
                   <Card>
@@ -196,7 +199,7 @@ const ProjectDashboard = () => {
                 </Col>
               </Row>
             </Col>
-            <Col className='col-12 col-md-4'>
+            <Col>
               <Card>
                 <p className="fs-3 text-center">Audit Report</p>
                 <Card
@@ -229,6 +232,7 @@ const ProjectDashboard = () => {
             </Col>
           </Row>
         </div>
+
       </div>
 
       <div className="mt-4">

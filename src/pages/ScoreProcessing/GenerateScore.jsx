@@ -19,15 +19,17 @@ const GenerateScore = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState('');
   const [fileInfo, setFileInfo] = useState({});
+  const [keycount, setkeycount] = useState([])
 
 
   useEffect(() => {
     getdata()
   }, [ProjectId]); // Run these effects whenever ProjectId changes
 
-  const getdata =()=>{
+  const getdata = () => {
     fetchCourseNames();
     fetchCourseCounts();
+    fetchKeyCounts()
   }
   const fetchCourseNames = async () => {
     try {
@@ -40,6 +42,26 @@ const GenerateScore = () => {
     } catch (error) {
       notification.error({
         message: 'Failed to fetch course names!',
+        duration: 3,
+      });
+    }
+  };
+  const fetchKeyCounts = async () => {
+    try {
+      const response = await fetch(`${apiurl}/Key/counts?WhichDatabase=Local&projectId=${ProjectId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch key count');
+      }
+      const result = await response.json();
+      console.log(result)
+      const counts = {};
+      result.forEach(item => {
+        counts[item.courseName] = item.count;
+      });
+      setkeycount(counts);
+    } catch (error) {
+      notification.error({
+        message: 'Failed to fetch course counts!',
         duration: 3,
       });
     }
@@ -142,8 +164,9 @@ const GenerateScore = () => {
       const result = await response.json();
 
       if (result.message) {
+        fetchKeyCounts()
         notification.success({
-          message:`File uploaded successfully for course ${courseName}!`,
+          message: `File uploaded successfully for course ${courseName}!`,
           duration: 3,
         });
         setLoading(false);
@@ -188,57 +211,90 @@ const GenerateScore = () => {
       title: 'Upload Key',
       key: 'upload',
       render: (text, record) => (
-        
         <div>
-          <Upload
-            showUploadList={false}
-            beforeUpload={beforeUpload}
-            customRequest={({ file }) => handleFileChange(file, record.courseName)}
-          >
-            <Button icon={<UploadOutlined />}>{fileInfo[record.courseName]?.name || 'Click to Upload'}</Button>
-          </Upload>
-          <Button
-            type="primary"
-            onClick={() => handleUpload(record.courseName)}
-            disabled={loading || !file || (file && file.courseName !== record.courseName)}
-          >
-            {loading && file && file.courseName === record.courseName ? 'Uploading...' : 'Upload'}
-          </Button>
+          {keycount[record.courseName] > 0 ? (
+            <Button type="primary" disabled>
+              Uploaded
+            </Button>
+          ) : (
+            <>
+              <Upload
+                showUploadList={false}
+                beforeUpload={beforeUpload}
+                customRequest={({ file }) => handleFileChange(file, record.courseName)}
+              >
+                <Button icon={<UploadOutlined />}>
+                  {fileInfo[record.courseName]?.name || 'Click to Upload'}
+                </Button>
+              </Upload>
+              <Button
+                className='ms-2'
+                type="primary"
+                onClick={() => handleUpload(record.courseName)}
+                disabled={loading || !file || (file && file.courseName !== record.courseName)}
+              >
+                {loading && file && file.courseName === record.courseName
+                  ? 'Uploading...'
+                  : 'Upload'}
+              </Button>
+            </>
+          )}
         </div>
       ),
     },
     {
       title: 'Generate Score',
       key: 'generateScore',
-      render: (text, record) => {
-        const entryCount = courseCounts[record.courseName] || 0;
-        const isProcessing = processing[record.courseName] || false;
-
-        if (entryCount > 0) {
-          return (
-            <Button
-              type="primary"
-              style={{ marginTop: 10 }}
-              onClick={() =>handleClick(record.courseName)}
-              disabled={isProcessing}
-            >
-              View Score
-            </Button>
-          );
-        } else {
-          return (
-            <Button
-              type="primary"
-              style={{ marginTop: 10 }}
-              onClick={() => handleProcessScore(record.courseName)}
-              disabled={isProcessing}
-            >
-              {isProcessing ? 'Processing...' : 'Generate Score'}
-            </Button>
-          );
-        }
-      },
+      render: (text, record) => (
+        <div>
+          {
+            (() => {
+              const entryCount = courseCounts[record.courseName] || 0;
+              const isProcessing = processing[record.courseName] || false;
+              const isKeyUploaded = keycount[record.courseName] >= 0;
+    
+              if (isKeyUploaded) {
+                if (entryCount > 0) {
+                  return (
+                    <Button
+                      type="primary"
+                      style={{ marginTop: 10 }}
+                      onClick={() => handleClick(record.courseName)}
+                    >
+                      View Score
+                    </Button>
+                  );
+                } else {
+                  return (
+                    <Button
+                      type="primary"
+                      style={{ marginTop: 10 }}
+                      onClick={() => handleProcessScore(record.courseName)}
+                      disabled={isProcessing}
+                    >
+                      {isProcessing ? 'Processing...' : 'Generate Score'}
+                    </Button>
+                  );
+                }
+              } else {
+                return (
+                  <Button
+                    type="primary"
+                    style={{ marginTop: 10 }}
+                    disabled={true}
+                  >
+                    Generate Score
+                  </Button>
+                );
+              }
+            })()
+          }
+        </div>
+      ),
     },
+
+   
+    
   ];
 
   return (
@@ -267,7 +323,7 @@ const GenerateScore = () => {
           onCancel={() => setModalVisible(false)}
           footer={null}
           width={1000}
-          style={{overflowX:'scroll'}}
+          style={{ overflowX: 'scroll' }}
         >
           {modalVisible && <ViewScore courseName={selectedCourse} />}
         </Modal>

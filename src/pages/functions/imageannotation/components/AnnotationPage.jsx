@@ -6,7 +6,9 @@ import Toolkit from './Toolkit';
 import { CloseOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import { useProjectId } from '@/store/ProjectState';
+
 import { handleEncrypt, handleDecrypt } from '@/Security/Security';
+
 
 //const apiurl = import.meta.env.VITE_API_URL_PROD;
 const apiurl = import.meta.env.VITE_API_URL;
@@ -50,9 +52,11 @@ const AnnotationPage = () => {
     axios
       .get(`${apiurl}/ImageConfigs/ByProjectId/${projectId}?WhichDatabase=Local`)
       .then((response) => {
+
         let decryptresponse = handleDecrypt(response.data);
         let destrigifieddata = JSON.parse(decryptresponse)
         const resdata = destrigifieddata[0].Annotations;
+
         if (resdata.length<=0) {
           localStorage.removeItem('annotations')
         }
@@ -68,8 +72,10 @@ const AnnotationPage = () => {
             coordinates: JSON.parse(fixedCoordinates), // Parse fixed coordinates JSON
           };
         });
+
         setAnnotationId(destrigifieddata[0].Id);
         setImageUrl(destrigifieddata[0].ImageUrl);
+
         setAnnotations(fetchedAnnotations);
         localStorage.setItem('annotations', JSON.stringify(fetchedAnnotations));
       })
@@ -236,17 +242,21 @@ const AnnotationPage = () => {
         })),
       };
 
+
       const putdatajson = JSON.stringify(postData)
           let encrypteddata = handleEncrypt(putdatajson)
 
           const encrypteddatatosend = {
             cyphertextt : encrypteddata
           }
+
       if (annotationId > 0) {
         // Annotations exist, use PUT to update
         const putResponse = await axios.put(
           `${apiurl}/ImageConfigs/${annotationId}?WhichDatabase=Local`,
+
           encrypteddatatosend,
+
           {
             headers: {
               'Content-Type': 'application/json',
@@ -261,6 +271,7 @@ const AnnotationPage = () => {
         // No annotations exist, use POST to create new annotations
         const { id, ...postDataWithoutId } = postData; // Destructure to remove `id`
 
+
         const putdatajson = JSON.stringify(postDataWithoutId)
           let encrypteddata = handleEncrypt(putdatajson)
 
@@ -271,6 +282,7 @@ const AnnotationPage = () => {
         const postResponse = await axios.post(
           `${apiurl}/ImageConfigs?WhichDatabase=Local`,
           encrypteddatatosend,
+
           {
             headers: {
               'Content-Type': 'application/json',

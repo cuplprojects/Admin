@@ -8,7 +8,7 @@ import { Applications, Conversion } from './conversion_applications';
 // import TopAuthor from './top-authors';
 // import TopInstalled from './top-installed';
 // import TopRelated from './top-related';
-import TotalCard from './total-card';
+// import TotalCard from './total-card';
 import NewDashboard from './NewDashboard';
 import { useEffect } from 'react';
 
@@ -30,7 +30,7 @@ function Workbench() {
         </Col>
       </Row>
 
-      <Row gutter={[16, 16]} className="mt-4" justify="center">
+      {/* <Row gutter={[16, 16]} className="mt-4" justify="center">
         <Col span={24} md={8}>
           <TotalCard
             title="Total Active Users"
@@ -60,7 +60,7 @@ function Workbench() {
             chartData={[35, 41, 62, 42, 13, 18, 29, 37, 36]}
           />
         </Col>
-      </Row>
+      </Row> */}
 
 
       <Row>

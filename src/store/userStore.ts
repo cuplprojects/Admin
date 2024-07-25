@@ -13,7 +13,7 @@ import { StorageEnum } from '#/enum';
 
 const { VITE_APP_HOMEPAGE: HOMEPAGE } = import.meta.env;
 
-type UserStore = {
+type userStore = {
   userInfo: Partial<UserInfo>;
   userToken: UserToken;
   // Use the actions namespace to store all actions
@@ -24,7 +24,7 @@ type UserStore = {
   };
 };
 
-const useUserStore = create<UserStore>((set) => ({
+const useuserStore = create<userStore>((set) => ({
   userInfo: getItem<UserInfo>(StorageEnum.User) || {},
   userToken: getItem<UserToken>(StorageEnum.Token) || {},
   actions: {
@@ -44,10 +44,10 @@ const useUserStore = create<UserStore>((set) => ({
   },
 }));
 
-export const useUserInfo = () => useUserStore((state) => state.userInfo);
-export const useUserToken = () => useUserStore((state) => state.userToken);
-export const useUserPermission = () => useUserStore((state) => state.userInfo.permissions);
-export const useUserActions = () => useUserStore((state) => state.actions);
+export const useUserInfo = () => useuserStore((state) => state.userInfo);
+export const useUserToken = () => useuserStore((state) => state.userToken);
+export const useUserPermission = () => useuserStore((state) => state.userInfo.permissions);
+export const useUserActions = () => useuserStore((state) => state.actions);
 
 export const useSignIn = () => {
   const { t } = useTranslation();

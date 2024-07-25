@@ -3,7 +3,9 @@ import { Col, Row, Card } from 'react-bootstrap';
 import { Button, notification } from 'antd';
 import ChartComponent from './ChartComponent';
 import { useProjectId } from '@/store/ProjectState';
-import StackedHorizontalBarChart from './stackchart.jsx';
+
+import StackedHorizontalBarChart from './stackchart';
+
 import useFlags from '@/CustomHooks/useFlag';
 
 const APIURL = import.meta.env.VITE_API_URL;
@@ -12,6 +14,7 @@ const AuditButton = () => {
   // const [fieldConfigs, setFieldConfigs] = useState([]);
   const ProjectId = useProjectId();
   const { flags, remarksCounts, corrected, remaining, totalCount, getFlags } = useFlags(ProjectId);
+
   // const WIP = ((corrected / totalCount) * 100).toFixed(3);
   const [WIP, setWIP] = useState(0);
   const [isAuditing, setIsAuditing] = useState(false);
@@ -22,6 +25,7 @@ const AuditButton = () => {
       setWIP(((corrected / totalCount) * 100).toFixed(3));
     }
   }, [corrected, totalCount, ProjectId]);
+
 
 
   const handleClickAudit = async () => {

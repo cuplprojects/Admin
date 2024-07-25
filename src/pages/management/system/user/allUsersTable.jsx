@@ -17,7 +17,7 @@ export default function GeneralTab() {
     email: '',
     roleId: '',
     roleName: '',
-    isActive: false,
+    isActive: true,
   });
 
   const [userList, setUserList] = useState([]);
@@ -87,29 +87,6 @@ export default function GeneralTab() {
       });
     } catch (error) {
       console.error('Error updating user status:', error.message);
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      await axios.post(`${apiurl}/Users?WhichDatabase=Local`, userData);
-      setUserData({
-        firstName: '',
-        lastName: '',
-        email: '',
-        roleId: '',
-        roleName: '',
-        isActive: false,
-      });
-      notification.success({
-        message: 'User added successfully!',
-        duration: 3,
-      });
-      const res = await axios.get(`${apiurl}/Users?WhichDatabase=Local`);
-      setUserList(res.data);
-    } catch (error) {
-      console.error('Error adding user:', error.message);
     }
   };
 

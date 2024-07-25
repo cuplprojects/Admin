@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Button, Progress,notification } from 'antd';
-import localforage from 'localforage';
+import { Button, Progress, Alert } from 'antd';
 import { useProjectId } from '@/store/ProjectState';
 
 const apiurl = import.meta.env.VITE_API_URL;
@@ -14,45 +13,18 @@ const ImportOmr = () => {
   const [showSkipAllBtn, setShowSkipAllBtn] = useState(false);
   const [showReplaceAllBtn, setShowReplaceAllBtn] = useState(false);
   const [conflictingFiles, setConflictingFiles] = useState([]);
-
+  const [alertMessage, setAlertMessage] = useState('');
   const [lastUploadedFile, setLastUploadedFile] = useState('');
+  const [alertType, setAlertType] = useState('');
   const [progress, setProgress] = useState(0);
-  
+
   const ProjectId = useProjectId();
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const storedFiles = await localforage.getItem('uploadFiles') || [];
-        const storedIndex = await localforage.getItem('currentFileIndex') || 0;
-        setFiles(storedFiles);
-        setCurrentFileIndex(storedIndex);
-      } catch (error) {
-        console.error('Error fetching data from localforage:', error);
-      }
-    };
-    fetchData();
-
-  }, []);
-
-  useEffect(() => {
     fetchLastOmrImageName(ProjectId);
-  }, [ProjectId])
+  }, [ProjectId]);
 
   const fetchLastOmrImageName = async (ProjectId) => {
-    try {
-      const response = await axios.get(`${apiurl}/OMRData/omrdata/${ProjectId}/last-image-name?WhichDatabase=Local`);
-      setLastUploadedFile(response.data);
-      return response.data; // This is the last omrImagesName
-
-    } catch (error) {
-      console.error("Error fetching the last OMR image name:", error);
-      return null;
-    }
-  };
-
-  const handleFileChange = async (e) => {
-    const selectedFiles = [...e.target.files];
     try {
       const response = await axios.get(
         `${apiurl}/OMRData/omrdata/${ProjectId}/last-image-name?WhichDatabase=Local`,
@@ -82,31 +54,26 @@ const ImportOmr = () => {
     });
   };
 
-
-  const readFileAsBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result.split(',')[1]);
-      reader.onerror = (error) => reject(error);
-      reader.readAsDataURL(file);
-    });
-  };
-
   const uploadFile = async (file, replace = false) => {
-    let progressPercent=0;
+    let progressPercent = 0;
     try {
       const base64File = await readFileAsBase64(file);
-      const fileNameWithoutExtension = file.name.replace(/\.[^/.]+$/, "");
-      const response = await axios.post(`${apiurl}/OMRData/upload-request?ProjectId=${ProjectId}&WhichDatabase=Local`,
+      const fileNameWithoutExtension = file.name.replace(/\.[^/.]+$/, '');
+      await axios.post(
+        `${apiurl}/OMRData/upload-request?ProjectId=${ProjectId}&WhichDatabase=Local`,
         { omrImagesName: fileNameWithoutExtension, filePath: base64File, replace: replace },
         {
           headers: {
             'Content-Type': 'application/json',
           },
-        
-        }
+          onUploadProgress: (progressEvent) => {
+            if (progressEvent.lengthComputable) {
+              progressPercent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+              setProgress(progressPercent);
+            }
+          },
+        },
       );
-      await removeFromLocalForage(file);
       return { success: true, conflict: false };
     } catch (error) {
       if (error.response && error.response.status === 409) {
@@ -121,57 +88,39 @@ const ImportOmr = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const totalFiles = files.length;
-    let uploadedCount = 0;
-    let conflicts = [];
-  
-    for (let index = 0; index < totalFiles; index++) {
-      const file = files[index];
-  
-      try {
-        const result = await uploadFile(file);
-        uploadedCount++;
-  
-        // Calculate overall progress
-        const progress = Math.round((uploadedCount / totalFiles) * 100);
-        setProgress(progress);
-  
-        // Check for conflicts
-        if (result.conflict) {
-          conflicts.push(file);
-        }
-      } catch (error) {
-        console.error('Error uploading file:', error);
-      }
-    }
-  
-    // Update state based on conflicts
+    setProgress(0); // Reset progress
+
+    const uploadPromises = files.map((file) => uploadFile(file));
+    const results = await Promise.all(uploadPromises);
+
+    const conflicts = results
+      .map((result, index) => (result.conflict ? files[index] : null))
+      .filter((file) => file !== null);
+
     setConflictingFiles(conflicts);
-  
-    // Update UI based on conflict status
+
     if (conflicts.length > 0) {
       setShowSkipBtn(true);
       setShowReplaceBtn(true);
       setShowSkipAllBtn(true);
       setShowReplaceAllBtn(true);
-      notification.warning({
-        message: 'Some files have conflicts.',
-        duration: 3,
-      });
+      setAlertMessage('Some files have conflicts.');
+      setAlertType('warning');
     } else {
-      await removeCurrentFileIndex();
-      notification.success({
-        message: 'All files uploaded successfully.',
-        duration: 3,
-      });
+      setAlertMessage('All files uploaded successfully.');
+      setAlertType('success');
+      setFiles([]);
     }
     setLoading(false);
   };
-  
 
   const resolveConflict = async (file, action) => {
     if (action === 'skip') {
-      await removeFromLocalForage(file);
+      setFiles(files.filter((f) => f.name !== file.name));
+      setUploadStatus((prev) => ({
+        ...prev,
+        pending: prev.pending - 1,
+      }));
     } else if (action === 'replace') {
       await uploadFile(file, true);
     }
@@ -184,17 +133,22 @@ const ImportOmr = () => {
       setShowReplaceBtn(false);
       setShowSkipAllBtn(false);
       setShowReplaceAllBtn(false);
+      setAlertMessage('');
+      setAlertType('');
       setLoading(false);
     }
   };
 
   const resolveAllConflicts = async (action) => {
     setLoading(true);
+    setProgress(0); // Reset progress
 
     if (action === 'skip') {
-      for (const file of conflictingFiles) {
-        await removeFromLocalForage(file);
-      }
+      setFiles(files.filter((file) => !conflictingFiles.includes(file)));
+      setUploadStatus((prev) => ({
+        ...prev,
+        pending: prev.pending - conflictingFiles.length,
+      }));
     } else if (action === 'replace') {
       for (const file of conflictingFiles) {
         await uploadFile(file, true);
@@ -206,6 +160,8 @@ const ImportOmr = () => {
     setShowReplaceBtn(false);
     setShowSkipAllBtn(false);
     setShowReplaceAllBtn(false);
+    setAlertMessage('');
+    setAlertType('');
     setLoading(false);
   };
 
@@ -220,16 +176,24 @@ const ImportOmr = () => {
           accept=".jpg,.jpeg"
           required
         />
-        <Button
-          type="primary"
-          htmlType="submit"
-          loading={loading}
-          disabled={files.length === 0}
-        >
+        <Button type="primary" htmlType="submit" loading={loading} disabled={files.length === 0}>
           Upload Files
         </Button>
       </form>
-      <div className='d-flex gap-4'>
+      {alertMessage && (
+        <Alert
+          message={alertMessage}
+          type={alertType}
+          showIcon
+          className="my-5"
+          closable
+          onClose={() => {
+            setAlertMessage('');
+            setAlertType('');
+          }}
+        />
+      )}
+      <div className="d-flex gap-4">
         {showSkipBtn && (
           <Button danger onClick={() => resolveConflict(conflictingFiles[0], 'skip')}>
             Skip {conflictingFiles[0].name}
@@ -251,16 +215,10 @@ const ImportOmr = () => {
           </Button>
         )}
       </div>
-      {loading && (
-        <Progress percent={progress} status="active" />
-      )}
-      {lastUploadedFile && (
-        <p>Last Uploaded File: {lastUploadedFile}</p>
-      )}
+      {loading && <Progress percent={progress} status="active" />}
+      {lastUploadedFile && <p>Last Uploaded File: {lastUploadedFile}</p>}
     </div>
   );
 };
 
 export default ImportOmr;
-
-

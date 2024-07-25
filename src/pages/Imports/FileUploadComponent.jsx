@@ -58,141 +58,145 @@ const ImportOmr = () => {
     }
   };
 
-  const readFileAsBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result.split(',')[1]); // Get the base64 string without the metadata prefix
-      reader.onerror = (error) => reject(error);
-      reader.readAsDataURL(file);
+  const handleFilesChange = (event) => {
+    const uploadedFiles = event.target.files;
+    const filesMap = new Map();
+
+    [...uploadedFiles].forEach((file) => {
+      filesMap.set(file, {
+        file,
+        status: FILE_STATUS.PENDING,
+        percentage: 0,
+        uploadedChunkSize: 0,
+      });
+    });
+
+    setSelectedFiles(uploadedFiles);
+    setFiles(filesMap);
+    setResumeButtonVisible(false);
+  };
+
+  const handleUpload = () => {
+    const newUploader = uploadFiles(selectedFiles, {
+      onProgress: handleProgress,
+      onError: handleError,
+      onAbort: handleAbort,
+      onComplete: handleComplete,
+    });
+
+    setUploader(newUploader);
+  };
+
+  const handleProgress = (e, file) => {
+    setFiles((prevFiles) => {
+      const fileObj = prevFiles.get(file);
+      if (!fileObj) return prevFiles; // Check if fileObj is defined
+
+      fileObj.status = FILE_STATUS.UPLOADING;
+      fileObj.percentage = e.percentage;
+      fileObj.uploadedChunkSize = e.loaded;
+      return new Map(prevFiles);
     });
   };
 
-  const uploadFile = async (index, replace = false) => {
-    setProgress(0);
-    try {
-      const base64File = await readFileAsBase64(files[index]);
-      const response = await axios.post(
-        `${apiurl}/OMRData/upload-request`,
-        { omrImagesName: files[index].name, filePath: base64File, replace: replace },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          onUploadProgress: (progressEvent) => {
-            const totalLength = progressEvent.lengthComputable
-              ? progressEvent.total
-              : progressEvent.target.getResponseHeader('content-length') ||
-                progressEvent.target.getResponseHeader('x-decompressed-content-length');
-            if (totalLength !== null) {
-              setProgress(Math.round((progressEvent.loaded * 100) / totalLength));
+  const handleComplete = (e, file) => {
+    setFiles((prevFiles) => {
+      const fileObj = prevFiles.get(file);
+      if (!fileObj) return prevFiles; // Check if fileObj is defined
+
+      fileObj.status = FILE_STATUS.COMPLETED;
+      fileObj.percentage = 100;
+      return new Map(prevFiles);
+    });
+
+    // Remove the completed file from localforage
+    localforage.removeItem(`${file.name}-upload`);
+  };
+
+  const handleError = (error, file) => {
+  
+    setFiles((prevFiles) => {
+      const fileObj = prevFiles.get(file);
+      if (!fileObj) return prevFiles; // Check if fileObj is defined
+    
+      fileObj.status = FILE_STATUS.FAILED;
+      return new Map(prevFiles);
+    });
+    setResumeButtonVisible(true);
+  };
+  
+  
+  
+  
+    const handleAbort = (e, file) => {
+      setFiles((prevFiles) => {
+        const fileObj = prevFiles.get(file);
+        if (!fileObj) return prevFiles; // Check if fileObj is defined
+
+        fileObj.status = FILE_STATUS.PAUSED;
+        return new Map(prevFiles);
+      });
+      setResumeButtonVisible(true);
+    };
+    const handleResumeUpload = () => {
+
+      const filesArray = Array.from(selectedFiles);
+      localforage.getItem('lastSuccessfulFileIndex').then((lastUploadedFileIndex) => {
+        if (lastUploadedFileIndex!== null) {
+          const filesToResume = filesArray.slice(lastUploadedFileIndex); // get the files to resume from the last uploaded file
+          filesToResume.forEach((file, index) => {
+            try {
+              resumeFileUpload(file, lastUploadedFileIndex + index); // pass the file and the correct chunk index
+              setFiles((prevFiles) => {
+                const fileObj = prevFiles.get(file);
+                if (fileObj) {
+                  fileObj.status = FILE_STATUS.UPLOADING;
+                  return new Map(prevFiles);
+                }
+                return prevFiles;
+              });
+            } catch (error) {
+              console.error(`Error resuming upload of file ${file.name}:`, error);
             }
-          }
-        },
-      );
-      console.log(`File ${index + 1} uploaded successfully:`, response);
-      await removeFromLocalForage(files[index]); // Remove the file from localforage after successful upload
-      const nextFileIndex = index + 1;
-      setCurrentFileIndex(nextFileIndex);
-      await localforage.setItem('currentFileIndex', nextFileIndex);
-
-      if (nextFileIndex >= files.length) {
-        await removeCurrentFileIndex();
-      }
-
-      setAlertMessage('');
-      setAlertType('');
-      setShowSkipBtn(false);
-      setShowReplaceBtn(false);
-      return true;
-    } catch (error) {
-      if (error.response && error.response.status === 409) {
-        setShowSkipBtn(true);
-        setShowReplaceBtn(true);
-        setCurrentFileName(files[index].name);
-        setAlertMessage('File with the same name already exists!');
-        setAlertType('danger');
-      } else {
-        console.error(`Error uploading file ${index + 1}:`, error);
-        setAlertMessage('Error uploading file!');
-        setAlertType('danger');
-      }
-      return false;
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    const fileCount = files.length;
-    for (let i = currentFileIndex; i < fileCount; i++) {
-      const uploadSuccess = await uploadFile(i);
-      if (!uploadSuccess) {
-        break;
-      }
-    }
-    setLoading(false);
-  };
-
-  const skipFile = async () => {
-    await removeFromLocalForage(files[currentFileIndex]);
-    const nextFileIndex = currentFileIndex + 1;
-    setCurrentFileIndex(nextFileIndex);
-    await localforage.setItem('currentFileIndex', nextFileIndex);
-    if (nextFileIndex >= files.length) {
-      await removeCurrentFileIndex();
-    }
-    setShowSkipBtn(false);
-    setShowReplaceBtn(false);
-    setAlertMessage('');
-    setAlertType('');
-  };
-
-  const replaceFile = async () => {
-    setShowReplaceBtn(false);
-    setShowSkipBtn(false);
-    await uploadFile(currentFileIndex, true);
-  };
-
-  return (
-    <div>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="file"
-          name="files"
-          onChange={handleFileChange}
-          multiple
-          accept=".jpg,.jpeg"
-          required
-        />
-        <Button
-          type="primary"
-          htmlType="submit"
-          loading={loading}
-          disabled={files.length === 0}
-        >
-          Upload Files
-        </Button>
-      </form>
-      {alertMessage && (
-        <div className={`alert alert-${alertType}`} role="alert">
-          {alertMessage}
+          });
+          setResumeButtonVisible(false);
+        } else {
+          console.log('No last uploaded file index found, cannot resume upload');
+        }
+      });
+    };
+    return (
+      <div>
+        <div className="tab-pane active d-flex align-items-center justify-content-around py-3 mt-5" id="OMRImages">
+          <h3 className="head text-center fs-3">Upload OMR Images</h3>
+          <div className="d-flex justify-content-center align-items-center">
+            <p>
+              <input type="file" multiple onChange={handleFilesChange} accept=".jpg,.jpeg" />
+            </p>
+          </div>
+          <div className="d-flex justify-content-center mt-4">
+            {selectedFiles.length > 0 && (
+              <button className="btn btn-primary align-items-center" onClick={handleUpload}>Upload</button>
+            )}
+          </div>
+          <div className="d-flex justify-content-center mt-4">
+          {resumeButtonVisible && (
+            <button className="btn btn-success align-items-center" onClick={handleResumeUpload}>Resume Upload</button>
+          )}
         </div>
-      )}
-      {showSkipBtn && (
-        <Button type="danger" onClick={skipFile}>
-          Skip
-        </Button>
-      )}
-      {showReplaceBtn && (
-        <Button type="primary" onClick={replaceFile}>
-          Replace
-        </Button>
-      )}
-      {loading && (
-        <Progress percent={progress} status="active" />
-      )}
-    </div>
-  );
-};
+        </div>
+        <div>Overall Progress: {overallProgress}%</div>
+        {/* <div>
+        {[...files.entries()].map(([file, fileObj]) => (
+          <div key={file.name}>
+            <div>{file.name}</div>
+            <div>Status: {fileObj.status}</div>
+            <div>Progress: {fileObj.percentage}%</div>
+          </div>
+        ))}
+      </div> */}
+      </div>
+    );
+  };
 
 export default ImportOmr;

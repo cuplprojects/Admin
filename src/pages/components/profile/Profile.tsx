@@ -19,7 +19,6 @@ const Profile: React.FC = () => {
         <Descriptions.Item label="Username">{user.username}</Descriptions.Item>
         <Descriptions.Item label="Email">{user.email}</Descriptions.Item>
         <Descriptions.Item label="Role">{user.role.name}</Descriptions.Item>
-        <Descriptions.Item label="Description">{user.role.desc}</Descriptions.Item>
       </Descriptions>
     </Card>
   );

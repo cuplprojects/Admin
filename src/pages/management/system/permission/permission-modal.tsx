@@ -2,7 +2,7 @@ import { AutoComplete, Form, Input, InputNumber, Modal, Radio, TreeSelect } from
 import { useCallback, useEffect, useState } from 'react';
 
 import { pagesSelect } from '@/router/hooks/use-permission-routes';
-import { useUserPermission } from '@/store/userStore';
+import { useUserPermission } from '@/store/UserDataStore';
 
 import { Permission } from '#/entity';
 import { BasicStatus, PermissionType } from '#/enum';
