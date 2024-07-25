@@ -10,9 +10,12 @@ import { useThemeToken } from '@/theme/hooks';
 import { color } from 'framer-motion';
 import ImportOmr from './OmrImport/ImportOmr';
 import { useProjectId } from '@/store/ProjectState';
+
 import { handleDecrypt, handleEncrypt } from '@/Security/Security';
 
-//const apiurl = import.meta.env.VITE_API_URL_PROD;
+import { Upload, Button, Table, notification, Modal } from 'antd';
+
+
 const apiurl = import.meta.env.VITE_API_URL;
 
 const Import = () => {
@@ -149,6 +152,10 @@ const Import = () => {
       reader.readAsArrayBuffer(selectedFile);
     } else {
       console.error('No file selected.');
+      notification.error({
+        message: 'No file selected!',
+        duration: 3,
+      })
       notification.error({
         message: 'No file selected!',
         duration: 3,
